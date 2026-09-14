@@ -1,1 +1,946 @@
+# Task: Refactor Seren's monolithic `index.html` into a clean multi-file structure
+
+You are working in the `hiyroscript/seren` repository.
+
+The repository currently contains a very large `index.html` containing essentially the entire REDLINE game: HTML markup, CSS, localization, configuration/data, audio, UI navigation, game state, controller/local multiplayer handling, bot AI, race mechanics, items, ultimates, traps, rendering, HUD logic, input handling, and boot/event wiring.
+
+Your task is to **actually refactor the repository**, not merely describe how to do it.
+
+The primary goal is:
+
+> Turn the monolithic `index.html` into a maintainable set of files while preserving the game exactly as it currently behaves.
+
+This is primarily a structural refactor. Do **not** redesign the game, rebalance mechanics, rewrite systems unnecessarily, change visuals, change strings, change controls, or introduce a framework.
+
+---
+
+# 1. Read the existing implementation first
+
+Before editing anything:
+
+1. Read the entire current `index.html`.
+2. Understand the major systems and their dependencies.
+3. Identify all top-level constants, mutable state, helper functions, event listeners, timers, canvas state, and initialization side effects.
+4. Pay particular attention to functions that depend on declarations appearing much later in the current file.
+5. Preserve useful comments, especially comments explaining gameplay rules, collision behavior, AI reasoning, rendering decisions, timing, controller handling, and previous bug fixes.
+
+Do not blindly cut the file at arbitrary line numbers.
+
+The existing comments are part of the maintainability of this project and should remain next to the code they describe.
+
+---
+
+# 2. Non-negotiable requirement: preserve existing behavior
+
+After this refactor, the game should behave as though the old `index.html` had simply been divided into files.
+
+Do not intentionally alter:
+
+* gameplay
+* physics
+* AI behavior
+* difficulty tuning
+* car properties
+* ultimate behavior
+* item behavior
+* trap behavior
+* track behavior
+* race timing
+* randomization
+* countdown behavior
+* collision rules
+* respawn behavior
+* boost behavior
+* brake/launch behavior
+* local multiplayer behavior
+* split-screen behavior
+* controller mappings
+* keyboard mappings
+* touch/pointer controls
+* HUD content
+* garage content
+* translations
+* DOM IDs
+* CSS class names
+* CSS appearance
+* animations
+* sound behavior
+* localStorage keys
+* personal-best storage
+* language storage
+* sound preference storage
+* accessibility behavior
+* reduced-motion behavior
+* desktop scaling
+* orientation/resize behavior
+
+Do not remove features simply because they are difficult to separate.
+
+Do not simplify working game logic.
+
+---
+
+# 3. Keep this a build-free static web project
+
+Do NOT introduce:
+
+* React
+* Vue
+* Svelte
+* Angular
+* TypeScript
+* Vite
+* Webpack
+* Parcel
+* npm dependencies
+* package managers
+* a compilation step
+* a backend
+* a server requirement beyond ordinary static hosting
+
+The finished project must remain deployable as a normal static site, including GitHub Pages-style hosting.
+
+Do not require generated bundles.
+
+Do not split the HTML into runtime-fetched HTML fragments. The game is effectively a single-page application already; keep its screen markup in `index.html`.
+
+The goal is to extract styling and JavaScript, not turn every screen into a separate webpage.
+
+---
+
+# 4. Target repository structure
+
+Use approximately this structure:
+
+```text
+/
+├── index.html
+├── upd
+├── css/
+│   └── app.css
+└── js/
+    ├── core.js
+    ├── i18n.js
+    ├── data.js
+    ├── audio.js
+    ├── runtime.js
+    ├── ui.js
+    ├── local.js
+    ├── ai.js
+    ├── mechanics.js
+    ├── race.js
+    ├── render.js
+    ├── hud.js
+    ├── input.js
+    └── main.js
+```
+
+This is a target organization, not permission to force functions into an inappropriate file. If a small adjustment to the boundaries produces substantially cleaner dependencies, make that adjustment.
+
+However, do not collapse everything back into two giant JavaScript files. The point is meaningful separation of concerns.
+
+Do not create dozens of tiny one-function files either.
+
+---
+
+# 5. `index.html`
+
+Turn `index.html` into the document shell.
+
+It should contain:
+
+* `<!DOCTYPE html>`
+* `<html>`
+* metadata
+* viewport configuration
+* theme color
+* title
+* existing Google Font links/preconnects
+* stylesheet link(s)
+* all existing application/screen markup
+* canvases
+* HUD markup
+* overlays
+* dialogs
+* buttons
+* inline SVG icons that are part of the UI
+* script references
+
+Remove the giant inline `<style>` block.
+
+Remove the giant inline game `<script>` block.
+
+Keep the existing DOM structure and IDs unless a change is absolutely required for the refactor.
+
+Do not replace the inline SVG UI icons with an external icon library.
+
+The resulting `index.html` should be easy to inspect and primarily describe the application's document structure.
+
+---
+
+# 6. CSS
+
+Move the current inline `<style>` contents to:
+
+```text
+css/app.css
+```
+
+The first pass should preserve the CSS essentially verbatim.
+
+Most importantly, preserve rule ordering. The existing stylesheet contains intentional cascade and specificity relationships.
+
+Do not perform a broad CSS cleanup at the same time as this JavaScript refactor.
+
+Do not rename selectors.
+
+Do not convert everything to utility classes.
+
+Do not change design tokens.
+
+Do not remove browser compatibility properties merely because they look redundant.
+
+Do not move inline styles from HTML unless doing so is trivial and guaranteed not to change behavior. This task is not a styling rewrite.
+
+`index.html` should load it with the appropriate `<link rel="stylesheet">`.
+
+---
+
+# 7. JavaScript loading strategy
+
+This refactor should prioritize correctness over fashionable architecture.
+
+The old JavaScript lives inside one IIFE and therefore currently shares one scope.
+
+For this task, use **ordered external classic scripts with `defer`**, unless there is a compelling technical reason not to.
+
+Example:
+
+```html
+<script defer src="js/core.js"></script>
+<script defer src="js/i18n.js"></script>
+...
+<script defer src="js/main.js"></script>
+```
+
+All files must be loaded in explicit dependency-safe order.
+
+Using `defer` ensures the DOM has been parsed before top-level DOM-dependent initialization occurs and keeps script execution order predictable.
+
+Do not convert this project to ES modules merely for appearances if doing so creates a large import/export rewrite or circular dependency problem.
+
+This is a structural extraction first.
+
+Because the original IIFE will no longer surround all files, place:
+
+```js
+"use strict";
+```
+
+at the top of each JavaScript file.
+
+Ensure every top-level identifier is declared exactly once.
+
+Audit for accidental duplicate declarations after splitting.
+
+There must be no `ReferenceError`, TDZ error, missing declaration, or ordering bug caused by the split.
+
+If you determine that a specific browser-global name would collide after removing the IIFE, resolve that narrowly and consistently. Do not use that as a reason for a wholesale rewrite.
+
+---
+
+# 8. Suggested responsibility of each JS file
+
+## `js/core.js`
+
+Put low-level application utilities here.
+
+Examples include:
+
+* storage wrapper and memory fallback
+* `$`
+* `clamp`
+* `lerp`
+* `rand`
+* `randi`
+* truly global configuration flags that other systems require
+* tiny generic helpers with no game-system ownership
+
+Do not place substantial gameplay systems here just because many files use them.
+
+---
+
+## `js/i18n.js`
+
+Put localization functionality here:
+
+* `STR`
+* current language state
+* `cap`
+* `t`
+* `applyLang`
+* translation-related helpers
+
+Preserve all existing English/French strings exactly unless correcting an obvious extraction error.
+
+Do not rewrite the translation format.
+
+Functions such as `applyLang()` may reference UI functions declared in later files; that is acceptable as long as `main.js` does not execute initialization until all deferred scripts have loaded.
+
+---
+
+## `js/data.js`
+
+Put stable game definitions and tuning data here.
+
+This should include appropriate things such as:
+
+* car definitions
+* car IDs
+* bot difficulty definitions
+* temperament definitions
+* effects
+* ultimate effect mappings
+* track definitions
+* track IDs
+* item definitions
+* item IDs
+* rarities
+* color tables
+* gameplay constants
+* ultimate constants
+* hazard timing constants
+* launch constants
+* race constants
+* field/player constants
+* other static tuning/configuration tables
+
+Do not alter numeric values while moving them.
+
+If a constant is needed during construction of the global game state, ensure `data.js` loads before that state is created.
+
+---
+
+## `js/audio.js`
+
+Put Web Audio functionality here:
+
+* audio context creation
+* master gain
+* sound preference state
+* `audio()`
+* `tone()`
+* `noise()`
+* engine start/update/stop
+* sound enable/disable behavior
+
+Preserve current lazy initialization behavior so browsers do not reject audio because it starts outside a user gesture.
+
+---
+
+## `js/runtime.js`
+
+This file should own shared runtime/canvas state and layout fundamentals.
+
+Appropriate contents include:
+
+* canvas/context references
+* canvas dimensions
+* DPR
+* road/lane/car geometry variables
+* split-view geometry variables
+* mutable global game state object `G`
+* default rule creation
+* rule lookup helpers
+* bot-count calculation
+* layout calculations
+* lane center calculation
+* desktop fitting
+* resize/orientation fundamentals
+* viewport calculations
+* shared camera/split-screen geometry
+* other core state/layout machinery
+
+Do not initialize the actual application here. Initialization belongs in `main.js`.
+
+---
+
+## `js/ui.js`
+
+Put non-race screen/UI behavior here.
+
+Examples:
+
+* screen switching
+* garage construction
+* garage tabs
+* best-score display helpers
+* mode screen painting
+* car selection UI
+* difficulty selection UI
+* custom race option painting
+* general menu/sheet helpers
+* language modal display-related behavior
+* car-selection canvas icon painting if that is the cleanest location
+
+Keep gameplay logic out of this file.
+
+---
+
+## `js/local.js`
+
+Put local multiplayer/controller-specific setup here.
+
+Examples:
+
+* Gamepad API polling
+* controller detection
+* controller connection/disconnection state
+* player seat assignment
+* local-player configuration
+* local car picking
+* player colors
+* controller readiness UI
+* local race setup
+* per-seat controller state
+* custom local-player flow
+* helpers that are exclusively concerned with couch/local multiplayer
+
+Do not accidentally move general gameplay mechanics here simply because local players also use them.
+
+---
+
+## `js/ai.js`
+
+Move bot decision-making here.
+
+This includes logic related to:
+
+* bot sensing
+* threat evaluation
+* temperament
+* target selection
+* lane scoring
+* lane choice
+* reaction timing
+* difficulty behavior
+* blocking/aggression decisions
+* ultimate valuation
+* item valuation
+* boost decisions
+* launch decisions
+* offensive/defensive judgement
+* bot planning
+
+Preserve all AI comments explaining the distinction between difficulty and vehicle capability.
+
+Difficulty must continue to change how well bots think rather than silently changing fundamental car rules.
+
+Do not retune bot behavior during extraction.
+
+---
+
+## `js/mechanics.js`
+
+Put shared race mechanics here.
+
+Appropriate systems include:
+
+* car movement mechanics
+* collisions
+* side-swipes
+* boost
+* braking
+* launch/jump
+* launch cooldown
+* landing
+* wrecking
+* respawn-related mechanical behavior
+* effects/status handling
+* ultimates
+* ultimate start/end/tick behavior
+* car-specific powers
+* items
+* mystery bubbles
+* oil/slicks
+* seekers/missiles
+* Bolt orbs
+* traps
+* puddles
+* meteors
+* tumbleweeds
+* hazard collision logic
+* world/gameplay objects whose behavior is mechanical rather than visual
+
+Player and bot versions of the same mechanic must continue to share the same underlying rules where they currently do.
+
+Do not duplicate mechanics into "player mechanic" and "bot mechanic" copies unnecessarily.
+
+---
+
+## `js/race.js`
+
+Put race progression/lifecycle here.
+
+Appropriate contents include:
+
+* race creation/reset
+* starting a race
+* countdown
+* pausing/resuming
+* quitting/leaving
+* crash/game-over flow
+* rival spawning
+* race progression
+* finish logic
+* placement/result calculation
+* race timer/track progression
+* world seeding/progression where it belongs to race state rather than drawing
+* main game-state update orchestration
+* timers belonging to race lifecycle
+
+Preserve endless, bots, local, standard, and custom modes.
+
+---
+
+## `js/render.js`
+
+Put Canvas 2D rendering here.
+
+This should contain the visual drawing implementation for things such as:
+
+* cars
+* car models
+* roads
+* lane markings
+* track scenery
+* city
+* desert
+* space
+* track transitions
+* props
+* traps
+* puddles
+* meteors
+* tumbleweeds
+* mystery bubbles
+* slicks
+* missiles/orbs
+* particles
+* car powers
+* burn/phase/etc. effects
+* finish line
+* split-screen view rendering
+* per-view camera translation
+* world rendering
+* main `render()` path
+
+Drawing code should not become gameplay code merely because it reads gameplay state.
+
+Preserve visual calculations and draw order carefully. Canvas draw order is behavior here.
+
+---
+
+## `js/hud.js`
+
+Put HUD presentation here.
+
+Examples:
+
+* distance display
+* best display during races
+* standings
+* position rows
+* race clock
+* ultimate meter
+* item box display
+* boost bar
+* launch meter
+* status/effect labels
+* local split-screen HUD
+* player badges
+* per-seat HUD rendering
+* HUD synchronization functions
+
+Preserve both DOM HUD behavior and canvas HUD behavior used by local split-screen.
+
+---
+
+## `js/input.js`
+
+Put input interpretation and input event handlers here.
+
+Include:
+
+* keyboard controls
+* pointer/touch controls
+* swipe/lane changes
+* boost input
+* brake/launch input
+* item activation
+* ultimate activation
+* pause key
+* controller input translated into gameplay actions
+* button press/release state where appropriate
+
+Keep gamepad discovery/setup in `local.js` if it is primarily local-multiplayer configuration, while per-frame driving input belongs here.
+
+Do not alter mappings.
+
+---
+
+## `js/main.js`
+
+This should be the final file and the main entry point.
+
+It should contain the application's intentional top-level side effects:
+
+* initial capability detection if not already defined
+* initial desktop/reduced-motion setup
+* initial language application
+* initial personal-best painting
+* initial sound-state painting
+* splash setup
+* splash timeout
+* DOM event-listener registration
+* menu/button wiring
+* boot sequence
+* final layout settling
+* font-ready settling
+* visibility handling if appropriate
+* initial car icon painting
+* startup calls that must happen only after every other file is loaded
+
+Keep `main.js` comparatively small.
+
+A useful rule is:
+
+> Other files define systems. `main.js` connects and starts them.
+
+Do not leave large gameplay algorithms in `main.js`.
+
+---
+
+# 9. Preserve execution timing
+
+One of the biggest risks in this refactor is moving code that used to be declared before/after another declaration.
+
+Remember:
+
+* Function bodies can refer to functions declared later if they are not executed until later.
+* Top-level expressions execute immediately.
+* Top-level initializers that use constants must run after those constants exist.
+* Event callbacks can safely reference later-defined functions when the callbacks do not run until after all deferred scripts have executed.
+* Boot logic must run last.
+
+Move all current immediate boot actions into `main.js` where necessary.
+
+Do not allow a file to execute application startup halfway through loading the dependency chain.
+
+---
+
+# 10. Keep the current DOM contract intact
+
+Many functions find elements directly through selectors such as:
+
+```js
+$("#...")
+document.querySelector(...)
+document.querySelectorAll(...)
+```
+
+Treat existing IDs/classes as an API.
+
+Avoid renaming them.
+
+In particular, make sure all existing screens and overlays still function, including the areas for:
+
+* splash
+* home
+* mode selection
+* local player count
+* controllers
+* standard/custom selection
+* custom setup
+* difficulty
+* garage/reference screens
+* car selection
+* race
+* pause
+* race over/results
+* language selection
+* HUD
+* countdown
+
+If an element exists in the current game, do not accidentally drop it while cleaning `index.html`.
+
+---
+
+# 11. Preserve all supported input paths
+
+Verify that the refactor retains all currently implemented control paths.
+
+That includes, where currently applicable:
+
+* keyboard
+* mouse/pointer
+* touch
+* gamepad/controller
+* local multiplayer controller assignment
+
+In particular verify the existing controls for:
+
+* changing lanes
+* boosting
+* braking
+* charging/releasing a launch
+* using an ultimate
+* using an item
+* pausing
+* menu navigation where applicable
+
+Do not replace the current controls with a new input abstraction unless absolutely necessary for extracting files.
+
+---
+
+# 12. Preserve all game modes
+
+Verify that the following flows remain operational:
+
+### Endless
+
+Mode selection → car selection → race → crash/result → replay/home.
+
+### Race against bots
+
+Mode selection → difficulty → car selection → race.
+
+### Local multiplayer
+
+Desktop gate → player count → controller discovery → standard/custom → configuration/difficulty → sequential car selection → split-screen race.
+
+### Custom local play
+
+All existing switches/rules must still affect the race correctly:
+
+* bot count
+* traps
+* mystery bubbles
+* boost/launch
+* ultimates
+* other existing custom configuration
+
+Backing out of custom mode and selecting standard mode must continue restoring the normal/default rules.
+
+---
+
+# 13. Preserve rendering behavior
+
+This game relies heavily on hand-written Canvas 2D rendering.
+
+Do not substitute image assets, CSS drawings, libraries, or another renderer.
+
+Preserve:
+
+* current car drawings
+* car selection thumbnails using the same car drawing implementation
+* track visuals
+* track blending
+* scenery
+* hazards
+* particles
+* status/power effects
+* split-screen clipping
+* camera offsets
+* screen shake
+* offscreen indicators
+* race ladder/standings visuals
+* reduced-motion handling
+
+Be especially careful with shared canvas context handling used when drawing car-selection icons versus the actual race canvas.
+
+---
+
+# 14. Preserve persistence
+
+The existing localStorage behavior must continue working with exactly the same keys.
+
+Existing users must not lose:
+
+* language preference
+* sound preference
+* personal best
+
+Retain the memory fallback used when localStorage is unavailable.
+
+---
+
+# 15. Do not perform unrelated cleanup
+
+Avoid opportunistic changes such as:
+
+* renaming hundreds of functions
+* converting every `function` to an arrow function
+* rewriting loops with array methods
+* changing quote style everywhere
+* formatting the entire codebase differently
+* changing comments
+* changing gameplay constants
+* replacing custom utilities with libraries
+* rewriting Canvas APIs
+* replacing Web Audio
+* redesigning the UI
+* changing translations
+* introducing classes solely to appear more object-oriented
+
+A clean diff is more important than stylistic modernization.
+
+The intended outcome is:
+
+**same game, better source organization.**
+
+---
+
+# 16. Validation requirements
+
+After creating the files, thoroughly inspect the result.
+
+At minimum check for:
+
+* missing script files
+* incorrect paths
+* script ordering mistakes
+* duplicate declarations
+* undefined variables
+* undefined functions
+* syntax errors
+* references to declarations left behind in `index.html`
+* CSS rules accidentally omitted
+* CSS order changes
+* broken selectors
+* broken DOM IDs
+* accidental inline-script leftovers
+* event listeners registered before their dependencies exist
+* code that now executes before required state exists
+
+Search the project for references to moved symbols when useful.
+
+If tooling is available, run JavaScript syntax checks on every JavaScript file.
+
+Serve the repository through a simple static server if available and inspect the browser console/runtime.
+
+Do not add a permanent development server dependency just to test it.
+
+---
+
+# 17. Functional smoke test checklist
+
+Where the environment allows it, verify as much of this as possible:
+
+1. Page loads without JavaScript errors.
+2. Splash screen appears and exits.
+3. Language selection works.
+4. Language preference survives reload.
+5. Sound toggle works.
+6. Sound preference survives reload.
+7. Home screen displays.
+8. Garage opens.
+9. Garage tabs/content render correctly.
+10. Start Race opens mode selection.
+11. Endless flow reaches car selection and race.
+12. Bot race flow reaches difficulty, car selection, and race.
+13. Local play remains desktop-gated.
+14. Controller detection UI still works.
+15. Local player-count flow still works.
+16. Standard/custom local race setup still works.
+17. Car-selection thumbnails still render.
+18. Countdown starts correctly.
+19. Canvas renders correctly.
+20. Lane movement works.
+21. Boost works.
+22. Brake/launch works.
+23. Launch meter and cooldown behave correctly.
+24. Mystery bubbles/items work.
+25. Ultimates work.
+26. Hazards still work.
+27. Bot AI still drives.
+28. Pause/resume works.
+29. Leaving a race works.
+30. Race-over/replay/home works.
+31. Personal best still updates.
+32. Bot-race standings work.
+33. Local split-screen still renders each player's view.
+34. Per-player local HUD still renders.
+35. Resize/orientation changes do not break the canvas.
+36. Desktop scaling still works.
+37. Reduced-motion behavior remains respected.
+38. No console `ReferenceError`, `TypeError`, duplicate-declaration error, or missing-resource errors appear during normal use.
+
+If full interactive browser testing is unavailable, perform static validation and dependency tracing carefully instead of claiming tests you did not actually run.
+
+---
+
+# 18. Quality bar for the finished refactor
+
+When done:
+
+* `index.html` should be dramatically smaller.
+* The inline `<style>` block should be gone.
+* The giant inline JavaScript implementation should be gone.
+* `css/app.css` should contain the styling.
+* JavaScript should be separated into meaningful subsystem files.
+* `main.js` should clearly reveal how the application boots.
+* No subsystem file should contain unrelated chunks merely because they happened to be adjacent in the old file.
+* There should be one authoritative definition of each constant/function/state variable.
+* Comments explaining important implementation decisions should still exist.
+* The project should still be understandable without installing anything.
+* The game should still operate as the same game.
+
+---
+
+# 19. Important implementation strategy
+
+Treat this as a refactor in two conceptual passes, even if you perform it in one working session.
+
+First, achieve **behavior-preserving extraction**:
+
+* extract CSS
+* extract JavaScript sections
+* establish dependency-safe loading
+* move startup to `main.js`
+* make the application run
+
+Only then make small organizational adjustments necessary to place code under the correct subsystem.
+
+Do not simultaneously redesign the architecture.
+
+If a beautiful abstraction risks changing behavior, choose the boring implementation that preserves behavior.
+
+---
+
+# 20. Final review
+
+Before considering the task complete, compare the new source against the original `index.html` and ensure no meaningful implementation was accidentally omitted.
+
+Every substantial block from the original inline `<style>` and `<script>` should have a clear home in the new project.
+
+Do not leave copies of moved code in `index.html`.
+
+Do not leave commented-out copies of the monolith.
+
+Do not delete `upd`.
+
+Do not merely produce a migration plan.
+
+**Make the changes in the repository.**
+
+When finished, provide a concise summary containing:
+
+* the files created
+* what responsibility each file now owns
+* any small structural decisions you made that differ from the suggested tree
+* what validation/testing you actually performed
+* any remaining concern you could not verify
+
+The final result should be a maintainable multi-file version of the existing REDLINE game with no intentional user-visible or gameplay changes.
 
