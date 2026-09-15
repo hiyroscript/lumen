@@ -66,10 +66,12 @@ The consequences, stated plainly:
   `window` (179 of them).
 - **Every top-level name must be unique across all fourteen files.** A duplicate
   `const` is a `SyntaxError` that kills the page; a duplicate `function` silently
-  wins. Before adding a top-level name, grep for it.
+  wins.
 - None of the 526 current names collides with a browser global. Keep it that way —
   avoid `name`, `status`, `length`, `top`, `self`, `origin`, `event`, `screen`,
   `history`, `location`, `find`, `focus`, `blur`, `open`, `close`, `print`, `stop`.
+
+`node tools/check.mjs` enforces both, so you do not have to remember them.
 
 This was a deliberate trade for staying build-free. Hiding the internals again
 means either a bundler or rewriting 526 cross-file references as imports.
@@ -330,6 +332,11 @@ fonts, in case the first read landed before the stylesheet applied.
    code is a split-screen bug waiting to happen.
 7. **Nothing boots outside `main.js`.**
 
+These seven are judgement calls — `tools/check.mjs` cannot check any of them. What
+it does check is the layer underneath: that the files load in the right order,
+that names do not collide, and that every selector, string and table entry the
+code reaches for actually exists.
+
 ## How to add things
 
 ### A car
@@ -375,6 +382,24 @@ both read `RARITY`, so they cannot disagree.
 quietly lapsed cannot leave its label behind. Mark it `bad: true` if Cleansed
 should wipe it.
 
+## Checking your work
+
+Most of the invariants above are mechanically checkable, and
+[`tools/check.mjs`](../tools/check.mjs) checks them:
+
+```sh
+node tools/check.mjs
+```
+
+Plain Node, no dependencies, no `package.json`, exits non-zero on failure. It
+covers the script order and `defer`, syntax, the uniqueness of every top-level
+name, browser-global collisions, every literal `#id` selector against the real
+DOM, translation completeness and key resolution, and the wiring of every car,
+effect and item.
+
+That is the cheap half. It cannot tell you whether the game still *plays* the
+same — for that, see below.
+
 ## Testing
 
 There is no test suite and no test dependency, by design — the brief is a
@@ -382,7 +407,7 @@ build-free static site.
 
 What has been used, and is worth repeating after a substantial change:
 
-- `node --check js/*.js` catches syntax errors without running anything.
+- `node tools/check.mjs` first — it is instant and catches the silent failures.
 - Serve the directory and drive it in a headless browser
   ([Playwright](https://playwright.dev/) against the system Chromium works well
   without adding anything to the repo). The flows worth covering are the ones in

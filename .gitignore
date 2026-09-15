@@ -1,0 +1,16 @@
+# There is nothing to build, so there is nothing to ignore but cruft.
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# stray tooling. The game has no dependencies and no package.json; if one of
+# these appears it came from something you ran, not from the project.
+node_modules/

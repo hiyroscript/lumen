@@ -429,14 +429,46 @@ better — some browsers restrict `localStorage` and canvas reads on `file://`.
 
 To edit: change a file, reload the page. That is the whole loop.
 
+### Checking your changes
+
+Because there is no build step, nothing normally catches a typo'd selector, a
+translation key that does not exist, or a second `const` with a name another file
+already used — the first two do nothing visible until you open the screen that
+uses them, and the third kills the page on load. One script finds all of it:
+
+```sh
+node tools/check.mjs
+```
+
+It is plain Node with no dependencies — there is no `package.json` and nothing to
+install — and it exits non-zero on failure, so it drops into a git hook or a CI
+job unchanged. It verifies:
+
+- every stylesheet and script in `index.html` exists, is deferred, and is in the
+  documented dependency order, with no inline `<style>` or `<script>` left behind
+- every JavaScript file parses
+- every top-level name is unique across all fourteen files, and none shadows a
+  browser global
+- every literal `#id` selector in the JavaScript resolves to an element that
+  exists in `index.html`
+- every string has all its languages, and every `data-i18n` attribute and literal
+  `t("…")` call resolves to a string that exists
+- every car has a draw branch, a name, an ultimate description, a button, a
+  select-screen canvas and an `ULT_EFFECTS` entry; every effect has a label;
+  every item has artwork and a valid rarity
+
+Run it before you commit. It takes well under a second.
+
 ## Project layout
 
 ```
 index.html          the document shell — screens, canvases, SVG icons, script tags
 css/app.css         the entire stylesheet
 js/                 the game, in load order (see below)
+tools/check.mjs     dependency-free validator for the invariants below
 docs/               ARCHITECTURE.md, TUNING.md and the screenshots
 upd                 the brief that drove the split into these files
+.nojekyll           tells GitHub Pages to serve the tree verbatim
 ```
 
 The fourteen scripts load in a fixed, dependency-safe order with `defer`, so each
