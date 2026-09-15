@@ -1,352 +1,759 @@
-You are working directly inside the existing GitHub repository `hiyroscript/seren`.
+You are working directly inside the current hiyroscript/seren repository on the latest main branch.
 
-Your task is to perform a complete UI/UX redesign of Seren.
+Seren has already received a large interface redesign. Do NOT work from an older understanding of the project.
 
-This is not a small visual refresh, a reskin, or a set of isolated CSS improvements. Treat the existing interface as a functional prototype whose game mechanics, content, state management, controls, and architecture must remain intact, but whose complete presentation and interaction layer should be reconsidered as one coherent professional product.
+Before making changes, inspect the current repository carefully, particularly:
 
-Before changing anything, thoroughly explore the repository and understand how Seren works.
+* index.html
+* css/app.css
+* js/ui.js
+* js/main.js
+* js/local.js
+* js/i18n.js
+* the current README and architecture documentation
+* any code involved in menu navigation, responsive layout, car-selection rendering, controller setup, and accessibility
 
-Read the README, architecture documentation, HTML structure, stylesheet, UI code, HUD code, runtime/layout code, input handling, localization system, and the portions of the rendering system that visually intersect with the interface. Understand the complete player journey from launch through race completion, including local multiplayer.
+Understand the interface that exists NOW before designing anything.
 
-Do not redesign the game from assumptions. Use the existing implementation as the source of truth.
+Objective
 
-## Core objective
+Completely redesign Seren’s menus.
 
-Reimagine Seren's entire interface so that it feels:
+The previous interface rework established a much better overall visual identity, but the menu experience itself still does not feel good enough.
 
-* clean
-* minimalist
-* deliberate
-* modern
-* polished
-* premium
-* professional
-* highly readable
-* visually coherent
-* unmistakably designed rather than merely styled
+The current menus feel too repetitive, too much like variations of the same panel, and not sufficiently distinctive, premium, or memorable.
 
-The resulting product should feel like a finished independent racing game with a strong, restrained visual identity.
+I want you to rethink the complete menu experience from the ground up while preserving Seren’s current overall visual direction.
 
-Do not make it feel like a generic web app, admin dashboard, mobile template, Bootstrap interface, or overly decorative arcade game.
+This redesign should make Seren feel like a polished standalone racing game rather than a web game displaying a succession of modal sheets.
 
-Preserve Seren's personality and sense of speed while making the interface significantly more sophisticated.
+Do not merely tweak spacing, borders, shadows, opacity, or font sizes.
 
-## Visual identity
+Do not simply make the existing menu cards prettier.
 
-The primary interface palette must be built around:
+Reconsider the compositions themselves.
+
+Preserve the new Seren identity
+
+The current interface redesign established the correct general direction.
+
+Keep that direction:
 
 * black
 * white
-* neutral grays
-* red
+* neutral gray
+* red as the primary interface accent
+* restrained use of glass and translucency
+* strong contrast
+* premium minimalism
+* modern typography
+* thin, deliberate borders
+* subtle depth
+* controlled animation
+* clean iconography
 
-Red should act as Seren's principal accent and identity color.
+Do not return to the old light-gray interface.
 
-The overall interface should remain restrained. Avoid introducing a large collection of unrelated interface colors simply to differentiate controls.
+Do not introduce an unrelated colorful arcade aesthetic.
 
-Gameplay-specific colors that communicate actual game state, car identity, hazards, effects, player identity, or other important mechanics may remain where they are necessary for comprehension. The black / white / gray / red rule primarily defines the interface system and visual chrome rather than forcing the game world itself into monochrome.
+Do not turn Seren into a cyberpunk/neon game.
 
-The result should have excellent contrast and remain legible over the moving Canvas game.
+Do not fill everything with red.
 
-## Glass treatment
+Red should remain intentional and meaningful.
 
-Dialogs, modal surfaces, sheets, overlays, pause states, configuration surfaces, and similar elevated interface layers should use a refined semi-transparent glass treatment.
+Gameplay colors that communicate real game information may continue to exist.
 
-The glass aesthetic should feel mature and restrained rather than flashy.
+Main problem to solve
 
-Use transparency, tonal layering, blur where appropriate, subtle borders, controlled highlights, and carefully judged depth to make the interface feel integrated with the scene underneath it.
+The current menu system relies heavily on one repeated structure:
 
-The effect must never compromise readability.
+* darkened backdrop
+* glass container
+* heading
+* vertically stacked option rows
+* icon on the left
+* text
+* chevron on the right
 
-Provide sensible visual behavior on browsers where backdrop blur or related effects are unavailable.
+That pattern is useful in moderation, but it currently makes too many different decisions feel like the same screen with different text.
 
-Do not turn every element into glass. Establish a clear hierarchy between background, navigation, content, controls, overlays, and interactive surfaces.
+That needs to change.
 
-## Design autonomy
+Game mode selection, difficulty selection, player count, controller setup, race style, custom configuration, and car selection do not need to have identical visual structures merely because they are all menus.
 
-Do not wait for a pixel-by-pixel specification.
+Design each screen around the actual decision the player is making.
 
-I specifically want you to make the design decisions.
+They should still clearly belong to the same design system, but they should not all look like clones.
 
-Audit the existing UI and determine where its hierarchy, density, proportions, typography, navigation, feedback, component consistency, spacing, information architecture, interaction patterns, and visual rhythm can be improved.
+Create visual rhythm across the setup flow.
 
-Then redesign it as a unified system.
+Some screens can be bold and spacious.
 
-Do not simply preserve every existing layout and repaint it with darker colors.
+Some can be compact and functional.
 
-At the same time, do not arbitrarily change game rules or remove information that players need.
+Some can emphasize visual selection.
 
-The goal is to improve how Seren communicates the game, not to simplify it by hiding important mechanics.
+Some can emphasize information.
 
-## Full-product scope
+Some can behave more like a dedicated game screen than a modal.
 
-The redesign must cover the complete player-facing experience, not only the home screen.
+Use judgment.
 
-Review and redesign the full flow including:
+Home screen — very important
 
-* startup and first-run experience
-* language selection
-* home
-* mode selection
-* single-player setup
-* local multiplayer setup
+The scrolling road background MUST remain.
+
+The animated road is part of Seren’s identity and should not be removed.
+
+However, you are completely free to reinterpret how the road is presented and how the interface is composed around it.
+
+Do not assume the current implementation of:
+
+* a full-screen flat road
+* two simple vertical lane markers
+* title near the top
+* two buttons centered in the middle
+* information at the bottom
+
+must remain unchanged.
+
+Preserve the concept, not necessarily the exact composition.
+
+The home screen should make the moving road feel intentional and integrated into the design rather than simply functioning as a wallpaper behind buttons.
+
+Find a visually sophisticated interpretation of an endlessly scrolling road.
+
+It can remain abstract and minimalist.
+
+It does not need to become a complicated Canvas scene.
+
+It should still feel fast, clean and unmistakably related to Seren.
+
+The movement should create atmosphere without distracting from navigation.
+
+The home screen should feel like the strongest visual statement in the menu system.
+
+It should immediately communicate:
+
+SEREN
+racing
+speed
+precision
+minimalism
+
+Make the hierarchy obvious without making the screen empty or generic.
+
+The player should immediately understand how to start playing and how to access secondary content.
+
+Keep language and audio controls available.
+
+Keep the personal-best information where appropriate.
+
+Keep desktop control information useful without letting it dominate the composition.
+
+Menu transition from Home
+
+Rethink what happens when the player presses Start Race.
+
+Do not assume every subsequent step must appear as the same bottom sheet over a blurred Home Screen.
+
+You may keep some overlay behavior where it is aesthetically appropriate, but the flow should feel designed rather than inherited from one reusable component.
+
+Transitions between Home and race setup should feel smooth, spatially understandable and connected to the moving-road identity.
+
+The background, road, glass, typography and motion can work together to make the user feel as though they are moving deeper into the game.
+
+Keep transitions fast.
+
+Never sacrifice usability for cinematic presentation.
+
+Game mode selection
+
+Completely reconsider the presentation of:
+
+* Endless
+* Race against bots
+* Local play
+
+These are three fundamentally important choices and should feel more substantial than generic settings rows.
+
+The player should understand the personality and purpose of each mode immediately.
+
+Find a cleaner and more visually compelling way to present them.
+
+Do not over-explain.
+
+Do not create giant paragraphs.
+
+Use the existing mode descriptions intelligently.
+
+Local Play must still communicate its desktop/controller requirements.
+
+Disabled or unavailable states must remain obvious and accessible.
+
+Difficulty selection
+
+Redesign the difficulty selection so that it feels like a deliberate game choice rather than another settings list.
+
+Preserve:
+
+* Easy
+* Medium
+* Hard
+* Brutal
+* their descriptions
+* their actual game behavior
+
+You may reinterpret the visual representation of difficulty completely.
+
+The relative progression from Easy to Brutal should be understandable immediately.
+
+Do not rely exclusively on red intensity or color to communicate difficulty.
+
+Car selection
+
+Give car selection significantly more presence.
+
+The repository already renders each car with the same drawing code used in the race.
+
+Use that strength.
+
+The player is choosing their character/vehicle here; the screen should feel appropriately important.
+
+Do not reduce the cars to tiny generic cards if a more expressive presentation works better.
+
+At the same time:
+
+* preserve all six cars
+* preserve random selection
+* preserve local multiplayer turn-taking
+* preserve unavailable/taken states
+* preserve controller navigation
+* preserve the actual Canvas car artwork
+* preserve the underlying picking behavior
+
+Single-player and local multiplayer must both work naturally.
+
+Local multiplayer menus
+
+Completely redesign the local multiplayer setup journey:
+
+* player count
 * controller discovery
-* standard/custom play setup
-* difficulty selection
+* standard vs custom play
+* custom game configuration
+* difficulty when relevant
 * car selection
-* Cars & More / reference content
-* in-race HUD
-* status/effect communication
-* item and ultimate interactions
-* launch/boost information
-* race countdown
-* pause states
-* disconnect/error-like race interruptions
-* results/race-over presentation
-* desktop presentation
-* mobile/touch presentation
-* landscape behavior
-* local multiplayer split-screen presentation
 
-These should feel like parts of one design system.
+This is currently a relatively long flow.
 
-Do not create one aesthetic for menus and another unrelated aesthetic for gameplay.
+Make it feel coherent and intentional.
 
-## Race HUD
+The player should always understand:
 
-Treat the race HUD as a critical part of the redesign rather than an afterthought.
+* where they are
+* what they are choosing
+* what comes next
+* how to go back
+* which controllers are connected
+* which player is currently selecting
+* what settings are currently active
 
-The game contains a substantial amount of live information, and the HUD needs to remain immediately understandable while the road is moving quickly.
+Do not add unnecessary wizard text or intrusive progress indicators just because there are multiple steps.
 
-Prioritize information hierarchy, peripheral readability, clear interaction states, and minimal obstruction of gameplay.
+Find an elegant game-like solution.
 
-Preserve all information and controls required by the mechanics.
+Controller discovery
 
-Remember that Seren has both a DOM HUD for normal play and Canvas-rendered HUD elements for local split-screen play. They must be redesigned together and should clearly belong to the same system.
+The controller connection screen should feel particularly polished.
 
-Do not update one and leave the other visually inconsistent.
+Connection state must be extremely clear.
 
-## UX principles
+It should gracefully communicate:
 
-Use the redesign to make Seren easier to understand without making it feel instructional or verbose.
+* expected number of controllers
+* detected controllers
+* player/controller assignment
+* readiness to continue
+* disconnected/not-yet-connected states
 
-Favor:
+Keep the actual Gamepad logic intact.
 
-* clear hierarchy
-* strong visual grouping
-* predictable navigation
-* consistent interaction behavior
-* meaningful feedback
-* restrained motion
-* clear selected/disabled/ready/active states
-* touch-friendly targets
-* keyboard usability
-* controller usability
-* rapid visual scanning
-* excellent typography
-* consistent spacing and geometry
+Do not fake controller detection for visual purposes.
+
+Standard vs Custom play
+
+Make Standard and Custom feel meaningfully distinct.
+
+The player should immediately understand:
+
+Standard:
+the intended full Seren experience.
+
+Custom:
+a configurable race.
+
+Avoid making them look like two ordinary preference rows.
+
+Custom race setup
+
+The custom race interface should remain efficient despite allowing several options.
+
+Preserve all existing functionality:
+
+* bot count
+* bot difficulty
+* traps
+* mystery bubbles
+* boost/launch
+* ultimates
+
+The screen should feel like configuring a race, not filling out a web settings form.
+
+Improve grouping, hierarchy and interaction.
+
+Do not make it visually noisy.
+
+Do not introduce complicated controls when simple ones work better.
+
+The currently selected configuration should always be easy to scan.
+
+Cars & More
+
+Review the Cars & More reference area as part of the menu redesign.
+
+It should remain useful as Seren’s built-in game reference.
+
+Preserve:
+
+* Cars
+* Tracks / traps
+* Mystery bubbles
+* Effects
+* dynamic values derived from the actual game data
+* car artwork
+* rarity information
+* effect information
+
+You may redesign its navigation, page structure and content presentation if doing so makes it feel more integrated with the new menus.
+
+Do not turn it into a generic documentation page.
+
+It should feel like part of the game.
+
+Language selection
+
+Bring the first-run language selection and later language switching into the redesigned menu language.
+
+It can remain an elevated dialog if that is the right solution.
+
+It should feel native to the redesigned Seren interface rather than a leftover component.
+
+Preserve English and French behavior.
+
+Pause and race-over interfaces
+
+Do not perform another complete HUD redesign.
+
+The current race HUD is outside the primary scope of this task.
+
+However, pause, race-over and other menu-like overlays should be reviewed so that they do not feel disconnected from the newly redesigned menus.
+
+Update them only as much as necessary to achieve consistency.
+
+Do not destabilize the race HUD or Canvas HUD.
+
+Visual system
+
+The new menus should continue using Seren’s existing interface foundation but may evolve it.
+
+Aim for:
+
+* strong composition
+* precise alignment
+* purposeful negative space
+* confident typography
+* strong hierarchy
+* elegant asymmetry where appropriate
+* layered depth used sparingly
+* sophisticated transparency
+* subtle environmental motion
+* clean geometry
+* satisfying selection feedback
+* clear navigation
+* restrained transitions
+
+Avoid an interface consisting of endless rounded rectangles.
+
+Not every piece of information needs a card.
+
+Not every action needs a visible border.
+
+Not every screen needs the same container.
+
+Use surfaces only when they have a reason to exist.
+
+Glass
+
+Keep the glass language from the current redesign, but use it more intelligently.
+
+Glass should communicate elevation and separation.
+
+Use it for elements such as:
+
+* floating controls
+* overlays
+* focused information
+* navigational surfaces
+* modal content
+* selected or elevated groups
+
+Do not cover every menu screen in one giant glass rectangle simply because the token already exists.
+
+Do not stack translucent rectangles endlessly inside other translucent rectangles.
+
+The result should feel lighter and more intentional.
+
+Maintain the existing opaque fallback for browsers that cannot render backdrop blur.
+
+Typography
+
+Keep the current general typographic personality.
+
+Seren should retain the combination of:
+
+* strong condensed/display typography
+* clean body text
+* monospaced metadata/readouts
+
+You may refine sizing, width, weight, tracking, line-height and hierarchy substantially.
+
+Do not create dozens of arbitrary text styles.
+
+The typography should do a large portion of the visual work so that the interface does not need unnecessary decorative containers.
+
+Motion
+
+Motion should become part of the menu system.
+
+Use it carefully.
+
+Useful motion can include:
+
+* road movement
+* screen transitions
+* selection changes
+* focus movement
+* menu entrances/exits
+* car-selection feedback
+* controller readiness
+* state changes
 
 Avoid:
 
-* unnecessary visual noise
-* excessive gradients
-* gratuitous glow
-* oversized decorative elements
-* excessive borders
-* inconsistent corner radii
-* random card styles
-* redundant labels
-* visual effects that obscure the road
-* tiny low-contrast text
-* over-animation
-* gimmicky cyberpunk styling
-* generic gaming UI clichés
+* excessive bouncing
+* slow transitions
+* constant pulsing
+* decorative looping animation everywhere
+* large motion that makes menu navigation feel sluggish
 
-Animations should reinforce interaction, state changes, transitions, readiness, selection, or motion. They should not exist merely because something can animate.
+The menus should feel responsive.
 
-Respect `prefers-reduced-motion`.
+Respect prefers-reduced-motion.
 
-## Typography
+Every important animated state must still make sense when motion is reduced.
 
-Establish a disciplined typography system.
+Responsive design
 
-It should have clear roles for:
+The redesign must work intentionally on:
 
-* display/title typography
-* navigation/actions
-* normal explanatory copy
-* compact metadata
-* numerical/readout information
-
-Typography should contribute heavily to Seren's professional character.
-
-Preserve localization requirements. The interface must work cleanly in both English and French, including strings that become longer after translation.
-
-Do not hard-code layouts that only work for the current English copy.
-
-## Responsive behavior
-
-Seren must continue to work across its existing target environments.
-
-The redesign must be intentional on:
-
-* portrait phones
+* narrow portrait phones
+* larger phones
 * landscape phones
-* desktop browsers
+* tablets where applicable
 * tall/narrow desktop windows
-* large displays
-* local split-screen configurations
+* standard desktop displays
+* wide landscape displays
 
-Do not think of desktop as simply a stretched phone interface.
+Do not merely scale a mobile menu upward.
 
-Do not compromise the existing road/camera behavior or gameplay visibility.
+Desktop should make intelligent use of available space.
 
-Account for safe-area insets and touch interaction.
+Mobile must retain good touch targets and clear hierarchy.
 
-## Interaction compatibility
+Respect all safe-area insets.
 
-Preserve all supported control methods and their behavior:
+Avoid placing important controls against unsafe screen edges.
 
-* keyboard
+Navigation and interaction
+
+Preserve all existing supported methods:
+
+* touch
 * mouse
-* touch/pointer gestures
-* controller/gamepad
+* keyboard
+* gamepad/controller
 * local multiplayer controllers
 
-Visual changes must not silently break input handling.
+Do not regress keyboard focus handling.
 
-Any DOM restructuring that changes IDs, selectors, event targets, or dynamically generated controls must be reflected safely in the relevant JavaScript.
+Do not break inert behavior or accidentally leave hidden screens reachable.
 
-## Preserve game behavior
+Maintain clear focus-visible states.
 
-Do not alter game balance, race mechanics, AI, physics, timings, track behavior, item behavior, ultimate behavior, progression, saved data semantics, or race rules unless a change is absolutely required for interface integration.
+Make controller navigation states visible.
 
-This task is primarily a complete UI/UX redesign.
+Maintain logical Back behavior throughout the flow.
 
-Keep gameplay logic separated from presentation logic.
+Localization
 
-Do not rewrite unrelated systems simply because you encounter them.
+English and French must both remain complete.
 
-## Existing technical architecture
+Any new player-facing copy must go through the existing translation system.
 
-Respect Seren's current lightweight architecture.
+Do not hard-code new interface strings in HTML or JavaScript.
 
-The project intentionally has:
+Design for French text expansion.
 
-* no framework
-* no package manager
-* no bundler
-* no build step
-* plain HTML
-* plain CSS
-* classic JavaScript files loaded with `defer`
-* Canvas 2D rendering
+Do not create layouts that only work because the English title is short.
 
-Do not introduce React, Vue, Svelte, Tailwind, Bootstrap, component frameworks, build tooling, npm dependencies, or a new application architecture merely to accomplish the redesign.
+Keep translated ARIA labels working.
 
-A sophisticated interface should still be achievable within the existing architecture.
+Accessibility
 
-If you refactor interface code, keep the project's dependency ordering and shared-scope constraints in mind.
+Maintain or improve:
 
-Be particularly careful about introducing duplicate top-level JavaScript declarations because the scripts share one global scope.
+* readable contrast
+* keyboard accessibility
+* focus states
+* semantic buttons
+* ARIA labeling
+* touch target sizing
+* reduced-motion support
+* forced-colors compatibility where practical
+* prefers-contrast behavior
+* information that is not communicated through color alone
 
-## Localization
+Minimalism is not an excuse for ambiguity.
 
-Do not regress Seren's English/French localization.
+Architecture
 
-Any new visible copy must use the existing translation system.
+Respect Seren’s current implementation.
 
-Do not scatter hard-coded user-facing strings through HTML or JavaScript.
+Do NOT introduce:
 
-Ensure both languages remain complete and usable.
+* React
+* Vue
+* Svelte
+* Tailwind
+* Bootstrap
+* npm
+* bundlers
+* component frameworks
+* build tooling
 
-## Accessibility
+Keep the project dependency-free and build-free.
 
-Maintain or improve the existing accessibility characteristics.
+The current architecture is intentional:
 
-At minimum:
+* one HTML shell
+* one main stylesheet
+* classic JavaScript files
+* Canvas 2D gameplay
+* DOM-based menu UI
+* shared global script scope
 
-* preserve keyboard operation
-* preserve visible focus states
-* maintain sufficient contrast
-* respect reduced motion
-* keep touch targets usable
-* preserve semantic buttons where appropriate
-* keep useful ARIA labeling
-* avoid conveying critical information exclusively through color
+You may restructure menu HTML and CSS substantially.
 
-Professional minimalism must not come at the expense of usability.
+You may refactor menu-related JavaScript where needed.
 
-## Code quality
+But do not unnecessarily rewrite game systems.
 
-Do not solve the redesign with a growing pile of one-off inline styles.
+Be extremely careful with global top-level JavaScript declarations.
 
-Build a coherent reusable visual system in the stylesheet.
+Preserve behavior
 
-Consolidate repeated patterns and define deliberate tokens for the redesigned interface where useful.
+Do not change:
 
-Remove obsolete styling when it is genuinely replaced rather than leaving two competing systems in the codebase.
+* physics
+* AI
+* game balance
+* race timing
+* items
+* ultimates
+* tracks
+* hazards
+* launch behavior
+* boost behavior
+* save semantics
+* local multiplayer rules
+* field size
+* difficulty behavior
 
-Keep CSS and JS understandable.
+This is a menu UI/UX redesign.
 
-Avoid unnecessary complexity.
+Functionality should remain the same unless a UI adaptation requires a small structural change.
 
-## Validation
+Code quality
 
-After implementation, thoroughly test the redesigned flow.
+Do not layer the new design on top of the previous one with hundreds of override rules.
 
-Walk through at least:
+Actually clean up the menu code.
 
-1. first visit / language selection
-2. home
-3. Endless race setup
-4. Race against bots setup
-5. each difficulty path
-6. car selection
-7. Cars & More
-8. race start and countdown
-9. active racing HUD
-10. ultimate/item states
-11. pause/resume
-12. results
-13. mobile/portrait
-14. landscape
-15. desktop
-16. local multiplayer setup
-17. custom local race setup
-18. split-screen race HUD
-19. controller disconnect/reconnect presentation
-20. English and French
+When a menu structure is replaced:
+
+* remove obsolete CSS
+* remove obsolete markup
+* remove obsolete helper classes
+* remove dead states
+* consolidate new patterns where they truly repeat
+
+But do not over-generalize every menu into one universal component again.
+
+Shared design tokens are good.
+
+Shared primitives are good.
+
+Forcing fundamentally different screens into one layout is not.
+
+Keep the code understandable.
+
+Important design instruction
+
+Use your own judgment.
+
+Do not ask me to provide wireframes for every screen.
+
+Do not interpret this prompt as an instruction to mechanically implement a specific layout.
+
+I want you to design.
+
+Explore Seren.
+
+Understand its player flow.
+
+Identify what currently feels repetitive, generic, cramped, oversized, visually weak, or unnecessarily card-heavy.
+
+Then solve those problems.
+
+Take creative ownership of the menu system while staying within Seren’s established visual identity.
+
+Home road requirement
+
+Before considering the task finished, verify this explicitly:
+
+The Home Screen still has an unmistakable continuously scrolling road.
+
+It may be redesigned, reframed, masked, transformed, layered, perspective-treated, partially obscured, integrated with typography, or otherwise reinterpreted.
+
+But it must remain a moving road and remain one of the defining visual elements of Seren’s Home Screen.
+
+Do not replace it with:
+
+* a static gradient
+* generic particles
+* plain black
+* a photograph
+* an unrelated animation
+
+The road is required.
+
+Make it better.
+
+Testing
+
+Walk through the entire redesigned menu flow.
+
+Test at minimum:
+
+1. startup splash
+2. first-run language selection
+3. Home
+4. language toggle
+5. sound toggle
+6. Cars & More
+7. Start Race
+8. mode selection
+9. Endless → car selection → race
+10. Race against bots → difficulty → car selection → race
+11. Local Play
+12. 2 players
+13. 3 players
+14. 4 players
+15. controller discovery
+16. Standard Play
+17. Custom Play
+18. bot-count changes
+19. difficulty changes
+20. every custom rule toggle
+21. local player car-picking turns
+22. Back navigation at every step
+23. random car selection
+24. unavailable/taken car states
+25. phone portrait
+26. phone landscape
+27. desktop
+28. tall narrow desktop
+29. English
+30. French
+31. keyboard navigation
+32. reduced motion
+33. race pause
+34. race results
 
 Run:
 
-`node tools/check.mjs`
+node tools/check.mjs
 
-Do not consider the work complete until the repository's validation passes.
+It must pass.
 
-Check the browser console for runtime errors.
+Check for JavaScript console errors.
 
-Make sure existing IDs or bindings were not accidentally broken during the redesign.
+Verify there are no duplicated IDs.
 
-## Final quality bar
+Verify every changed selector still resolves.
 
-The final result should look like Seren received a complete visual direction from a strong product/UI designer rather than a CSS cleanup.
+Verify all translation keys exist.
 
-It should be immediately recognizable as more mature, calmer, more intentional, and more professional.
+Verify menu restructuring has not broken event listeners.
 
-The interface should support the game instead of competing with it.
+Final quality bar
 
-Use the black / white / gray / red identity consistently, with red used deliberately rather than everywhere.
+The menus should feel substantially different after this work.
 
-Use the semi-transparent glass language especially effectively for dialogs and elevated surfaces.
+Someone comparing the current main branch with the finished redesign should immediately see that this was a genuine menu redesign rather than another styling pass.
 
-Maintain enough personality that Seren still feels like a racing game rather than a productivity application.
+Seren should feel:
 
-Make confident decisions.
+* more confident
+* more expensive
+* more game-like
+* more visually distinctive
+* less repetitive
+* less card-heavy
+* easier to navigate
+* better composed
+* more memorable
 
-Do not ask me to specify every component.
+The Home Screen should become a signature screen.
 
-Explore the existing game, establish a coherent design language, implement it consistently across the entire experience, and leave the repository in a complete, tested, production-ready state.
+The game mode menu should feel important.
 
+Car selection should feel exciting.
 
-note: the game Redline has been completely rebranded/renamed to Seren
+Local multiplayer setup should feel polished rather than procedural.
+
+Custom setup should feel purposeful rather than form-like.
+
+All of it must still unmistakably belong to the dark black / white / gray / red glass-based Seren interface that now exists.
+
+Redesign the menus completely.
+
+Keep the gameplay.
+
+Keep the identity.
+
+Keep the scrolling road.
+
+Make the menu experience worthy of the rest of the game.
