@@ -213,7 +213,11 @@ for (const n of ORDER) {
 }
 
 head("DOM contract");
-const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1]));
+const idList = [...html.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1]);
+const ids = new Set(idList);
+const repeatedIds = idList.filter((id, i) => idList.indexOf(id) !== i);
+if(repeatedIds.length) fail("duplicate element IDs: " + repeatedIds.join(", "));
+else pass("all element IDs are unique");
 let literal = 0, dynamic = 0;
 const missing = new Set();
 for (const n of ORDER) {

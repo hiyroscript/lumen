@@ -240,22 +240,29 @@ geometry, the split-view geometry, `G`, the rule readers (`defaultRules`,
 the select-screen thumbnails come out of the same `drawCar` the road uses, then
 puts it back in a `finally`.
 
-### `ui.js` — 311 lines
-Screen switching (`show(id)` toggles `.on` classes — there is no router), the
-garage, the custom setup sheet, the car board, the personal best, and the
-select-screen car art. Gameplay logic does not live here.
+### `ui.js`
+Screen switching, focus management, setup summaries, the reference index,
+custom rules, car picking, and shared Canvas car previews. Gameplay logic lives
+elsewhere.
 
-Two things here are about the interface rather than about a screen:
-
-- `gateFocus()` decides what the keyboard and the pointer may reach. The seven
-  setup steps in `SHEET_IDS` are sheets drawn *over* the home screen, which
-  therefore stays `.on` underneath them; a pause or a result is drawn over the
-  instruments. In both cases the thing underneath has to stay visible — it is
-  the backdrop — and stop taking focus, which is exactly what the `inert`
-  attribute does. Call it from anywhere a modal surface opens or closes; `show()`
-  already does.
-- `infoCard()` is the one card shape every reference page builds, so the four
-  tabs of Cars & more read as one index rather than as four layouts.
+- `show(id)` sets `menuScreen`, toggles screen visibility, remembers the invoking
+  control, and restores focus. `SETUP_IDS` identifies the full-screen race setup
+  destinations. Home stays visible underneath to retain the moving road, while
+  its title and controls fade away. The `menu` body class gives menus the full
+  viewport; entering a race restores the existing race shell and scaling.
+- `gateFocus()` makes every inactive screen inert, gates the HUD during pause or
+  results, and moves focus into and out of dialogs. `menuKeydown()` contains Tab
+  within the active surface and routes Escape to its Back control. Native button
+  activation owns Enter and Space in menus.
+- `setupSummary()` reads the mode, player count, style, bots and difficulty from
+  `G`. It is presentation only. `paintCustom()` still writes through the original
+  rules and restores focus after rebuilding controls.
+- `paintPicks()` keeps the six direct-pick buttons, taken states and player roster
+  current. `previewCar()` renders the focused/hovered vehicle at showroom size
+  using the same `paintCarIcon()` / `drawCar()` path as the other car artwork.
+  Previewing never commits a pick. The board remains three columns for gamepads.
+- `infoCard()` creates reference entries with shared data; the index uses proper
+  tab semantics and arrow-key navigation.
 
 ### `local.js` — 161 lines
 Seats and player colours (`seatOf`, `seatCol`), the pad primitives (`padPoll`,
@@ -422,12 +429,12 @@ only thing carrying the meaning, so a dark one is fine.
 
 ### A screen
 
-A `<section class="screen">` with an id, a line in `show()`, and — if it is one of
-the setup steps drawn over the home screen — its id in `SHEET_IDS` so `gateFocus()`
-knows to make the backdrop inert. Sheets get `class="screen sheet-screen"` and a
-`.sheet` inside with `.sheet-head` / `.sheet-body` / `.sheet-foot`; the stylesheet
-does the rest, including turning the bottom sheet into a centred dialog on a wide
-window.
+A `<section class="screen">` with an id. `show()` handles visibility generically.
+Add setup destinations to `SETUP_IDS` to retain Home's road behind them. Use
+`.setup-screen` / `.setup-frame` with shared `.setup-rail`, `.setup-head`,
+`.setup-body` and optional `.setup-foot` for navigation and overflow. Give the
+actual decision its own layout: do not force modes, controllers and cars into
+one option-row pattern. Add new copy to both languages in `STR`.
 
 ## Checking your work
 
@@ -469,3 +476,9 @@ What has been used, and is worth repeating after a substantial change:
 - Fake gamepads through `navigator.getGamepads` to exercise local play; the code
   reads only `index`, `id`, `connected`, `buttons[i].pressed/.value` and
   `axes[i]`.
+
+Menu behavior can also be checked with `node tools/menu-check.mjs`. It executes
+all fourteen scripts against small DOM/Canvas test doubles, drives the actual
+event handlers, and supplies simulated Gamepad snapshots. It does not validate
+CSS layout, browser rendering or real controller hardware. See
+[MENU-REDESIGN-QA.md](MENU-REDESIGN-QA.md) for the remaining visual test matrix.

@@ -400,7 +400,7 @@ One system, from the splash to the finish line, built on four things:
   colours, gold/silver/bronze in the running order, the rarity of a pickup, the
   green of an armed launch, the gold of immunity — stay, because they are the
   game speaking and not the interface decorating.
-- **Glass for anything elevated.** Sheets, dialogs, panels, the countdown plate
+- **Glass for anything elevated.** Dialogs, panels, the countdown plate
   and every instrument over the road use one recipe: a dark tonal fill, a blurred
   backdrop, a hairline edge and a highlight along the top. Where a browser cannot
   blur, the same surfaces go opaque instead of translucent, so readability never
@@ -412,6 +412,15 @@ One system, from the splash to the finish line, built on four things:
 - **One geometry.** A single radius scale, a single spacing scale, and one focus
   ring — a white outline over a dark halo, so it is visible on glass, on red and
   on the moving road alike.
+
+Menus use distinct compositions: an angled scrolling road and oversized wordmark
+on Home, three mode destinations, a numbered difficulty scale, equal-column
+player previews, live controller bays, a rule workbench, and a car showroom.
+The showroom uses the actual car renderer; hovering or focusing inspects a car,
+and choosing it keeps the original direct-pick behavior. Local setup displays
+the player roster and current configuration. Cars & More uses a reference index
+with keyboard-operable tabs. Setup occupies the viewport; the game retains its
+original race layout.
 
 The race HUD is the same system rather than a second one. The corners hold what
 you consult: the pause button and the track and clock top left, distance and the
@@ -440,7 +449,7 @@ same constants — see
   the difficulty levels are four bars filled to the level rather than four shades.
 - **Keyboard.** Everything is a real `<button>`, the focus ring is visible on
   every surface, and a screen that is not showing is hidden outright rather than
-  faded — so nothing invisible sits in the tab order. A sheet makes the home
+  faded — so nothing invisible sits in the tab order. Setup makes the home
   screen behind it `inert`, and a pause or a result makes the instruments
   `inert`, so tabbing cannot walk out of the thing in front of you.
 - **Language.** Every string in the interface is translated, including the
@@ -452,10 +461,9 @@ same constants — see
 - **Contrast.** `prefers-contrast: more` firms up the hairlines, the secondary
   ink and the glass. `forced-colors: active` falls back to system colours with
   real borders.
-- **Desktop scaling.** In a portrait window the whole shell is scaled up to fill
-  it rather than sitting small in the middle, and the canvas backing store is
-  resized to match, so it stays crisp. In a landscape one the race takes the full
-  width while the menus keep their column.
+- **Desktop scaling.** Menus use the full viewport and adapt their compositions
+  to its width and height. The race retains its original portrait shell scaling
+  and landscape layout, with a matching Canvas backing store.
 - **Orientation and resize.** The world scales off the viewport *height* against a
   portrait phone as the reference, which is what keeps both orientations the same
   game: a short landscape viewport draws a smaller road and smaller cars, so the
@@ -520,6 +528,11 @@ job unchanged. It verifies:
 
 Run it before you commit. It takes well under a second.
 
+`node tools/menu-check.mjs` also checks menu state and event wiring using
+DOM/Canvas test doubles, including localization, setup, simulated controllers,
+car turns and pause/results. Browser visuals and hardware still need separate
+checks; see [the redesign QA record](docs/MENU-REDESIGN-QA.md).
+
 ## Project layout
 
 ```
@@ -528,7 +541,7 @@ css/app.css         the entire stylesheet
 js/                 the game, in load order (see below)
 tools/check.mjs     dependency-free validator for the invariants below
 docs/               ARCHITECTURE.md, TUNING.md and the screenshots
-upd                 the brief that drove the split into these files
+upd                 the current menu redesign brief
 .nojekyll           tells GitHub Pages to serve the tree verbatim
 ```
 

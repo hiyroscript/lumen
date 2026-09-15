@@ -152,13 +152,8 @@ document.addEventListener("keydown", function(e){
   if(!e.key) return;
   const k = e.key.toLowerCase();
   const racing = $("#race").classList.contains("on");
-  if(k === " " || k === "enter"){
-    if(G.state === "over"){ e.preventDefault(); startRace(); return; }
-    if($("#home").classList.contains("on") && !$("#langWrap").classList.contains("on")){ e.preventDefault(); show("modes"); return; }
-    if($("#modes").classList.contains("on")){ e.preventDefault(); show("cars"); return; }
-    if($("#diffs").classList.contains("on")){ e.preventDefault(); G.diff = "medium"; show("cars"); return; }
-    if($("#cars").classList.contains("on")){ e.preventDefault(); pickCar(CAR_IDS[randi(0, CAR_IDS.length-1)]); return; }
-  }
+  if(e.defaultPrevented) return;
+  if((k === " " || k === "enter") && e.target.closest("button")) return;
   if(!racing) return;
   if(k === "arrowleft" || k === "a"){ e.preventDefault(); move(-1); }
   else if(k === "arrowright" || k === "d"){ e.preventDefault(); move(1); }

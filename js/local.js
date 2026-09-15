@@ -36,11 +36,16 @@ function uiTick(ts){
   else carPadTick(dt);
 }
 
+/* Device names are external strings; never interpret them as menu markup. */
+function escapeMenuText(value){
+  return value.replace(/[&<>"']/g, function(c){ return {"&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"}[c]; });
+}
+
 /* A pad's own name, trimmed of the vendor and product ids the browser tacks on. */
 function padName(p){
-  let id = (p && p.id) || "Controller";
+  let id = (p && p.id) || t("controller");
   id = id.replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s+/g, " ").trim();
-  if(!id) id = "Controller";
+  if(!id) id = t("controller");
   return id.length > 34 ? id.slice(0, 33) + "\u2026" : id;
 }
 /* One row per seat, filled in the order the pads were seen. The button unlocks
@@ -55,8 +60,8 @@ function padsRefresh(){
     html += '<div class="pad-row' + (p ? " on" : "") + '">' +
             '<span class="chip-seat" style="background:' + PCOLS[i] + '"></span>' +
             '<span class="who">' + t("playerN") + " " + (i + 1) + '</span>' +
-            '<span class="nm">' + (p ? padName(p) : t("padWaiting")) + '</span>' +
-            '<span class="dot"></span></div>';
+            '<span class="pad-state">' + (p ? '✓ ' + t("padReady") : t("padMissing")) + '</span>' +
+            '<span class="nm">' + (p ? escapeMenuText(padName(p)) : t("padWaiting")) + '</span></div>';
   }
   if(list._html !== html){ list._html = html; list.innerHTML = html; }
   const ok = pads.length >= G.players;
@@ -75,6 +80,7 @@ function padsRefresh(){
   const line = t("padCtrls");
   if(hint && hint.textContent !== line) hint.textContent = line;
   $("#btnPadsGo").classList.toggle("off", !ok);
+  $("#btnPadsGo").disabled = !ok;
 }
 
 /* The car sheet, driven by whoever's turn it is. Their pad and nobody else's:
@@ -91,6 +97,9 @@ function seatPad(seat){
 function carPadTick(dt){
   const p = seatPad(pickTurn);
   const k = carKeys || (carKeys = newPadKeys());
+  const connection = $("#carPadState");
+  const label = t(p ? "padReady" : "padMissing");
+  if(connection.textContent !== label) connection.textContent = label;
   if(!p) return;
   const lx = padAxis(p, 0), ly = padAxis(p, 1);
   let dx = 0, dy = 0;

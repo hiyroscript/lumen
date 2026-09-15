@@ -97,43 +97,92 @@ function buildGarage(){
   if(garageTab === "cars") paintCarIcons();
 }
 
-/* The seven setup steps. All of them are sheets over the home screen, which is
-   why home stays on underneath them. */
-const SHEET_IDS = ["modes", "players", "pads", "style", "custom", "diffs", "cars"];
-
-/* What the keyboard and the pointer may reach.
-
-   A sheet is modal, so the home screen it is drawn over has to stop taking
-   focus and clicks while staying visible - it is the backdrop. The language
-   dialog is modal over everything, and a pause or a result is modal over the
-   instruments. `inert` is exactly that: still painted, no longer reachable.
-   Called from show() and from every place a panel opens or closes. */
+/* Setup screens share the moving road, with only the active screen reachable. */
+const SETUP_IDS = ["modes", "players", "pads", "style", "custom", "diffs", "cars"];
+let menuScreen = "home", menuFocus = {}, modalFocus = null;
+function menuButtons(root){
+  return Array.from(root.querySelectorAll('button:not(:disabled), [tabindex="0"]')).filter(function(el){
+    return !el.closest("[inert]") && el.getClientRects().length && getComputedStyle(el).visibility !== "hidden";
+  });
+}
 function gateFocus(){
+  const modal = $("#langWrap.on") || $("#pausePanel.on") || $("#overPanel.on");
   const langUp = $("#langWrap").classList.contains("on");
-  const sheetUp = SHEET_IDS.some(function(id){ return $("#" + id).classList.contains("on"); });
-  const panelUp = $("#pausePanel").classList.contains("on") ||
-                  $("#overPanel").classList.contains("on");
   document.querySelectorAll(".screen").forEach(function(el){
-    el.inert = langUp || (sheetUp && el.id === "home");
+    el.inert = langUp || el.id !== menuScreen;
   });
   const hud = $(".hud");
-  if(hud) hud.inert = langUp || panelUp;
+  if(hud) hud.inert = !!modal;
+  if(modal && !modal.contains(document.activeElement)){
+    modalFocus = document.activeElement;
+    const first = menuButtons(modal)[0];
+    if(first) first.focus({preventScroll:true});
+  } else if(!modal && modalFocus){
+    if(modalFocus.isConnected && !modalFocus.closest("[inert]")) modalFocus.focus({preventScroll:true});
+    modalFocus = null;
+  }
+}
+function setupSummary(){
+  let label = t("raceSetup");
+  if(menuScreen !== "modes"){
+    label = t(G.local ? "local" : G.mode === "bots" ? "bots" : "endless");
+    if(G.local && menuScreen !== "players") label += " · " + G.players + " " + t("playersShort");
+    if(["custom", "diffs", "cars"].indexOf(menuScreen) >= 0 && G.local) label += " · " + t(G.custom ? "customPlay" : "standardPlay");
+    if(menuScreen === "cars" && G.mode !== "endless"){
+      label += " · " + botsWanted() + " " + t("botCount");
+      if(botsWanted()) label += " · " + t(DIFFS[G.diff].key);
+    }
+  }
+  document.querySelectorAll(".session-context").forEach(function(el){ el.textContent = label; });
+  const next = menuScreen === "pads" ? "nextStyle" : menuScreen === "custom" ? "nextCars" : G.local && menuScreen === "cars" && pickTurn < G.players - 1 ? "nextPlayer" : "nextRace";
+  document.querySelectorAll(".next-context").forEach(function(el){ el.textContent = t(next); });
+}
+function show(id){
+  const active = document.activeElement;
+  if(active && active.id && active.closest(".screen")) menuFocus[menuScreen] = active.id;
+  menuScreen = id;
+  const setup = SETUP_IDS.indexOf(id) >= 0;
+  document.body.classList.toggle("menu", id !== "race");
+  document.querySelectorAll(".screen").forEach(function(el){
+    el.classList.toggle("on", el.id === id || (el.id === "home" && setup));
+  });
+  $("#home").classList.toggle("in-setup", setup);
+  setupSummary();
+  gateFocus();
+  const root = document.getElementById(id);
+  const remembered = document.getElementById(menuFocus[id]);
+  const first = remembered && !remembered.disabled ? remembered : menuButtons(root)[0];
+  if(id === "race"){
+    root.tabIndex = -1; root.focus({preventScroll:true});
+  } else if(first && !root.inert) first.focus({preventScroll:true});
+  if(id === "cars") paintPicks();
+  if(id === "garage" || id === "cars") requestAnimationFrame(paintCarIcons);
+  if(id === "pads") padsRefresh();
+  if(id === "pads" || (id === "cars" && G.local)) uiStart();
 }
 
-function show(id){
-  const sheet = SHEET_IDS.indexOf(id) >= 0;
-  $("#home").classList.toggle("on", id === "home" || sheet);
-  $("#modes").classList.toggle("on", id === "modes");
-  $("#players").classList.toggle("on", id === "players");
-  $("#pads").classList.toggle("on", id === "pads");
-  $("#style").classList.toggle("on", id === "style");
-  $("#custom").classList.toggle("on", id === "custom");
-  $("#diffs").classList.toggle("on", id === "diffs");
-  $("#garage").classList.toggle("on", id === "garage");
-  $("#cars").classList.toggle("on", id === "cars");
-  $("#race").classList.toggle("on", id === "race");
-  gateFocus();
-  if(id === "pads" || (id === "cars" && G.local)) uiStart();
+/* Tab stays in the active dialog or screen. Escape follows the same Back
+   actions as pointer controls; Enter/Space keep native button activation. */
+function menuKeydown(e){
+  const modal = $("#langWrap.on") || $("#pausePanel.on") || $("#overPanel.on");
+  const root = modal || document.getElementById(menuScreen);
+  if(!root) return;
+  if(e.key === "Tab"){
+    const all = menuButtons(root);
+    if(!all.length) return;
+    const first = all[0], last = all[all.length - 1];
+    if(e.shiftKey && (document.activeElement === first || !root.contains(document.activeElement))){e.preventDefault();last.focus();}
+    else if(!e.shiftKey && (document.activeElement === last || !root.contains(document.activeElement))){e.preventDefault();first.focus();}
+  }
+  if(e.key === "Escape" && menuScreen !== "race"){
+    e.preventDefault();
+    if(modal){
+      if(lang){ $("#langWrap").classList.remove("on"); gateFocus(); }
+      return;
+    }
+    const back = root.querySelector('[data-i18n-aria="navBack"], [data-i18n-aria="navClose"]');
+    if(back) back.click();
+  }
 }
 
 /* ---------------- best score ------------------------------------- */
@@ -156,7 +205,8 @@ function soloMode(m){
    whole run-up. Only an empty board leaves the sheet. */
 function backFromCars(){
   if(G.local && pickTurn > 0){
-    G.picks.pop(); pickTurn--; paintPicks();
+    G.picks.pop(); pickTurn--; carCur = firstFree(); paintPicks();
+    carEl(CAR_IDS[carCur]).focus({preventScroll:true});
     return;
   }
   if(G.local && G.custom) show("custom");
@@ -176,6 +226,9 @@ const RULE_TOGGLES = [
   { k:"ults",    name:"optUlts",    desc:"optUltsDesc" }
 ];
 function paintCustom(){
+  const focused = document.activeElement;
+  const attr = focused && ["data-bots", "data-diff", "data-rule"].find(function(k){ return focused.hasAttribute(k); });
+  const value = attr ? focused.getAttribute(attr) : null;
   const r = G.rules || (G.rules = defaultRules());
   const fill = FIELD_SIZE - G.players;
   if(r.bots > fill) r.bots = -1;            /* a seat was added since it was set */
@@ -185,7 +238,7 @@ function paintCustom(){
   let steps = "";
   for(let i=0;i<=fill;i++){
     const on = (r.bots < 0 ? i === fill : i === r.bots);
-    steps += '<button class="step' + (on ? " on" : "") + '" data-bots="' + i + '">' +
+    steps += '<button class="step' + (on ? " on" : "") + '" aria-pressed="' + on + '" data-bots="' + i + '">' +
              (i === fill && fill > 0 ? t("botCountFill") : String(i)) + '</button>';
   }
   $("#botSteps").innerHTML = steps;
@@ -195,7 +248,7 @@ function paintCustom(){
   /* how hard they push - nothing to set when there are none */
   let ds = "";
   DIFF_IDS.forEach(function(id){
-    ds += '<button class="step' + (G.diff === id ? " on" : "") + '" data-diff="' + id + '">' +
+    ds += '<button class="step' + (G.diff === id ? " on" : "") + '" aria-pressed="' + (G.diff === id) + '"' + (n === 0 ? ' disabled' : '') + ' data-diff="' + id + '">' +
           t(DIFFS[id].key) + '</button>';
   });
   $("#diffSteps").innerHTML = ds;
@@ -203,12 +256,17 @@ function paintCustom(){
 
   let tg = "";
   RULE_TOGGLES.forEach(function(o){
-    tg += '<button class="tog' + (r[o.k] ? " on" : "") + '" data-rule="' + o.k + '">' +
+    tg += '<button class="tog' + (r[o.k] ? " on" : "") + '" role="switch" aria-checked="' + r[o.k] + '" data-rule="' + o.k + '">' +
           '<span class="sw"><i></i></span>' +
           '<span class="tx"><b>' + t(o.name) + '</b><span>' + t(o.desc) + '</span></span>' +
           '</button>';
   });
   $("#toggles").innerHTML = tg;
+  if(attr){
+    const replacement = $("#customBody").querySelector("[" + attr + "='" + value + "']");
+    if(replacement && !replacement.disabled) replacement.focus({preventScroll:true});
+  }
+  setupSummary();
 }
 
 /* ---- choosing cars, in turns ------------------------------------
@@ -231,8 +289,14 @@ function paintPicks(){
     const el = carEl(CAR_IDS[i]);
     if(!el) continue;
     el.classList.toggle("taken", carTaken(CAR_IDS[i]));
+    el.disabled = carTaken(CAR_IDS[i]);
     el.classList.toggle("cursor", on && i === carCur);
   }
+  $("#pickRoster").textContent = on ? G.picks.map(function(id, i){ return t("playerN") + " " + (i + 1) + " / " + t(CARS[id].key); }).join(" · ") : "";
+  previewCar(CAR_IDS[carCur]);
+  $("#carPadState").textContent = "";
+  $("#carRules").textContent = on && G.custom ? RULE_TOGGLES.map(function(rule){ return t(rule.name) + ": " + t(ruleOn(rule.k) ? "ruleEnabled" : "ruleDisabled"); }).join(" · ") : "";
+  setupSummary();
   if(!on || !row) return;
   const seat = clamp(pickTurn, 0, LOCAL_MAX - 1);
   row.querySelector("i").style.background = PCOLS[seat];
@@ -249,6 +313,7 @@ function pickCar(id){
       carCur = firstFree();
       carKeys = newPadKeys();          /* the next player starts from nothing held */
       paintPicks();
+      carEl(CAR_IDS[carCur]).focus({preventScroll:true});
       return;
     }
     G.car = G.picks[0];
@@ -267,15 +332,32 @@ function carStep(step){
     n = n + step;
     if(n < 0) n += CAR_IDS.length;
     if(n >= CAR_IDS.length) n -= CAR_IDS.length;
-    if(!carTaken(CAR_IDS[n])){ carCur = n; paintPicks(); tone(520, .04, "square", .05); return; }
+    if(!carTaken(CAR_IDS[n])){ carCur = n; paintPicks(); carEl(CAR_IDS[n]).focus(); tone(520, .04, "square", .05); return; }
   }
+}
+
+function previewCar(id){
+  if(!CARS[id]) return;
+  const hero = $("#carHero");
+  hero.setAttribute("data-car", id);
+  $("#carHeroName").textContent = t(CARS[id].key);
+  $("#carHeroPower").textContent = t(id + "Ult");
+  CAR_IDS.forEach(function(k){carEl(k).classList.toggle("preview", k === id && !carTaken(k));});
+  paintCarIcon(hero, id);
 }
 
 function setTab(){
   ["cars","tracks","items","effects"].forEach(function(k){
-    $("#tab" + k.charAt(0).toUpperCase() + k.slice(1)).classList.toggle("on", garageTab === k);
+    const tab = $("#tab" + cap(k));
+    tab.classList.toggle("on", garageTab === k);
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-selected", String(garageTab === k));
+    tab.setAttribute("aria-controls", "garageBody");
+    tab.tabIndex = garageTab === k ? 0 : -1;
   });
+  $("#garageBody").setAttribute("aria-labelledby", "tab" + cap(garageTab));
   buildGarage();
+  $("#garageBody").scrollTop = 0;
 }
 
 /* ---------------- select-screen car art --------------------------
