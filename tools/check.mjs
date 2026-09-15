@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* REDLINE - a dependency-free check over the things that break silently.
+/* SEREN - a dependency-free check over the things that break silently.
  *
  *   node tools/check.mjs
  *
@@ -18,6 +18,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
+import assert from "node:assert/strict";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (p) => readFileSync(join(ROOT, p), "utf8");
@@ -157,6 +158,36 @@ for (const n of ORDER) {
   catch (e) { fail(`${p}: ${e.message}`); }
 }
 if (Object.keys(sources).length === ORDER.length) pass(`${ORDER.length} files parse`);
+
+head("Saved-data migration");
+for (const scenario of [
+  { name: "fresh install", seed: {}, expected: [null, null, null] },
+  { name: "previous saves", seed: { "redline.lang": "fr", "redline.sound": "0", "redline.best": "4820" }, expected: ["fr", "0", "4820"] },
+  { name: "existing Seren saves win", seed: { "redline.lang": "fr", "redline.sound": "1", "redline.best": "4820", "seren.lang": "en", "seren.sound": "0", "seren.best": "0" }, expected: ["en", "0", "0"] },
+  { name: "blocked writes retain migrated values in memory", seed: { "redline.lang": "fr", "redline.sound": "0", "redline.best": "4820" }, blockWrite: true, expected: ["fr", "0", "4820"] },
+  { name: "blocked storage still supports session saves", seed: {}, blockRead: true, blockWrite: true, expected: [null, null, null] }
+]) {
+  try {
+    const saved = new Map(Object.entries(scenario.seed));
+    const context = vm.createContext({
+      window: {},
+      localStorage: {
+        getItem(k) { if (scenario.blockRead) throw new Error("blocked"); return saved.get(k) ?? null; },
+        setItem(k, v) { if (scenario.blockWrite) throw new Error("blocked"); saved.set(k, v); }
+      }
+    });
+    vm.runInContext(sources.core, context);
+    const actual = vm.runInContext('["lang", "sound", "best"].map(k => store.get("seren." + k))', context);
+    assert.deepEqual(Array.from(actual), scenario.expected);
+    for (const [key, value] of Object.entries(scenario.seed)) assert.equal(saved.get(key), value);
+    if (!scenario.blockWrite) {
+      scenario.expected.forEach((value, i) => assert.equal(saved.get("seren." + ["lang", "sound", "best"][i]) ?? null, value));
+    }
+    vm.runInContext('store.set("seren.best", "5000")', context);
+    assert.equal(vm.runInContext('store.get("seren.best")', context), "5000");
+    pass(scenario.name);
+  } catch (e) { fail(`${scenario.name}: ${e.message}`); }
+}
 
 head("Global scope");
 const owner = new Map();

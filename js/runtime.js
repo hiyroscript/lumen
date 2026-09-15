@@ -1,6 +1,6 @@
 "use strict";
 
-/* REDLINE - shared runtime state and layout.
+/* SEREN - shared runtime state and layout.
    The canvas and its context, the road geometry, the split-screen view
    geometry, the one mutable game-state object G, the rule set readers, and
    the layout/resize machinery. It defines the state; it does not start the

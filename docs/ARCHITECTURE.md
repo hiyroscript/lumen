@@ -1,6 +1,6 @@
 # Architecture
 
-How REDLINE is put together, and where to change what.
+How SEREN is put together, and where to change what.
 
 The whole game is fourteen classic `<script defer>` files, one stylesheet and one
 HTML shell. There is no build step, no bundler, no package manager and no
@@ -191,7 +191,7 @@ a periodic road pattern at or above the top of the current view.
 
 ## File by file
 
-### `core.js` — 48 lines
+### `core.js`
 `store` (localStorage with a memory fallback), `$`, `clamp`, `lerp`, `rand`,
 `randi`, `withA` (hex → rgba), and three capability flags: `DESKTOP`, `NO_MOTION`,
 `LANDSCAPE`. Plus `SPLASH_IMAGE`, `SPLASH_MS` and `TRAFFIC_ENABLED`.
