@@ -1,759 +1,840 @@
-You are working directly inside the current hiyroscript/seren repository on the latest main branch.
+SEREN — SETTINGS SYSTEM & SETTINGS MENU IMPLEMENTATION
 
-Seren has already received a large interface redesign. Do NOT work from an older understanding of the project.
+Work directly from the current Seren repository and implement a complete Settings system that feels native to the game’s recently redesigned interface.
 
-Before making changes, inspect the current repository carefully, particularly:
+Before editing anything, inspect the current implementation in:
 
 * index.html
 * css/app.css
-* js/ui.js
 * js/main.js
-* js/local.js
+* js/ui.js
 * js/i18n.js
-* the current README and architecture documentation
-* any code involved in menu navigation, responsive layout, car-selection rendering, controller setup, and accessibility
+* js/audio.js
+* js/core.js
+* any other file that references language, sound, accessibility, motion, contrast, menu focus, localStorage, or the home navigation
 
-Understand the interface that exists NOW before designing anything.
+Do not build an isolated settings feature that duplicates systems already present in the project. Integrate with and improve the existing architecture.
 
-Objective
+The final result must feel like Seren always had a proper Settings menu.
 
-Completely redesign Seren’s menus.
+⸻
 
-The previous interface rework established a much better overall visual identity, but the menu experience itself still does not feel good enough.
+PRIMARY GOAL
 
-The current menus feel too repetitive, too much like variations of the same panel, and not sufficiently distinctive, premium, or memorable.
+Replace the current standalone audio toggle on the Home screen with a Settings button.
 
-I want you to rethink the complete menu experience from the ground up while preserving Seren’s current overall visual direction.
+The Settings button must occupy the exact same UI position currently occupied by the sound/audio button.
 
-This redesign should make Seren feel like a polished standalone racing game rather than a web game displaying a succession of modal sheets.
+Do not move the Home screen’s primary content or redesign the whole Home screen around this feature.
 
-Do not merely tweak spacing, borders, shadows, opacity, or font sizes.
+The Settings button opens a polished Settings interface containing:
 
-Do not simply make the existing menu cards prettier.
+1. Language
+2. Audio
+3. Accessibility / interface preferences
+4. Other useful player preferences that genuinely affect the game
+5. A safe way to restore settings to their defaults
 
-Reconsider the compositions themselves.
+Do not fill the Settings menu with fake or non-functional options.
 
-Preserve the new Seren identity
+Every visible setting must actually work.
 
-The current interface redesign established the correct general direction.
+⸻
 
-Keep that direction:
+HOME SCREEN CHANGES
 
-* black
-* white
-* neutral gray
-* red as the primary interface accent
-* restrained use of glass and translucency
-* strong contrast
-* premium minimalism
-* modern typography
-* thin, deliberate borders
+The current Home screen has separate Language and Sound controls.
+
+Consolidate these preferences into the new Settings system.
+
+Replace the current Sound button
+
+Remove the existing direct sound-toggle behavior from the Home topbar.
+
+The current #btnSound position becomes the Settings button.
+
+Use an appropriate minimal settings icon such as sliders or a gear, but draw it using the same inline SVG conventions already used throughout Seren.
+
+The button should:
+
+* visually use the existing .icon-btn language
+* have the same dimensions as the old button
+* have an accessible translated aria-label
+* open Settings
+* work with keyboard navigation
+* retain proper focus behavior after the Settings menu is closed
+
+Use an ID such as:
+
+#btnSettings
+
+Do not retain the old sound icon in this location.
+
+Remove the redundant standalone Language control
+
+Because Language will now live inside Settings, remove the permanent #btnLang control from the Home screen.
+
+Do not remove Seren’s first-launch language selection behavior.
+
+On a fresh installation where no language has been chosen yet, Seren should still ask the player to select English or French before normal interaction.
+
+After that initial choice, language changes happen through Settings.
+
+The Home topbar should therefore become substantially cleaner, with Settings being the main utility control.
+
+⸻
+
+SETTINGS PRESENTATION
+
+Create a dedicated settings overlay/dialog rather than turning Settings into another race-setup screen.
+
+Suggested structure:
+
+#settingsWrap
+→ #settingsCard
+→ Settings header
+→ scrollable settings content
+→ grouped settings sections
+
+It should use role="dialog" and aria-modal="true".
+
+The visual treatment must follow Seren’s established design system:
+
+* black / near-black foundation
+* white primary typography
+* gray secondary typography
+* red as the sole interface accent
+* thin translucent borders
+* glass / semi-transparent elevated surface
+* restrained blur
 * subtle depth
-* controlled animation
-* clean iconography
+* minimal ornamentation
+* Archivo display typography for major headings
+* IBM Plex Sans / Mono where currently appropriate
+* existing spacing and token system from app.css
 
-Do not return to the old light-gray interface.
+Do not introduce blue, green, purple, gradients unrelated to Seren’s existing glass surfaces, generic Material UI styling, or large colorful preference icons.
 
-Do not introduce an unrelated colorful arcade aesthetic.
+This should look like a premium racing game’s settings panel, not a browser settings page.
 
-Do not turn Seren into a cyberpunk/neon game.
+⸻
 
-Do not fill everything with red.
+SETTINGS LAYOUT
 
-Red should remain intentional and meaningful.
+At the top:
 
-Gameplay colors that communicate real game information may continue to exist.
+SETTINGS
 
-Main problem to solve
+Include a clear Close button in the upper-right area of the panel.
 
-The current menu system relies heavily on one repeated structure:
+Below it, organize preferences into clearly separated groups.
 
-* darkened backdrop
-* glass container
-* heading
-* vertically stacked option rows
-* icon on the left
-* text
-* chevron on the right
+Use hierarchy through typography, spacing, borders, and subtle background changes rather than giant cards around every individual option.
 
-That pattern is useful in moderation, but it currently makes too many different decisions feel like the same screen with different text.
+Recommended sections:
 
-That needs to change.
+GENERAL
 
-Game mode selection, difficulty selection, player count, controller setup, race style, custom configuration, and car selection do not need to have identical visual structures merely because they are all menus.
+Language
 
-Design each screen around the actual decision the player is making.
+Show the currently selected language clearly.
 
-They should still clearly belong to the same design system, but they should not all look like clones.
+Currently supported languages are:
 
-Create visual rhythm across the setup flow.
+* English
+* Français
 
-Some screens can be bold and spacious.
+Do not advertise unsupported languages.
 
-Some can be compact and functional.
+Use either a compact segmented selector or two clean language options.
 
-Some can emphasize visual selection.
+Changing language must immediately update the entire visible interface without requiring a reload.
 
-Some can emphasize information.
+Reuse Seren’s existing localization system rather than introducing a second translation mechanism.
 
-Some can behave more like a dedicated game screen than a modal.
+Continue storing the selected language using the existing:
 
-Use judgment.
+seren.lang
 
-Home screen — very important
+The settings panel itself must also update immediately after the language changes.
 
-The scrolling road background MUST remain.
+Do not close Settings automatically simply because the language changed.
 
-The animated road is part of Seren’s identity and should not be removed.
+Refactor the existing language-selection logic into a reusable function if necessary so that both:
 
-However, you are completely free to reinterpret how the road is presented and how the interface is composed around it.
+* first-launch language selection
+* Settings language selection
 
-Do not assume the current implementation of:
+go through the same underlying code path.
 
-* a full-screen flat road
-* two simple vertical lane markers
-* title near the top
-* two buttons centered in the middle
-* information at the bottom
+⸻
 
-must remain unchanged.
+AUDIO
 
-Preserve the concept, not necessarily the exact composition.
+Seren currently has generated WebAudio effects and a global soundOn state.
 
-The home screen should make the moving road feel intentional and integrated into the design rather than simply functioning as a wallpaper behind buttons.
+Preserve that architecture.
 
-Find a visually sophisticated interpretation of an endlessly scrolling road.
+Master sound
 
-It can remain abstract and minimalist.
+Provide a real On / Off switch.
 
-It does not need to become a complicated Canvas scene.
+It must control the same global audio state currently controlled by setSound().
 
-It should still feel fast, clean and unmistakably related to Seren.
+Continue supporting the existing preference key:
 
-The movement should create atmosphere without distracting from navigation.
+seren.sound
 
-The home screen should feel like the strongest visual statement in the menu system.
+Turning audio off must:
 
-It should immediately communicate:
+* mute all generated game audio
+* stop the running engine sound as the game already does
+* update Settings immediately
 
-SEREN
-racing
-speed
-precision
-minimalism
+Turning audio back on must restore audio using the player’s configured volume.
 
-Make the hierarchy obvious without making the screen empty or generic.
+Do not create a separate audio state that can become inconsistent with soundOn.
 
-The player should immediately understand how to start playing and how to access secondary content.
+Master volume
 
-Keep language and audio controls available.
+Add a master-volume setting.
 
-Keep the personal-best information where appropriate.
+Use a range slider from:
 
-Keep desktop control information useful without letting it dominate the composition.
+0 → 100
 
-Menu transition from Home
+Show the numerical percentage beside or near the slider.
 
-Rethink what happens when the player presses Start Race.
+Persist this separately, for example:
 
-Do not assume every subsequent step must appear as the same bottom sheet over a blurred Home Screen.
+seren.volume
 
-You may keep some overlay behavior where it is aesthetically appropriate, but the flow should feel designed rather than inherited from one reusable component.
+Use a sensible default corresponding approximately to Seren’s current master gain.
 
-Transitions between Home and race setup should feel smooth, spatially understandable and connected to the moving-road identity.
+The existing audio code currently gives the master gain a fixed value when sound is enabled. Refactor that behavior so the gain becomes:
 
-The background, road, glass, typography and motion can work together to make the user feel as though they are moving deeper into the game.
+sound disabled:
+0
 
-Keep transitions fast.
+sound enabled:
+configured master volume
 
-Never sacrifice usability for cinematic presentation.
+Changing volume should take effect immediately.
 
-Game mode selection
+Do not create individual Music / Dialogue / Voice sliders because Seren does not currently have those audio systems.
 
-Completely reconsider the presentation of:
+Only expose settings corresponding to actual game audio.
 
-* Endless
-* Race against bots
-* Local play
+The slider must support mouse, touch and keyboard input.
 
-These are three fundamentally important choices and should feel more substantial than generic settings rows.
+⸻
 
-The player should understand the personality and purpose of each mode immediately.
+ACCESSIBILITY & INTERFACE
 
-Find a cleaner and more visually compelling way to present them.
+Add a compact Accessibility / Interface section.
 
-Do not over-explain.
+These preferences must affect actual behavior.
 
-Do not create giant paragraphs.
+Reduced motion
 
-Use the existing mode descriptions intelligently.
+Seren already contains support for the operating system’s prefers-reduced-motion preference and also has JavaScript behavior associated with reduced motion.
 
-Local Play must still communicate its desktop/controller requirements.
+Turn this into a proper player preference without breaking system-level accessibility.
 
-Disabled or unavailable states must remain obvious and accessible.
+Use three states:
 
-Difficulty selection
+* System
+* Reduced
+* Full
 
-Redesign the difficulty selection so that it feels like a deliberate game choice rather than another settings list.
+Default:
 
-Preserve:
+System
 
-* Easy
-* Medium
-* Hard
-* Brutal
-* their descriptions
-* their actual game behavior
+Persist something such as:
 
-You may reinterpret the visual representation of difficulty completely.
+seren.motion
 
-The relative progression from Easy to Brutal should be understandable immediately.
+Behavior:
 
-Do not rely exclusively on red intensity or color to communicate difficulty.
+System
+Use the operating system’s prefers-reduced-motion value.
 
-Car selection
+Reduced
+Force Seren’s reduced-motion behavior even when the operating system does not request it.
 
-Give car selection significantly more presence.
+Full
+Allow Seren’s normal animations even when the operating system requests reduced motion, provided doing so does not compromise core accessibility functionality.
 
-The repository already renders each car with the same drawing code used in the race.
+Inspect every use of the existing NO_MOTION behavior before changing it.
 
-Use that strength.
+Do not only stop CSS animations while leaving frame-by-frame JavaScript motion unaffected.
 
-The player is choosing their character/vehicle here; the screen should feel appropriately important.
+The setting needs to be applied coherently across both CSS and JS where Seren currently reacts to reduced motion.
 
-Do not reduce the cars to tiny generic cards if a more expressive presentation works better.
+Avoid scattering independent checks everywhere. Prefer a small centralized helper/state such as:
 
-At the same time:
+motionReduced()
 
-* preserve all six cars
-* preserve random selection
-* preserve local multiplayer turn-taking
-* preserve unavailable/taken states
-* preserve controller navigation
-* preserve the actual Canvas car artwork
-* preserve the underlying picking behavior
+or an equivalent clean implementation.
 
-Single-player and local multiplayer must both work naturally.
+The setting must take effect without a page reload whenever reasonably possible.
 
-Local multiplayer menus
+⸻
 
-Completely redesign the local multiplayer setup journey:
+HIGH CONTRAST
 
-* player count
-* controller discovery
-* standard vs custom play
-* custom game configuration
-* difficulty when relevant
-* car selection
+Seren already contains styling for prefers-contrast: more.
 
-This is currently a relatively long flow.
+Expose this as another accessibility preference.
 
-Make it feel coherent and intentional.
+Use:
 
-The player should always understand:
+* System
+* On
+* Off
 
-* where they are
-* what they are choosing
-* what comes next
-* how to go back
-* which controllers are connected
-* which player is currently selecting
-* what settings are currently active
+Persist something such as:
 
-Do not add unnecessary wizard text or intrusive progress indicators just because there are multiple steps.
+seren.contrast
 
-Find an elegant game-like solution.
+System should continue respecting the browser/OS preference.
 
-Controller discovery
+On should apply Seren’s existing higher-contrast treatment manually.
 
-The controller connection screen should feel particularly polished.
+Off should use the standard visual treatment.
 
-Connection state must be extremely clear.
+Do not redesign the color palette.
 
-It should gracefully communicate:
+High Contrast should simply strengthen:
 
-* expected number of controllers
-* detected controllers
-* player/controller assignment
-* readiness to continue
-* disconnected/not-yet-connected states
+* text contrast
+* borders
+* glass separation
+* interactive-state visibility
 
-Keep the actual Gamepad logic intact.
+while retaining Seren’s black / white / gray / red identity.
 
-Do not fake controller detection for visual purposes.
+⸻
 
-Standard vs Custom play
+CONTROL HINTS
 
-Make Standard and Custom feel meaningfully distinct.
+Add:
 
-The player should immediately understand:
+Show control hints
 
-Standard:
-the intended full Seren experience.
+This affects the desktop control-hint row displayed on the Home screen.
 
-Custom:
-a configurable race.
+Default:
 
-Avoid making them look like two ordinary preference rows.
+On.
 
-Custom race setup
+Persist something such as:
 
-The custom race interface should remain efficient despite allowing several options.
+seren.controlHints
 
-Preserve all existing functionality:
+When disabled:
 
-* bot count
-* bot difficulty
-* traps
-* mystery bubbles
-* boost/launch
-* ultimates
+* hide the keyboard control-hint group
+* do not hide essential buttons
+* do not affect gameplay controls
+* do not affect controller instructions where those instructions are required to configure local multiplayer
 
-The screen should feel like configuring a race, not filling out a web settings form.
+This preference is purely about optional Home-screen hints.
 
-Improve grouping, hierarchy and interaction.
+The setting should update immediately.
 
-Do not make it visually noisy.
+⸻
 
-Do not introduce complicated controls when simple ones work better.
+RESTORE DEFAULT SETTINGS
 
-The currently selected configuration should always be easy to scan.
+At the bottom of Settings, provide a low-emphasis:
 
-Cars & More
+Restore default settings
 
-Review the Cars & More reference area as part of the menu redesign.
+This must reset preferences only.
 
-It should remain useful as Seren’s built-in game reference.
+Reset:
 
-Preserve:
+* language only if you deliberately decide that is appropriate
+* sound enabled state
+* volume
+* motion preference
+* contrast preference
+* control-hint preference
+* any other preference introduced by this Settings implementation
 
-* Cars
-* Tracks / traps
-* Mystery bubbles
-* Effects
-* dynamic values derived from the actual game data
-* car artwork
-* rarity information
-* effect information
+Do not erase:
 
-You may redesign its navigation, page structure and content presentation if doing so makes it feel more integrated with the new menus.
+* personal best
+* game progress
+* race records
+* gameplay data unrelated to preferences
 
-Do not turn it into a generic documentation page.
+Preferably keep Language unchanged during a normal “Restore default settings” operation so the user does not suddenly lose the language they are currently using.
 
-It should feel like part of the game.
+If language remains unchanged, make that behavior intentional.
 
-Language selection
+Do not use localStorage.clear().
 
-Bring the first-run language selection and later language switching into the redesigned menu language.
+Reset only specific Seren preference keys.
 
-It can remain an elevated dialog if that is the right solution.
+Provide a lightweight confirmation before destructive preference reset if needed, but do not create an unnecessarily elaborate confirmation flow.
 
-It should feel native to the redesigned Seren interface rather than a leftover component.
+⸻
 
-Preserve English and French behavior.
+SETTINGS STATE ARCHITECTURE
 
-Pause and race-over interfaces
+Do not scatter direct calls to localStorage throughout event handlers.
 
-Do not perform another complete HUD redesign.
+Seren already has its store abstraction.
 
-The current race HUD is outside the primary scope of this task.
+Continue using it.
 
-However, pause, race-over and other menu-like overlays should be reviewed so that they do not feel disconnected from the newly redesigned menus.
+Create centralized settings defaults and small read/write helpers where useful.
 
-Update them only as much as necessary to achieve consistency.
+For example, conceptually:
 
-Do not destabilize the race HUD or Canvas HUD.
+SETTINGS_DEFAULTS
 
-Visual system
+and helpers such as:
 
-The new menus should continue using Seren’s existing interface foundation but may evolve it.
+getSetting()
+setSetting()
+applySettings()
 
-Aim for:
+This does not have to be a massive new framework.
 
-* strong composition
-* precise alignment
-* purposeful negative space
-* confident typography
-* strong hierarchy
-* elegant asymmetry where appropriate
-* layered depth used sparingly
-* sophisticated transparency
-* subtle environmental motion
-* clean geometry
-* satisfying selection feedback
-* clear navigation
-* restrained transitions
+Keep the architecture appropriate to the current vanilla-JavaScript project.
 
-Avoid an interface consisting of endless rounded rectangles.
+The important requirement is to avoid having DOM state, stored state, and game state drift apart.
 
-Not every piece of information needs a card.
+There should be one authoritative value for each preference.
 
-Not every action needs a visible border.
+⸻
 
-Not every screen needs the same container.
+AUDIO REFACTOR REQUIREMENTS
 
-Use surfaces only when they have a reason to exist.
+Preserve the existing lazy AudioContext behavior.
 
-Glass
+Do not create an AudioContext simply during page initialization if the browser would reject it.
 
-Keep the glass language from the current redesign, but use it more intelligently.
+The audio system currently intentionally creates WebAudio from a user interaction.
 
-Glass should communicate elevation and separation.
+Maintain that safety.
 
-Use it for elements such as:
+Refactor master gain cleanly.
 
-* floating controls
-* overlays
-* focused information
-* navigational surfaces
-* modal content
-* selected or elevated groups
+Conceptually:
 
-Do not cover every menu screen in one giant glass rectangle simply because the token already exists.
+effectiveGain = soundOn ? configuredVolume : 0
 
-Do not stack translucent rectangles endlessly inside other translucent rectangles.
+Any engine/audio node already connected through the master node should automatically respect the master volume.
 
-The result should feel lighter and more intentional.
+Do not individually multiply volume into every sound-effect function unless absolutely necessary.
 
-Maintain the existing opaque fallback for browsers that cannot render backdrop blur.
+⸻
 
-Typography
+FIRST-LAUNCH LANGUAGE EXPERIENCE
 
-Keep the current general typographic personality.
+Do not break the existing first-run language flow.
 
-Seren should retain the combination of:
+If seren.lang has never been chosen:
 
-* strong condensed/display typography
-* clean body text
-* monospaced metadata/readouts
+1. splash completes
+2. Home becomes available behind the modal
+3. the language chooser appears
+4. focus is correctly trapped inside it
+5. choosing a language saves it
+6. the interface updates
+7. the initial picker closes
+8. focus returns correctly
 
-You may refine sizing, width, weight, tracking, line-height and hierarchy substantially.
+Once language has been selected, this first-run modal should not appear again.
 
-Do not create dozens of arbitrary text styles.
+Language subsequently lives in Settings.
 
-The typography should do a large portion of the visual work so that the interface does not need unnecessary decorative containers.
+It is acceptable to keep the existing #langWrap specifically for this onboarding case instead of trying to make it serve two visually different jobs.
 
-Motion
+⸻
 
-Motion should become part of the menu system.
+MODAL & FOCUS MANAGEMENT
 
-Use it carefully.
+The current menu code contains centralized focus gating.
 
-Useful motion can include:
+Update it properly.
 
-* road movement
-* screen transitions
-* selection changes
-* focus movement
-* menu entrances/exits
-* car-selection feedback
-* controller readiness
-* state changes
+Settings must become a first-class modal alongside the existing language, pause and race-over panels.
 
-Avoid:
+When Settings opens:
 
-* excessive bouncing
-* slow transitions
-* constant pulsing
-* decorative looping animation everywhere
-* large motion that makes menu navigation feel sluggish
+* all underlying menu screens become inert
+* focus moves into Settings
+* keyboard Tab remains inside Settings
+* Shift+Tab wraps correctly
+* Escape closes Settings
+* clicking the explicit Close button closes Settings
+* underlying Home buttons cannot be activated
 
-The menus should feel responsive.
+When Settings closes:
 
-Respect prefers-reduced-motion.
+* inert state is removed correctly
+* focus returns to #btnSettings
+* the Home screen resumes normal keyboard navigation
 
-Every important animated state must still make sense when motion is reduced.
+Do not implement a second independent focus-trap system if the existing gateFocus() / menuKeydown() system can be extended.
 
-Responsive design
+Update modal detection centrally.
 
-The redesign must work intentionally on:
+Avoid logic such as a growing chain of unrelated hardcoded conditions if a helper like:
 
-* narrow portrait phones
-* larger phones
-* landscape phones
-* tablets where applicable
-* tall/narrow desktop windows
-* standard desktop displays
-* wide landscape displays
+activeModal()
 
-Do not merely scale a mobile menu upward.
+makes the code easier to maintain.
 
-Desktop should make intelligent use of available space.
+For example, Settings, language, pause, and results should all be discoverable through the same central mechanism.
 
-Mobile must retain good touch targets and clear hierarchy.
+⸻
 
-Respect all safe-area insets.
+ESCAPE BEHAVIOR
 
-Avoid placing important controls against unsafe screen edges.
+Escape while Settings is open must close Settings.
 
-Navigation and interaction
+Escape must not accidentally navigate from Home into another menu at the same time.
 
-Preserve all existing supported methods:
+One keypress = one action.
 
-* touch
-* mouse
-* keyboard
-* gamepad/controller
-* local multiplayer controllers
+If another modal is open, preserve that modal’s existing behavior.
 
-Do not regress keyboard focus handling.
+⸻
 
-Do not break inert behavior or accidentally leave hidden screens reachable.
+BACKDROP INTERACTION
 
-Maintain clear focus-visible states.
+Allow clicking/tapping the darkened backdrop outside the settings card to close Settings.
 
-Make controller navigation states visible.
+Clicking anywhere inside the settings card must not close it.
 
-Maintain logical Back behavior throughout the flow.
+The Close button must always remain available.
 
-Localization
+On touch devices, avoid accidental closure while dragging sliders.
 
-English and French must both remain complete.
+⸻
 
-Any new player-facing copy must go through the existing translation system.
+SETTINGS CONTROL DESIGN
 
-Do not hard-code new interface strings in HTML or JavaScript.
+Create reusable Settings-row styling instead of manually styling every preference separately.
 
-Design for French text expansion.
+A setting row should generally contain:
 
-Do not create layouts that only work because the English title is short.
+Left:
 
-Keep translated ARIA labels working.
+* setting name
+* optional short explanatory text
 
-Accessibility
+Right:
 
-Maintain or improve:
+* switch
+* segmented options
+* value
+* slider
+* action
 
-* readable contrast
-* keyboard accessibility
-* focus states
-* semantic buttons
-* ARIA labeling
-* touch target sizing
-* reduced-motion support
-* forced-colors compatibility where practical
-* prefers-contrast behavior
-* information that is not communicated through color alone
+Keep descriptions concise.
 
-Minimalism is not an excuse for ambiguity.
+Examples:
 
-Architecture
+Sound
+Enable game audio
 
-Respect Seren’s current implementation.
+Master volume
+72%
 
-Do NOT introduce:
+Reduced motion
+System / Reduced / Full
 
-* React
-* Vue
-* Svelte
-* Tailwind
-* Bootstrap
-* npm
-* bundlers
-* component frameworks
-* build tooling
+Do not put every option inside huge boxed cards.
 
-Keep the project dependency-free and build-free.
+Use thin dividers and careful alignment.
 
-The current architecture is intentional:
+⸻
 
-* one HTML shell
-* one main stylesheet
-* classic JavaScript files
-* Canvas 2D gameplay
-* DOM-based menu UI
-* shared global script scope
+SWITCHES
 
-You may restructure menu HTML and CSS substantially.
+Seren already has switch-like controls in the custom race interface.
 
-You may refactor menu-related JavaScript where needed.
+Inspect those styles before implementing new switches.
 
-But do not unnecessarily rewrite game systems.
+Reuse or adapt their visual language rather than creating an unrelated iOS/Android toggle style.
 
-Be extremely careful with global top-level JavaScript declarations.
+Settings switches should:
 
-Preserve behavior
+* have role="switch"
+* expose aria-checked
+* work with mouse
+* work with touch
+* work with keyboard
+* have visible focus
+* have a sufficiently large hit target
 
-Do not change:
+Do not rely on red/gray alone to communicate state.
 
-* physics
+Include textual or structural state indication where appropriate.
+
+⸻
+
+SLIDER
+
+The volume slider should be visually customized to Seren rather than using an untouched browser range input.
+
+Use:
+
+* subtle gray track
+* red filled portion
+* restrained thumb
+* visible keyboard focus
+* sufficient hit area
+
+Keep it native enough to preserve accessibility.
+
+Do not create a slider from divs if <input type="range"> can do the job better.
+
+⸻
+
+RESPONSIVE BEHAVIOR
+
+Settings must work correctly in:
+
+* portrait phone
+* landscape phone
+* tablet
+* desktop
+* desktop portrait shell
+* wide desktop menu mode
+
+On desktop:
+
+* use a centered glass panel of a restrained width
+* do not stretch settings across the entire monitor
+
+On mobile:
+
+* allow the settings panel to become nearly full-screen
+* respect all safe-area insets
+* keep Close reachable
+* make the settings body scroll independently when required
+* prevent the document/game underneath from scrolling
+
+Very short landscape screens must remain usable.
+
+Do not allow the bottom settings to become unreachable.
+
+⸻
+
+VISUAL RELATIONSHIP TO THE HOME BACKGROUND
+
+Opening Settings from Home should preserve visual context.
+
+The animated road/ribbon may remain visible behind the darkened glass overlay.
+
+The background should be sufficiently dimmed that settings remain readable.
+
+Do not replace the Home screen with a completely unrelated solid page unless necessary for browser fallback.
+
+The glass treatment should create depth between:
+
+1. moving Home environment
+2. dim overlay
+3. Settings surface
+
+Respect Seren’s existing fallback for browsers without backdrop-filter.
+
+Settings must remain completely readable when blur is unsupported.
+
+Add the settings card to that fallback treatment.
+
+⸻
+
+TRANSLATION
+
+Every new visible string needs entries in STR for both:
+
+en
+and
+fr
+
+This includes:
+
+* Settings
+* Close accessibility label if a new key is required
+* General
+* Language
+* Audio
+* Sound
+* Master volume
+* Accessibility
+* Reduced motion
+* System
+* Reduced
+* Full
+* High contrast
+* On
+* Off
+* Interface
+* Show control hints
+* Restore default settings
+* descriptions
+* reset confirmation text if implemented
+
+Do not hardcode English strings in JavaScript-generated Settings content.
+
+Use Seren’s existing t() system.
+
+Any icon-only control must use translated data-i18n-aria text.
+
+Maintain:
+
+document.documentElement.lang
+
+through the existing language system.
+
+⸻
+
+CURRENT LANGUAGE VISUAL STATE
+
+The selected language must be visually and semantically identifiable.
+
+For example:
+
+English
+EN
+
+Français
+FR
+
+The active language should use:
+
+* stronger border or fill
+* correct aria-pressed / selected state
+* restrained red accent
+
+Changing language should immediately repaint the selected state.
+
+⸻
+
+CURRENT SETTING VISUAL STATES
+
+Every preference must accurately reflect stored state when Settings opens.
+
+Never rely on the Settings dialog having remained mounted in a previously correct state.
+
+Create something like:
+
+paintSettings()
+
+that derives the UI from authoritative state.
+
+Call it when:
+
+* Settings opens
+* a preference changes
+* language changes
+* defaults are restored
+
+The DOM should be a view of settings state, not the source of truth.
+
+⸻
+
+SETTINGS OPEN / CLOSE API
+
+Create small explicit functions such as:
+
+openSettings()
+closeSettings()
+paintSettings()
+
+or equivalent.
+
+Do not implement opening and closing by duplicating raw .classList.add("on") / .remove("on") calls throughout unrelated event handlers.
+
+These functions should coordinate:
+
+* visible state
+* paint
+* focus
+* accessibility/inert behavior
+
+⸻
+
+SETTINGS BUTTON FEEDBACK
+
+Clicking Settings may play Seren’s subtle UI tone if sound is enabled.
+
+Do not make opening Settings loud.
+
+Changing normal segmented preferences may use the project’s existing subtle interface tone.
+
+Turning Sound OFF should not play a sound after it has been disabled.
+
+Turning Sound ON may play a short confirmation tone.
+
+Moving the volume slider should not produce dozens of tones every pixel.
+
+If you want audible volume feedback, trigger it sparingly, such as on change rather than on every input event.
+
+⸻
+
+HOME TOPBAR CLEANUP
+
+After removing the standalone Language and Sound buttons, make sure the Home topbar still looks intentional.
+
+Do not leave an awkward empty control-sized gap where Language used to be.
+
+Settings should visually belong to the composition.
+
+Do not interfere with:
+
+* Seren title
+* moving ribbon
+* Start Race
+* Cars & More
+* Best Run
+* desktop control hints
+
+The Home screen should look cleaner than before.
+
+⸻
+
+DO NOT CHANGE
+
+Do not unnecessarily modify:
+
+* core race mechanics
+* cars
 * AI
-* game balance
-* race timing
-* items
-* ultimates
 * tracks
-* hazards
-* launch behavior
-* boost behavior
-* save semantics
 * local multiplayer rules
-* field size
-* difficulty behavior
+* race setup
+* HUD gameplay layout
+* game balancing
+* car abilities
+* items
+* collision logic
+* rendering unrelated to accessibility preferences
 
-This is a menu UI/UX redesign.
+This task is about Settings and the minimum supporting refactors required to make those settings genuinely functional.
 
-Functionality should remain the same unless a UI adaptation requires a small structural change.
+⸻
 
-Code quality
+LIKELY FILE RESPONSIBILITIES
 
-Do not layer the new design on top of the previous one with hundreds of override rules.
+Keep responsibilities consistent with the existing architecture.
 
-Actually clean up the menu code.
+index.html
 
-When a menu structure is replaced:
+Add:
 
-* remove obsolete CSS
-* remove obsolete markup
-* remove obsolete helper classes
-* remove dead states
-* consolidate new patterns where they truly repeat
-
-But do not over-generalize every menu into one universal component again.
-
-Shared design tokens are good.
-
-Shared primitives are good.
-
-Forcing fundamentally different screens into one layout is not.
-
-Keep the code understandable.
-
-Important design instruction
-
-Use your own judgment.
-
-Do not ask me to provide wireframes for every screen.
-
-Do not interpret this prompt as an instruction to mechanically implement a specific layout.
-
-I want you to design.
-
-Explore Seren.
-
-Understand its player flow.
-
-Identify what currently feels repetitive, generic, cramped, oversized, visually weak, or unnecessarily card-heavy.
-
-Then solve those problems.
-
-Take creative ownership of the menu system while staying within Seren’s established visual identity.
-
-Home road requirement
-
-Before considering the task finished, verify this explicitly:
-
-The Home Screen still has an unmistakable continuously scrolling road.
-
-It may be redesigned, reframed, masked, transformed, layered, perspective-treated, partially obscured, integrated with typography, or otherwise reinterpreted.
-
-But it must remain a moving road and remain one of the defining visual elements of Seren’s Home Screen.
-
-Do not replace it with:
-
-* a static gradient
-* generic particles
-* plain black
-* a photograph
-* an unrelated animation
-
-The road is required.
-
-Make it better.
-
-Testing
-
-Walk through the entire redesigned menu flow.
-
-Test at minimum:
-
-1. startup splash
-2. first-run language selection
-3. Home
-4. language toggle
-5. sound toggle
-6. Cars & More
-7. Start Race
-8. mode selection
-9. Endless → car selection → race
-10. Race against bots → difficulty → car selection → race
-11. Local Play
-12. 2 players
-13. 3 players
-14. 4 players
-15. controller discovery
-16. Standard Play
-17. Custom Play
-18. bot-count changes
-19. difficulty changes
-20. every custom rule toggle
-21. local player car-picking turns
-22. Back navigation at every step
-23. random car selection
-24. unavailable/taken car states
-25. phone portrait
-26. phone landscape
-27. desktop
-28. tall narrow desktop
-29. English
-30. French
-31. keyboard navigation
-32. reduced motion
-33. race pause
-34. race results
-
-Run:
-
-node tools/check.mjs
-
-It must pass.
-
-Check for JavaScript console errors.
-
-Verify there are no duplicated IDs.
-
-Verify every changed selector still resolves.
-
-Verify all translation keys exist.
-
-Verify menu restructuring has not broken event listeners.
-
-Final quality bar
-
-The menus should feel substantially different after this work.
-
-Someone comparing the current main branch with the finished redesign should immediately see that this was a genuine menu redesign rather than another styling pass.
-
-Seren should feel:
-
-* more confident
-* more expensive
-* more game-like
-* more visually distinctive
-* less repetitive
-* less card-heavy
-* easier to navigate
-* better composed
-* more memorable
-
-The Home Screen should become a signature screen.
-
-The game mode menu should feel important.
-
-Car selection should feel exciting.
-
-Local multiplayer setup should feel polished rather than procedural.
-
-Custom setup should feel purposeful rather than form-like.
-
-All of it must still unmistakably belong to the dark black / white / gray / red glass-based Seren interface that now exists.
-
-Redesign the menus completely.
-
-Keep the gameplay.
-
-Keep the identity.
-
-Keep the scrolling road.
-
-Make the menu experience worthy of the rest of the game.
+* Settings button replacing Sound button
+* Settings overlay/dialog markup
+* settings controls or containers
+* remove redundant permanent Language button from Home
+* retain the initial-language modal
