@@ -1,4 +1,4 @@
-# REDLINE
+# SEREN
 
 A three-lane arcade racer that runs in a browser tab. Six cars, each with its own
 ultimate, race up a road that never stops speeding up — through a city, a desert
@@ -9,8 +9,6 @@ No install, no build step, no dependencies. One HTML file, one stylesheet and
 fourteen JavaScript files, drawn entirely with hand-written Canvas 2D.
 
 **▶ [Play it](https://hiyroscript.github.io/seren/)** · a game by hiyroscript
-
-![The home screen](docs/img/home.png)
 
 ---
 
@@ -369,13 +367,17 @@ sheet) → each player picks a car in turn with their own pad → race.
 
 ## Settings and saved data
 
-Three values in `localStorage`, and nothing else:
+Three active values in `localStorage`:
 
 | Key | Holds |
 | --- | --- |
-| `redline.lang` | `en` or `fr` |
-| `redline.sound` | `1` or `0` |
-| `redline.best` | your furthest distance, in metres |
+| `seren.lang` | `en` or `fr` |
+| `seren.sound` | `1` or `0` |
+| `seren.best` | your furthest distance, in metres |
+
+Existing saves from the previous name are copied from `redline.*` on startup
+when the corresponding `seren.*` value is absent. Existing Seren values take
+priority, and the old keys remain as a backup. All new saves use `seren.*`.
 
 If `localStorage` is unavailable — a private window, blocked site data — the game
 falls back to an in-memory store and keeps working for the session.

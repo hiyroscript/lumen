@@ -1,6 +1,6 @@
 "use strict";
 
-/* REDLINE - Canvas 2D drawing. Cars, tracks, scenery, hazards, particles and
+/* SEREN - Canvas 2D drawing. Cars, tracks, scenery, hazards, particles and
    the effects that sit over them. Draw order here is behaviour: it is what
    decides what covers what. This file reads game state and never changes
    it. */

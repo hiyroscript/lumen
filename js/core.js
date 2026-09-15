@@ -1,6 +1,6 @@
 "use strict";
 
-/* REDLINE - low-level utilities shared by every other file.
+/* SEREN - low-level utilities shared by every other file.
    Storage with a memory fallback, the tiny maths/DOM helpers, and the two
    capability flags the rest of the game reads. Nothing here owns a game
    system. */
@@ -27,6 +27,16 @@ const store = {
   get(k){ try{ const v = localStorage.getItem(k); return v === null ? (k in mem ? mem[k] : null) : v; }catch(e){ return k in mem ? mem[k] : null; } },
   set(k,v){ mem[k] = String(v); try{ localStorage.setItem(k, String(v)); }catch(e){} }
 };
+
+/* Copy previous-version saves before any system reads them. Existing Seren
+   values win, including "0". Keep the old keys as a backup; all new writes use
+   seren.*. store.set also preserves the value in memory if writes are blocked. */
+["lang", "sound", "best"].forEach(function(key){
+  const currentKey = "seren." + key;
+  if(store.get(currentKey) !== null) return;
+  const previous = store.get("redline." + key);
+  if(previous !== null) store.set(currentKey, previous);
+});
 
 /* ---------------- tiny helpers ----------------------------------- */
 const $ = function(s){ return document.querySelector(s); };
