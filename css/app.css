@@ -1,0 +1,688 @@
+/* ============================================================
+   REDLINE — design tokens
+   ============================================================ */
+:root{
+  --black:#0B0B0C;
+  --asphalt:#16171B;
+  --asphalt-2:#1D1F24;
+  --gray-050:#F4F4F6;
+  --gray-100:#E8E9EC;
+  --gray-200:#DCDEE3;
+  --gray-300:#C9CCD3;
+  --icon:#3A3D42;
+  --muted:#767A83;
+  --red:#E21B22;
+  --red-dark:#B3151B;
+  --red-press:#FF7A7F;
+  --green:#2FBF63;
+
+  --r-sm:10px;
+  --r-md:14px;
+  --r-lg:20px;
+
+  --display:'Archivo','Arial Narrow',Helvetica,Arial,sans-serif;
+  --body:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+
+  --pad:22px;
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;padding:0}
+body{
+  background:var(--black);
+  font-family:var(--body);
+  color:var(--icon);
+  overflow:hidden;
+  overscroll-behavior:none;
+  -webkit-user-select:none;user-select:none;
+  -webkit-text-size-adjust:100%;
+}
+
+/* Portrait-first shell. On desktop it stays a centered column. */
+#shell{
+  position:relative;
+  width:100%;max-width:520px;
+  height:100dvh;height:100vh;height:100dvh;
+  margin:0 auto;
+  background:var(--gray-100);
+  overflow:hidden;
+  box-shadow:0 0 0 1px rgba(0,0,0,.5), 0 40px 90px rgba(0,0,0,.55);
+}
+
+.screen{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  opacity:0;pointer-events:none;
+  transition:opacity .32s ease;
+  z-index:1;
+}
+.screen.on{opacity:1;pointer-events:auto;z-index:2}
+
+/* ============================================================
+   Type
+   ============================================================ */
+.display{
+  font-family:var(--display);
+  font-variation-settings:'wdth' 122,'wght' 800;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.02em;
+  line-height:.92;
+  color:var(--black);
+}
+.eyebrow{
+  font-family:var(--mono);
+  font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--muted);
+}
+.num{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+.btn{
+  appearance:none;border:0;cursor:pointer;
+  font-family:var(--display);
+  font-variation-settings:'wdth' 118,'wght' 750;
+  text-transform:uppercase;letter-spacing:.06em;
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  transition:background .12s ease, transform .09s ease, color .12s ease, box-shadow .12s ease;
+}
+.btn:focus-visible{outline:3px solid var(--black);outline-offset:3px}
+
+.btn-primary{
+  background:var(--red);color:#fff;
+  width:100%;padding:20px 22px;font-size:19px;
+  border-radius:var(--r-md);
+  box-shadow:0 6px 0 var(--red-dark);
+}
+.btn-primary:active{background:var(--red-press);transform:translateY(4px);box-shadow:0 2px 0 var(--red-dark)}
+.btn-primary svg{stroke:#fff}
+
+.btn-ghost{
+  background:transparent;color:var(--icon);
+  width:100%;padding:17px 22px;font-size:15px;
+  border-radius:var(--r-md);
+  border:2px solid var(--gray-300);
+}
+.btn-ghost:active{background:var(--red-press);border-color:var(--red-press);color:#fff}
+.btn-ghost:active svg{stroke:#fff}
+
+.icon-btn{
+  appearance:none;border:0;cursor:pointer;
+  width:44px;height:44px;border-radius:var(--r-sm);
+  background:var(--gray-050);
+  display:flex;align-items:center;justify-content:center;
+  transition:background .12s ease,transform .09s ease;
+}
+.icon-btn:active{background:var(--red-press);transform:scale(.94)}
+.icon-btn:active svg{stroke:#fff}
+.icon-btn:focus-visible{outline:3px solid var(--black);outline-offset:2px}
+svg.ic{width:22px;height:22px;fill:none;stroke:var(--icon);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+
+/* ============================================================
+   1. Splash
+   ============================================================ */
+#splash{position:absolute;inset:0;display:flex;background:var(--black);align-items:center;justify-content:center;opacity:1;pointer-events:auto;z-index:20;transition:opacity .42s ease}
+#splash.out{opacity:0;pointer-events:none}
+#splashArt{
+  width:min(56vw,220px);height:min(56vw,220px);
+  display:flex;align-items:center;justify-content:center;
+  animation:rise .9s cubic-bezier(.2,.8,.25,1) both;
+}
+#splashArt img{width:100%;height:100%;object-fit:contain;display:block}
+@keyframes rise{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+#splashCredit{
+  position:absolute;left:0;right:0;bottom:calc(34px + var(--safe-b));
+  text-align:center;
+  font-family:var(--mono);font-size:12px;letter-spacing:.18em;
+  color:#6A6E76;
+  animation:fadeIn .8s .5s both;
+}
+#splashBar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(78px + var(--safe-b));width:64px;height:3px;background:#26282D;border-radius:2px;overflow:hidden}
+#splashBar i{display:block;height:100%;width:0;background:var(--red);animation:load 2.1s .15s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes load{to{width:100%}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ============================================================
+   2. Language dialog
+   ============================================================ */
+#langWrap{
+  position:absolute;inset:0;z-index:30;
+  background:rgba(11,11,12,.62);
+  display:none;align-items:flex-end;justify-content:center;
+  padding:16px;padding-bottom:calc(16px + var(--safe-b));
+}
+#langWrap.on{display:flex}
+#langCard{
+  width:100%;background:var(--gray-050);border-radius:var(--r-lg);
+  padding:26px 22px 22px;
+  animation:slideUp .34s cubic-bezier(.2,.8,.25,1) both;
+}
+@keyframes slideUp{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+#langCard h2{margin:10px 0 4px;font-size:26px}
+#langCard p{margin:0 0 20px;font-size:14px;color:var(--muted);line-height:1.45}
+.lang-row{display:flex;flex-direction:column;gap:10px}
+.lang-opt{
+  appearance:none;cursor:pointer;width:100%;
+  display:flex;align-items:center;gap:14px;
+  padding:16px 18px;border-radius:var(--r-md);
+  background:var(--gray-100);border:2px solid transparent;
+  font-family:var(--body);font-size:16px;font-weight:600;color:var(--black);
+  transition:background .12s ease,transform .09s ease,color .12s ease;
+}
+.lang-opt:active{background:var(--red-press);color:#fff;transform:scale(.985)}
+.lang-opt:active .lang-code{background:#fff;color:var(--red)}
+.lang-opt:focus-visible{outline:3px solid var(--black);outline-offset:2px}
+.lang-code{
+  font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.08em;
+  background:var(--black);color:#fff;border-radius:6px;padding:5px 8px;min-width:38px;text-align:center;
+}
+
+/* ============================================================
+   3. Home
+   ============================================================ */
+#home{background:var(--gray-100)}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:calc(14px + var(--safe-t)) var(--pad) 0;
+  gap:10px;
+}
+.topbar .spacer{flex:1}
+.home-head{padding:26px var(--pad) 0}
+.home-title{font-size:clamp(46px,15vw,68px)}
+.home-title .t2{color:var(--red)}
+.home-sub{margin-top:12px;display:flex;align-items:center;gap:10px}
+.rule{height:2px;background:var(--gray-300);flex:1}
+
+/* the signature: a live asphalt ribbon with the car idling on it */
+#ribbon{
+  position:relative;flex:1;min-height:0;margin:22px 0 0;
+  background:var(--asphalt);
+  overflow:hidden;
+}
+#ribbon:before,#ribbon:after{
+  content:"";position:absolute;top:0;bottom:0;width:14px;background:var(--gray-200);
+}
+#ribbon:before{left:0}#ribbon:after{right:0}
+.lane-line{
+  position:absolute;top:-140px;bottom:-140px;width:5px;
+  background:repeating-linear-gradient(to bottom,#EDEDF0 0 34px,transparent 34px 74px);
+  opacity:.75;
+  animation:scroll 1.15s linear infinite;
+}
+.lane-line.l1{left:33.33%}
+.lane-line.l2{left:66.66%}
+@keyframes scroll{to{transform:translateY(74px)}}
+.home-mid{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);padding:0 26px}
+#ribbon .fade{position:absolute;left:0;right:0;height:70px;pointer-events:none}
+#ribbon .fade.top{top:0;background:linear-gradient(var(--gray-100),transparent)}
+
+.home-foot{padding:20px var(--pad) calc(24px + var(--safe-b));background:var(--gray-100)}
+.best-strip{
+  display:flex;align-items:baseline;justify-content:space-between;
+  padding:0 2px 14px;
+}
+.best-strip .k{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.best-strip .v{font-family:var(--mono);font-weight:600;font-size:20px;color:var(--black)}
+
+/* ============================================================
+   4. Mode sheet
+   ============================================================ */
+#modes{background:rgba(11,11,12,.55);justify-content:flex-end;padding:16px;padding-bottom:calc(16px + var(--safe-b))}
+#modeCard{width:100%;background:var(--gray-050);border-radius:var(--r-lg);padding:22px 20px}
+#modes.on #modeCard{animation:slideUp .3s cubic-bezier(.2,.8,.25,1) both}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.sheet-head h2{margin:0;font-size:24px}
+.mode{
+  appearance:none;border:0;cursor:pointer;width:100%;text-align:left;
+  background:var(--gray-100);border-radius:var(--r-md);
+  padding:18px;display:flex;align-items:center;gap:16px;
+  transition:background .12s ease,transform .09s ease;
+}
+.mode:active{background:var(--red-press);transform:scale(.985)}
+.mode:active .mode-name,.mode:active .mode-desc{color:#fff}
+.mode:active .mode-mark{background:#fff}
+.mode:active .mode-mark svg{stroke:var(--red)}
+.mode:focus-visible{outline:3px solid var(--black);outline-offset:2px}
+.mode-mark{width:46px;height:46px;border-radius:var(--r-sm);background:var(--black);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.mode-mark svg{stroke:#fff;width:24px;height:24px}
+.mode-name{font-family:var(--display);font-variation-settings:'wdth' 118,'wght' 750;text-transform:uppercase;font-size:18px;letter-spacing:.04em;color:var(--black)}
+.mode-desc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.35}
+.soon{margin:14px 2px 0;font-size:12px;color:var(--muted);text-align:center;font-family:var(--mono);letter-spacing:.06em}
+.sect{margin:0 2px 4px;font-size:13px;font-family:var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+.lede{margin:0 2px 12px;font-size:13px;line-height:1.45;color:var(--muted)}
+
+.car-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
+.car-opt{
+  appearance:none;border:0;cursor:pointer;width:100%;text-align:center;
+  background:var(--gray-100);border-radius:var(--r-md);
+  padding:9px 5px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;
+  transition:background .12s ease,transform .09s ease;
+}
+.car-opt:active{background:var(--red-press);transform:scale(.96)}
+.car-opt:active .mode-name{color:#fff}
+.car-opt:active .car-art{background:#fff}
+.car-opt:focus-visible{outline:3px solid var(--black);outline-offset:2px}
+.car-opt .mode-name{font-size:14px;letter-spacing:.03em;line-height:1}
+.car-art{
+  width:100%;aspect-ratio:1/1;border-radius:var(--r-sm);
+  background:var(--black);display:flex;align-items:center;justify-content:center;
+}
+.car-art canvas{width:100%;height:100%;display:block}
+#garage{background:var(--gray-100)}
+.tabs{display:flex;gap:6px;padding:0 var(--pad) 12px}
+.tab{flex:1;appearance:none;border:0;cursor:pointer;padding:9px 6px;border-radius:var(--r-sm);
+  background:var(--gray-200);font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--icon);
+  white-space:pre-line;line-height:1.3;text-align:center;
+  display:flex;align-items:center;justify-content:center}
+.tab.on{background:var(--red);color:#fff}
+#garageBody{flex:1;overflow-y:auto;padding:0 var(--pad) calc(24px + var(--safe-b))}
+.info{background:var(--gray-050);border-radius:var(--r-md);padding:14px 16px;margin-bottom:10px}
+.kind{
+  display:inline-block;margin-bottom:6px;padding:3px 7px;border-radius:5px;
+  font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;
+}
+.kind.track{background:var(--gray-200);color:var(--icon)}
+.kind.trap{background:var(--red);color:#fff}
+.odds{float:right;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--black);
+  background:var(--gray-200);border-radius:5px;padding:3px 7px;margin-top:-1px}
+.kind.pickup{background:#7FB3E8;color:#0B0B0C}
+.info h3{margin:0 0 2px;font-family:var(--display);font-variation-settings:'wdth' 118,'wght' 750;
+  text-transform:uppercase;font-size:16px;letter-spacing:.04em;color:var(--black)}
+.info p{margin:4px 0 0;font-size:13px;color:var(--muted);line-height:1.4}
+.info .tagrow{margin-top:6px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+/* ---- local play ---- */
+.seat-chips{width:46px;height:46px;flex:0 0 auto;border-radius:var(--r-sm);background:var(--black);
+  display:flex;align-items:center;justify-content:center;gap:4px}
+.seat-chips i{width:6px;height:22px;border-radius:3px}
+#padList{margin:0 0 14px}
+.pad-row{display:flex;align-items:center;gap:11px;background:var(--gray-100);
+  border-radius:var(--r-md);padding:11px 14px;margin-bottom:7px}
+.pad-row .chip{width:12px;height:22px;border-radius:3px;flex:0 0 auto;opacity:.3}
+.pad-row.on .chip{opacity:1}
+.pad-row .who{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--black);flex:0 0 auto}
+.pad-row .nm{font-size:12px;color:var(--muted);flex:1;text-align:right;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pad-note{margin:0 2px 12px;font-size:12px;font-family:var(--mono);letter-spacing:.06em;color:var(--muted)}
+/* ---- custom setup ---- */
+#customBody{max-height:min(52vh,430px);overflow-y:auto;padding-right:2px}
+.opt{background:var(--gray-100);border-radius:var(--r-md);padding:13px 14px;margin-bottom:8px}
+.opt-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.opt-name{font-family:var(--display);font-variation-settings:'wdth' 118,'wght' 750;
+  text-transform:uppercase;font-size:15px;letter-spacing:.04em;color:var(--black)}
+.opt-val{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--black);
+  background:var(--gray-200);border-radius:5px;padding:2px 8px;flex:0 0 auto}
+.opt-desc{margin:4px 0 0;font-size:12px;line-height:1.4;color:var(--muted)}
+.opt.off{opacity:.4;pointer-events:none}
+.steps{display:flex;gap:5px;margin-top:9px;flex-wrap:wrap}
+.step{
+  appearance:none;border:0;cursor:pointer;flex:1 1 0;min-width:40px;
+  background:var(--gray-200);border-radius:var(--r-sm);padding:9px 4px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--icon);transition:background .12s ease,color .12s ease,transform .09s ease;
+}
+.step:active{transform:scale(.95)}
+.step.on{background:var(--red);color:#fff}
+.step:focus-visible{outline:3px solid var(--black);outline-offset:2px}
+.tog{
+  appearance:none;border:0;cursor:pointer;width:100%;text-align:left;
+  background:var(--gray-100);border-radius:var(--r-md);padding:12px 14px;
+  display:flex;align-items:center;gap:12px;margin-bottom:8px;
+  transition:background .12s ease,transform .09s ease;
+}
+.tog:active{transform:scale(.99)}
+.tog:focus-visible{outline:3px solid var(--black);outline-offset:2px}
+.tog .sw{width:40px;height:23px;border-radius:12px;background:var(--gray-300);
+  flex:0 0 auto;position:relative;transition:background .16s ease}
+.tog .sw i{position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;
+  background:#fff;transition:transform .16s cubic-bezier(.2,.8,.25,1)}
+.tog.on .sw{background:var(--green)}
+.tog.on .sw i{transform:translateX(17px)}
+.tog .tx{flex:1}
+.tog .tx b{display:block;font-family:var(--display);
+  font-variation-settings:'wdth' 118,'wght' 750;text-transform:uppercase;
+  font-size:14px;letter-spacing:.04em;color:var(--black);font-weight:400}
+.tog .tx span{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.35}
+.btn[disabled],.btn.off{opacity:.4;pointer-events:none}
+#carTurn{display:none;align-items:center;gap:10px;background:var(--gray-100);
+  border-radius:var(--r-md);padding:10px 14px;margin-bottom:12px}
+#carTurn.on{display:flex}
+#carTurn i{width:15px;height:15px;border-radius:4px;flex:0 0 auto}
+#carTurn span{font-family:var(--display);font-variation-settings:'wdth' 118,'wght' 750;
+  text-transform:uppercase;font-size:15px;letter-spacing:.04em;color:var(--black)}
+.car-opt.taken{opacity:.3;pointer-events:none}
+.car-opt.taken .car-art{background:var(--gray-200)}
+.car-opt.cursor{outline:3px solid var(--red);outline-offset:2px}
+#ovBoard{display:none;margin:0 0 16px}
+#ovBoard.on{display:block}
+#ovBoard .r{display:flex;align-items:center;gap:10px;padding:8px 12px;
+  background:var(--gray-050);border-radius:var(--r-sm);margin-bottom:5px}
+#ovBoard .r.seat{background:var(--gray-100)}
+#ovBoard .pl{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);width:34px;flex:0 0 auto}
+#ovBoard .chip{width:12px;height:20px;border-radius:3px;flex:0 0 auto;background:var(--gray-300)}
+#ovBoard .nm{flex:1;font-family:var(--display);font-variation-settings:'wdth' 118,'wght' 700;
+  text-transform:uppercase;font-size:14px;letter-spacing:.03em;color:var(--black);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ovBoard .by{font-family:var(--mono);font-size:11px;color:var(--muted);flex:0 0 auto}
+/* the two personal-record cells mean nothing on a shared screen */
+body.local #overPanel .stats{display:none}
+.mode.off{opacity:.45;pointer-events:none}
+/* Four sets of instruments are painted on the canvas, so the page's single
+   set has to get out of the way completely. */
+body.local .hud .readout,body.local #hudActions,body.local #airWrap,
+body.local #boostWrap,body.local #effList,body.local #immuneTag,
+body.local #cleanseTag{display:none!important}
+.diff-mark{width:56px;height:70px;flex:0 0 auto;border-radius:var(--r-sm);background:var(--black);
+  display:flex;align-items:center;justify-content:center;gap:4px}
+.diff-mark i{width:5px;border-radius:3px;background:var(--red)}
+.diff-mark i:nth-child(1){height:14px}.diff-mark i:nth-child(2){height:22px}
+.diff-mark i:nth-child(3){height:30px}.diff-mark i:nth-child(4){height:38px}
+.car-opt:active .diff-mark{background:#fff}
+.car-opt:active .diff-mark i{background:var(--red)}
+#raceClock{
+  display:none;margin-top:7px;font-family:var(--mono);font-weight:600;font-size:13px;
+  color:rgba(255,255,255,.8);text-shadow:0 1px 8px rgba(0,0,0,.85);
+}
+#raceClock.on{display:block}
+#raceClock.final{color:var(--red)}
+/* The square is both the charge readout and the button that spends it. It has to
+   take its own taps, so it opts back into pointer events - the hud around it
+   stays transparent to them, which is what keeps a tap here off the road behind
+   it. Everything from appearance down is undoing what a browser does to a button
+   by default, so it still draws exactly as the readout always did. */
+#ultPct{
+  position:relative;overflow:hidden;pointer-events:auto;
+  display:inline-flex;align-items:center;justify-content:center;
+  width:54px;height:54px;box-sizing:border-box;flex:0 0 auto;
+  appearance:none;-webkit-appearance:none;padding:0;margin:0;
+  cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  border-radius:var(--r-sm);border:2px solid rgba(255,255,255,.28);
+  background:rgba(11,11,12,.62);
+  font-family:var(--mono);font-weight:600;font-size:15px;
+  color:rgba(255,255,255,.78);text-shadow:0 1px 6px rgba(0,0,0,.85);
+  transition:border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .09s ease;
+}
+#ultPct::-moz-focus-inner{border:0;padding:0}
+#ultPct:focus{outline:none}
+#ultPct:focus-visible{outline:2px solid #fff;outline-offset:3px}
+/* the press, same as the item box next to it */
+#ultPct:active{transform:scale(.92)}
+/* Charged: the face stays dark - the outline carries it. White border with a
+   light red ring just outside, so the edge reads as both colours at once, and
+   a red light plays over the square: an inset glow that breathes, an outer
+   bloom, and a shine crossing the face. Every resting value lives on .ready
+   itself rather than in the keyframes, so with reduced motion the square still
+   looks charged, it just stops moving. */
+#ultPct.ready{
+  border-color:#fff;color:#fff;
+  text-shadow:0 0 7px rgba(255,122,127,.9);
+  box-shadow:
+    0 0 0 2px var(--red-press),
+    0 0 13px 2px rgba(226,27,34,.55),
+    inset 0 0 13px 2px rgba(255,60,66,.45);
+  animation:ultGlow 1.15s ease-in-out infinite;
+}
+/* the light sweeping across it */
+#ultPct.ready::after{
+  content:"";position:absolute;top:-60%;left:-140%;
+  width:52%;height:220%;transform:rotate(20deg);pointer-events:none;
+  background:linear-gradient(90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,150,155,.5) 42%,
+    rgba(255,255,255,.85) 52%,
+    rgba(255,190,193,.45) 62%,
+    rgba(255,255,255,0) 100%);
+  animation:ultShine 2.4s ease-in-out infinite;
+}
+@keyframes ultGlow{
+  0%,100%{box-shadow:
+    0 0 0 2px var(--red-press),
+    0 0 12px 2px rgba(226,27,34,.5),
+    inset 0 0 12px 2px rgba(255,60,66,.4)}
+  50%    {box-shadow:
+    0 0 0 3px var(--red-press),
+    0 0 26px 7px rgba(226,27,34,.85),
+    inset 0 0 20px 5px rgba(255,60,66,.7)}
+}
+@keyframes ultShine{0%{left:-140%}60%,100%{left:150%}}
+
+/* ============================================================
+   5. Race
+   ============================================================ */
+#race{background:var(--black)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.hud{position:absolute;inset:0;pointer-events:none}
+.hud-top{
+  position:absolute;left:0;right:0;top:0;
+  padding:calc(12px + var(--safe-t)) 16px 0;
+  display:flex;align-items:flex-start;justify-content:space-between;
+}
+#btnPause{pointer-events:auto;background:rgba(232,233,236,.9)}
+.readout{text-align:right}
+.readout .k{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:#8D919A;text-transform:uppercase}
+.readout .v{font-family:var(--mono);font-weight:600;font-size:34px;color:#fff;line-height:1;margin-top:3px;text-shadow:0 2px 10px rgba(0,0,0,.6)}
+.readout .b{font-family:var(--mono);font-size:11px;color:#8D919A;margin-top:7px;letter-spacing:.1em}
+.readout .pos{
+  display:flex;justify-content:flex-end;align-items:baseline;gap:8px;margin-top:4px;
+  font-family:var(--mono);opacity:.62;
+}
+/* Your own row in the ladder. The rest sit dimmed; yours runs at full strength
+   and breathes - a light passing through the text, so the eye lands on it
+   without having to read all six. brightness() is used rather than a fixed
+   colour so it lifts whatever place colour the row currently carries, gold
+   through white. The lit look also sits on .mine itself and not only in the
+   keyframes, so with reduced motion your row is still the bright one, it just
+   stops moving. */
+.readout .pos.mine{
+  opacity:1;
+  filter:brightness(1.3);
+  text-shadow:0 0 10px rgba(255,255,255,.5);
+  animation:posMine 1.7s ease-in-out infinite;
+}
+.readout .pos .p{font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.85}
+.readout .pos .n{font-size:13px;font-weight:600;min-width:50px;text-align:right}
+.readout .pos.mine .p{opacity:1}
+.readout .pos.mine .n{font-size:14px}
+@keyframes posMine{
+  0%,100%{filter:brightness(1.05);text-shadow:0 0 7px rgba(255,255,255,.3)}
+  50%    {filter:brightness(1.75);text-shadow:0 0 17px rgba(255,255,255,.9)}
+}
+#gauges{position:absolute;left:16px;top:calc(66px + var(--safe-t));pointer-events:none}
+#trackName{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.85)}
+#effList{
+  position:absolute;left:16px;bottom:calc(30px + var(--safe-b));
+  display:flex;flex-direction:column-reverse;gap:5px;pointer-events:none;
+}
+#effList span{
+  font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  text-shadow:0 1px 8px rgba(0,0,0,.9);animation:effIn .25s ease both;
+}
+#effList span.out{animation:effOut .4s ease forwards}
+@keyframes effIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+@keyframes effOut{to{opacity:0;transform:translateX(-14px)}}
+#immuneTag{
+  position:absolute;left:0;right:0;bottom:calc(30px + var(--safe-b));text-align:center;
+  font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+  color:#FFD86B;text-shadow:0 1px 8px rgba(0,0,0,.9);display:none;
+}
+#immuneTag.on{display:block}
+#shell.immune::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:40;border-radius:inherit;
+  border:4px solid #FFD86B;animation:immuneEdge 1.1s linear infinite;
+}
+@keyframes immuneEdge{0%,100%{border-color:#FFFFFF}50%{border-color:#FFD86B}}
+#cleanseTag{
+  position:absolute;left:0;right:0;top:42%;text-align:center;
+  font-family:var(--display);font-variation-settings:'wdth' 118,'wght' 750;
+  text-transform:uppercase;letter-spacing:.1em;font-size:26px;color:#B96BFF;
+  text-shadow:0 2px 18px rgba(0,0,0,.8);opacity:0;pointer-events:none;
+}
+#cleanseTag.on{animation:cleansePop 1s ease both}
+@keyframes cleansePop{0%{opacity:0;transform:scale(.85)}25%{opacity:1;transform:scale(1)}75%{opacity:1}100%{opacity:0}}
+/* The ultimate meter and the item square sit together, bottom right, so both
+   of the things you can spend are in one place instead of opposite corners. */
+#hudActions{
+  position:absolute;right:16px;bottom:calc(30px + var(--safe-b));
+  display:flex;align-items:center;gap:10px;
+  pointer-events:none;
+}
+#itemBox{
+  position:relative;pointer-events:auto;
+  width:54px;height:54px;box-sizing:border-box;
+  appearance:none;cursor:pointer;
+  border:2px solid rgba(255,255,255,.34);border-radius:var(--r-sm);
+  background:rgba(11,11,12,.62);
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .18s ease,box-shadow .18s ease,background .18s ease,transform .09s ease;
+}
+#itemBox:active{transform:scale(.92)}
+/* the swap flash is written frame by frame, so it must not be eased as well */
+#itemBox.swapping{transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}
+#itemBox.full{background:rgba(11,11,12,.8)}
+#itemBox svg{width:30px;height:30px;display:block}
+#boostWrap{position:absolute;left:16px;right:16px;bottom:calc(14px + var(--safe-b));height:4px;background:rgba(255,255,255,.16);border-radius:3px;overflow:hidden}
+#boostFill{height:100%;width:100%;background:var(--red);border-radius:3px;transition:background .2s ease}
+#boostWrap.full #boostFill{background:var(--red-press)}
+#boostWrap.locked #boostFill{background:rgba(255,255,255,.34)}
+/* The launch meter sits directly above the boost bar: same width, same shape,
+   so the two things you spend by holding read as one stack. It empties as you
+   hold the brake and the notch is the line you have to get under. */
+#airWrap{
+  position:absolute;left:16px;right:16px;bottom:calc(22px + var(--safe-b));
+  height:4px;background:rgba(255,255,255,.16);border-radius:3px;
+  transition:box-shadow .16s ease;
+}
+#airFill{
+  position:absolute;left:0;top:0;bottom:0;width:100%;
+  background:var(--green);border-radius:3px;transition:background .2s ease;
+}
+/* Everything left of the notch is the launch zone. Tinted so the target is
+   visible before you ever hold the brake, not only once you are draining. */
+#airZone{
+  position:absolute;left:0;top:0;bottom:0;
+  background:rgba(47,191,99,.30);border-radius:3px 0 0 3px;pointer-events:none;
+}
+#airMark{
+  position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;
+  background:#FFFFFF;border-radius:1px;box-shadow:0 0 4px rgba(0,0,0,.8);
+}
+/* The wind-up fills the emptied track back up, the other way, in white. Same
+   bar, same question - how much launch have I got - so there is one place to
+   look rather than two. */
+#airWind{
+  position:absolute;left:0;top:0;bottom:0;width:0;
+  background:#FFFFFF;border-radius:3px;box-shadow:0 0 8px rgba(255,255,255,.85);
+}
+#airWrap.winding{box-shadow:0 0 12px rgba(255,255,255,.8)}
+#airWrap.wound{box-shadow:0 0 18px rgba(255,233,168,.95);animation:airFull .6s ease-in-out infinite alternate}
+#airWrap.wound #airWind{background:#FFE9A8;box-shadow:0 0 14px rgba(255,210,74,.95)}
+@keyframes airFull{from{opacity:.78}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){#airWrap.wound{animation:none}}
+#airWrap.armed{box-shadow:0 0 10px rgba(47,191,99,.9)}
+#airWrap.armed #airFill{background:#7CF7A6}
+#airWrap.armed #airMark{background:#7CF7A6}
+#airWrap.cooling #airFill{background:rgba(47,191,99,.34)}
+#airWrap.cooling #airMark{background:rgba(255,255,255,.4)}
+#airWrap.air #airFill{background:#FFFFFF}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+
+/* countdown gantry */
+#count{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:26px;background:rgba(11,11,12,.42);pointer-events:none}
+#count.on{display:flex}
+.gantry{display:flex;gap:12px;padding:14px 18px;background:var(--black);border-radius:var(--r-md);box-shadow:0 14px 34px rgba(0,0,0,.5)}
+.gantry i{width:22px;height:22px;border-radius:50%;background:#26282D;transition:background .16s ease,box-shadow .16s ease}
+.gantry i.lit{background:var(--red);box-shadow:0 0 16px rgba(226,27,34,.85)}
+.gantry i.go{background:var(--green);box-shadow:0 0 16px rgba(47,191,99,.8)}
+#countNum{font-family:var(--mono);font-weight:600;font-size:84px;color:#fff;line-height:1;text-shadow:0 4px 24px rgba(0,0,0,.7)}
+#countNum.pop{animation:pop .5s ease both}
+@keyframes pop{0%{transform:scale(.7);opacity:0}35%{transform:scale(1.06);opacity:1}100%{transform:scale(1);opacity:1}}
+
+/* pause + over panels */
+.panel{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(11,11,12,.72)}
+.panel.on{display:flex}
+.panel-card{width:100%;max-width:400px;background:var(--gray-050);border-radius:var(--r-lg);padding:26px 22px;animation:slideUp .28s cubic-bezier(.2,.8,.25,1) both}
+.panel-card h2{margin:0 0 4px;font-size:30px}
+.panel-card .lead{margin:0 0 20px;font-size:14px;color:var(--muted)}
+.stats{display:flex;gap:10px;margin-bottom:20px}
+.stat{flex:1;background:var(--gray-100);border-radius:var(--r-md);padding:14px}
+.stat .k{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.stat .v{font-family:var(--mono);font-weight:600;font-size:26px;color:var(--black);margin-top:4px}
+.stat.hot{background:var(--red)}
+.stat.hot .k{color:rgba(255,255,255,.8)}
+.stat.hot .v{color:#fff}
+.stack{display:flex;flex-direction:column;gap:10px}
+#newBest{display:none;align-items:center;gap:8px;margin:0 0 16px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+#newBest.on{display:flex}
+#newBest svg{stroke:var(--red);width:16px;height:16px}
+
+/* desktop control hint */
+.keys{display:none;gap:8px;margin-top:16px;align-items:center;justify-content:center;flex-wrap:wrap}
+body.desk .keys{display:flex}
+.key{font-family:var(--mono);font-size:11px;color:var(--icon);background:var(--gray-050);border:1.5px solid var(--gray-300);border-bottom-width:3px;border-radius:6px;padding:5px 8px;min-width:26px;text-align:center}
+.keys .lbl{font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:.06em}
+
+/* In a portrait window on a computer the shell stays the column it has always
+   been, scaled up to fill the height. It only ever grows: --desk-k is floored
+   at 1, so a laptop that already filled its height is left alone. */
+@media (orientation:portrait){
+  body.desk #shell{
+    width:min(520px, calc(100dvh * 0.62));
+    height:min(100dvh, 900px);
+    max-width:none;
+    border-radius:18px;
+    transform:scale(var(--desk-k, 1));
+    transform-origin:center center;
+  }
+}
+
+/* Landscape, phone or computer: the shell stretches across the screen instead
+   of standing as a column. Nothing rotates - the road still runs up the screen
+   and the scene is sized off the height, so the same stretch of road is in
+   front of you. What the extra width buys is more of the world either side.
+   Capped at 2.2:1, which covers phones and 16:9, so an ultrawide gets side
+   bars rather than a letterbox slot. The menus keep their column: only the
+   race uses the full width. */
+@media (orientation:landscape){
+  #shell{
+    max-width:none;
+    width:min(100vw, calc(100dvh * 2.2));
+    height:100dvh;
+    border-radius:0;
+    transform:none;
+  }
+  body{display:flex;align-items:center;justify-content:center}
+  .topbar,.home-head,.home-foot{width:100%}
+  #ribbon{max-width:520px;margin-left:auto;margin-right:auto;width:100%}
+  #modeCard,#langCard,.panel-card{max-width:520px;margin-left:auto;margin-right:auto}
+  #modes,#cars,#diffs,#style,#custom{align-items:center;justify-content:center}
+  #modes #modeCard,#cars #modeCard,#diffs #modeCard,#style #modeCard,#custom #modeCard{width:100%}
+  .tabs,#garageBody{max-width:560px;margin-left:auto;margin-right:auto;width:100%}
+  .home-title{font-size:clamp(38px,7vw,60px)}
+}
+body.local #shell{
+  width:100vw;height:100dvh;max-width:none;
+  border-radius:0;transform:none;
+}
+body.desk{display:flex;align-items:center;justify-content:center}
+body.desk .topbar,body.desk .home-head,body.desk .home-foot{width:100%}
+body.desk #ribbon{max-width:520px;margin-left:auto;margin-right:auto;width:100%}
+body.desk #modeCard,body.desk #langCard,body.desk .panel-card{max-width:520px;margin-left:auto;margin-right:auto}
+body.desk #modes,body.desk #cars,body.desk #diffs,body.desk #style,body.desk #custom{align-items:center;justify-content:center}
+body.desk #modes #modeCard,body.desk #cars #modeCard,body.desk #diffs #modeCard,body.desk #style #modeCard,body.desk #custom #modeCard{width:100%}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
+@media (max-height:640px){
+  .home-title{font-size:clamp(38px,12vw,52px)}
+  .home-head{padding-top:16px}
+  #countNum{font-size:64px}
+}
