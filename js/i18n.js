@@ -239,6 +239,21 @@ const STR = {
                  fr:"La manette du joueur {n} s\u2019est d\u00e9connect\u00e9e. Reconnectez-la pour continuer."},
   botShort:     {en:"Bot",                         fr:"Bot"},
 
+  homeKicker:   {en:"Precision in motion", fr:"La précision en mouvement"},
+  raceSetup:    {en:"Race setup", fr:"Préparation de course"},
+  playersShort: {en:"players", fr:"joueurs"},
+  carSpotlight: {en:"On the starting grid", fr:"Sur la grille de départ"},
+  pickHint:     {en:"Choose a car to join the grid.", fr:"Choisissez une voiture pour prendre le départ."},
+  nextStyle:    {en:"Next / Race style", fr:"Ensuite / Type de course"},
+  nextCars:     {en:"Next / Your starting grid", fr:"Ensuite / Votre grille de départ"},
+  nextRace:     {en:"Next / Race", fr:"Ensuite / La course"},
+  nextPlayer:   {en:"Next / Next player", fr:"Ensuite / Joueur suivant"},
+  ruleEnabled:  {en:"On", fr:"Oui"},
+  ruleDisabled: {en:"Off", fr:"Non"},
+  padReady:     {en:"Connected", fr:"Connectée"},
+  padMissing:   {en:"Not connected", fr:"Non connectée"},
+  controller:   {en:"Controller", fr:"Manette"},
+
   /* ---- interface furniture ----
      Icon-only controls carry their name in aria-label rather than on screen,
      so the label has to be translated like any other string. */
@@ -289,6 +304,7 @@ function paintLocalGate(){
   if(!b) return;
   const ok = !!DESKTOP;
   b.classList.toggle("off", !ok);
+  b.disabled = !ok;
   const d = b.querySelector(".mode-desc");
   if(d) d.textContent = t(ok ? "localDesc" : "localDesk");
 }
