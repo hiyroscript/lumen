@@ -17,7 +17,7 @@ if(DESKTOP) document.body.classList.add("desk");
 deskFit();
 applyLang();
 paintBest();
-setSound(soundOn);
+applySettings();          /* sound, volume, motion, contrast, hints - all at once */
 
 setTimeout(function(){
   $("#splash").classList.add("out");
@@ -28,20 +28,51 @@ setTimeout(function(){
 }, SPLASH_MS);
 
 /* ---------------- UI wiring -------------------------------------- */
+/* First launch only. It goes through the same chooseLang() the Settings row
+   uses, then steps out of the way for good. */
 document.querySelectorAll(".lang-opt").forEach(function(b){
   b.addEventListener("click", function(){
-    lang = b.getAttribute("data-lang");
-    store.set("seren.lang", lang);
-    applyLang();
+    chooseLang(b.getAttribute("data-lang"));
     $("#langWrap").classList.remove("on");
     gateFocus();
     tone(660, .09, "square", .1);
   });
 });
-$("#btnLang").addEventListener("click", function(){
-  $("#langWrap").classList.add("on"); gateFocus();
+
+/* ---- settings ----
+   The panel opens quietly, closes on its own button, on Escape (ui.js) and on
+   the darkened backdrop. A press that began on the card - dragging the volume
+   slider past its edge - is not a press on the backdrop, so the panel stays. */
+let backdropPress = false;
+$("#btnSettings").addEventListener("click", function(){ openSettings(); tone(520, .05, "square", .06); });
+$("#btnCloseSettings").addEventListener("click", function(){ closeSettings(); });
+$("#settingsWrap").addEventListener("pointerdown", function(e){ backdropPress = e.target === this; });
+$("#settingsWrap").addEventListener("click", function(e){ if(e.target === this && backdropPress) closeSettings(); });
+
+/* One listener for the whole sheet rather than one per control: a row says
+   which preference it is and which value it means, and nothing here needs to
+   know that the next preference added is a switch or a segmented row. */
+$("#settingsBody").addEventListener("click", function(e){
+  const el = e.target && e.target.closest ? e.target.closest("[data-set]") : null;
+  if(!el || el.tagName === "INPUT") return;
+  const key = el.getAttribute("data-set");
+  const val = el.getAttribute("data-val");
+  if(key === "lang") setLanguage(val);
+  else if(val === null) setSetting(key, getSetting(key) === "1" ? "0" : "1");
+  else setSetting(key, val);
+  /* Whatever has just been switched off does not get to make a noise about it,
+     and turning sound back on answers for itself. */
+  if(soundOn) tone(660, .05, "square", .07);
 });
-$("#btnSound").addEventListener("click", function(){ setSound(!soundOn); if(soundOn) tone(760,.07,"square",.1); });
+
+/* The level follows the thumb; the tone waits for it to be let go, rather than
+   firing once a pixel. */
+$("#setVolRange").addEventListener("input", function(){ setSetting("volume", this.value); });
+$("#setVolRange").addEventListener("change", function(){ if(soundOn) tone(620, .06, "square", .08); });
+
+$("#btnSetReset").addEventListener("click", function(){
+  if(restorePressed() && soundOn) tone(520, .07, "square", .08);
+});
 $("#btnStart").addEventListener("click", function(){ audio(); show("modes"); });
 $("#btnCloseModes").addEventListener("click", function(){ show("home"); });
 $("#modeEndless").addEventListener("click", function(){ soloMode("endless"); G.diff = "medium"; beginPicks(); });

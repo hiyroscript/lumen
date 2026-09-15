@@ -4,9 +4,17 @@
    The context is created lazily on the first call, so it is always born
    inside a user gesture and browsers do not refuse it. */
 
-/* ---------------- sound (generated, no files) -------------------- */
+/* ---------------- sound (generated, no files) --------------------
+   Every voice in the game is connected through the one master gain, so the
+   volume is set in a single place and nothing has to multiply it in for
+   itself. Settings owns both preferences behind these two setters. */
 let actx=null, master=null, engineNode=null;
 let soundOn = store.get("seren.sound") !== "0";
+let masterVol = 0.9;                       /* 0..1; js/settings.js sets it at boot */
+
+/* What the master gain should be right now: silence when sound is off, the
+   player's own level when it is on. */
+function masterGain(){ return soundOn ? masterVol : 0; }
 
 function audio(){
   if(actx) return actx;
@@ -15,7 +23,7 @@ function audio(){
     if(!AC) return null;
     actx = new AC();
     master = actx.createGain();
-    master.gain.value = soundOn ? 0.9 : 0;
+    master.gain.value = masterGain();
     master.connect(actx.destination);
   }catch(e){ actx = null; }
   return actx;
@@ -55,10 +63,12 @@ function engineSet(r){ if(engineNode) engineNode.o.frequency.value = 46 + r*74; 
 function engineStop(){ if(engineNode){ try{ engineNode.o.stop(); }catch(e){} engineNode = null; } }
 function setSound(on){
   soundOn = on; store.set("seren.sound", on ? "1" : "0");
-  if(master) master.gain.value = on ? 0.9 : 0;
-  /* The two glyphs swap by class rather than inline style, so the stylesheet
-     stays the one place that decides how a hidden icon is hidden. */
-  $("#icSoundOn").classList.toggle("off", !on);
-  $("#icSoundOff").classList.toggle("off", on);
+  if(master) master.gain.value = masterGain();
   if(!on) engineStop();
+}
+/* The level the player set, 0..1. No context yet is not a problem: audio()
+   reads masterGain() the moment it builds one. */
+function setVolume(v){
+  masterVol = clamp(v, 0, 1);
+  if(master) master.gain.value = masterGain();
 }

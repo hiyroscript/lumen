@@ -30,10 +30,11 @@ const warn = (m) => { warnings++; console.log("  warn  " + m); };
 const head = (m) => console.log("\n" + m);
 
 /* The documented load order. core first because everything uses its helpers,
-   data before runtime because the G literal reads ULT_TIME, main last because
-   it is the only file that starts anything. */
-const ORDER = ["core", "i18n", "data", "audio", "runtime", "ui", "local",
-               "ai", "mechanics", "race", "render", "hud", "input", "main"];
+   data before runtime because the G literal reads ULT_TIME, settings after the
+   systems it drives and the focus gate it borrows, main last because it is the
+   only file that starts anything. */
+const ORDER = ["core", "i18n", "data", "audio", "runtime", "ui", "settings",
+               "local", "ai", "mechanics", "race", "render", "hud", "input", "main"];
 
 /* Window properties a top-level declaration would shadow or overwrite. Not the
    whole of `window` - Node cannot see that - but the names that are plausible

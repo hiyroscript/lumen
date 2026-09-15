@@ -14,7 +14,7 @@
      4  Surfaces        the glass recipe, and what it does without blur
      5  Controls        buttons, icon buttons, steps, switches
      6  Splash
-     7  Language
+     7  Language       the first-run picker, and the settings dialog
      8  Home
      9  Setup           destinations, scale, bays, workbench, showroom
     10  Cars & more
@@ -204,10 +204,13 @@ body{
 /* Where the browser cannot blur, the same surface goes opaque instead of
    translucent - the layering survives, the readability never depends on it. */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-  .panel-card,#langCard,.hud-btn,#gauges,#effList span,
+  .panel-card,#langCard,#settingsCard,.hud-btn,#gauges,#effList span,
   #ultPct,#itemBox,#meterRail,.count-card,#immuneTag span{
     background:linear-gradient(180deg,#1C1F24,#0B0C0E)!important;
   }
+  /* Nothing is blurred behind these, so the dim has to do all the separating. */
+  #settingsWrap{background:rgba(5,5,6,.94)!important}
+  #langWrap{background:rgba(5,5,6,.94)!important}
   .hud-btn,#gauges,#effList span,#ultPct,#itemBox,#meterRail{
     background:#121316!important;
   }
@@ -264,7 +267,7 @@ body{
 .btn:focus-visible,.icon-btn:focus-visible,.mode:focus-visible,
 .car-opt:focus-visible,.step:focus-visible,.tog:focus-visible,
 .tab:focus-visible,.lang-opt:focus-visible,#ultPct:focus-visible,
-#itemBox:focus-visible{
+#itemBox:focus-visible,.set-reset:focus-visible,.set-range:focus-visible{
   outline:2px solid #fff;
   outline-offset:2px;
   box-shadow:0 0 0 5px rgba(0,0,0,.65);
@@ -325,7 +328,7 @@ svg.ic{width:21px;height:21px;fill:none;stroke:var(--ink-2);stroke-width:1.8;
 @keyframes load{to{width:100%}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
-/* 7 LANGUAGE — a compact elevated choice */
+/* 7a LANGUAGE — a compact elevated choice, shown once on a fresh install */
 #langWrap{position:absolute;inset:0;z-index:40;background:rgba(5,5,6,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:calc(20px + var(--safe-t)) calc(20px + var(--safe-r)) calc(20px + var(--safe-b)) calc(20px + var(--safe-l))}
 #langWrap.on{display:flex}
 #langCard{width:100%;max-width:480px;max-height:100%;overflow-y:auto;padding:32px;background:var(--glass-1);border:1px solid var(--line-2);border-top:3px solid var(--red);border-radius:4px;box-shadow:var(--lift-3);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);animation:slideUp var(--d-2) var(--ease) both}
@@ -336,6 +339,86 @@ svg.ic{width:21px;height:21px;fill:none;stroke:var(--ink-2);stroke-width:1.8;
 .lang-opt{appearance:none;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:20px;min-height:110px;padding:16px;border:1px solid var(--line-2);border-radius:2px;background:var(--wash);font:500 15px var(--body);color:var(--ink)}
 .lang-opt:hover,.lang-opt:focus-visible{background:var(--wash-2);border-color:var(--ink)}
 .lang-code{font:500 24px var(--mono);color:var(--ink-2)}
+
+/* 7b SETTINGS — one dialog over whatever opened it, rows rather than cards.
+   The card is the same glass as every other elevated surface; hierarchy comes
+   from type, hairlines and spacing, and red only ever marks what is chosen. */
+/* A grid rather than a flex row for one reason: the card's max-height:100% then
+   means the space inside this padding, so a tall panel on a short screen is
+   capped where the gutter starts and scrolls its own body instead of running
+   off the bottom of the shell. */
+#settingsWrap{
+  position:absolute;inset:0;z-index:39;display:none;place-items:center;
+  background:rgba(5,5,6,.70);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  padding:calc(16px + var(--safe-t)) calc(16px + var(--safe-r)) calc(16px + var(--safe-b)) calc(16px + var(--safe-l));
+}
+#settingsWrap.on{display:grid}
+#settingsCard{
+  display:flex;flex-direction:column;
+  width:100%;max-width:520px;max-height:100%;overflow:hidden;
+  background:var(--glass-1);border:1px solid var(--line-2);border-top:3px solid var(--red);
+  border-radius:4px;box-shadow:var(--lift-3);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  animation:slideUp var(--d-2) var(--ease) both;
+}
+.set-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+  flex-shrink:0;padding:24px 24px 18px;border-bottom:1px solid var(--line-2)}
+.set-head .display{margin:8px 0 0;font-size:30px}
+/* The body is the only thing that scrolls: the head and the road behind stay put. */
+.set-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+  padding:0 24px 24px;scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
+.set-body::-webkit-scrollbar{width:6px}
+.set-body::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:3px}
+
+.set-group{padding-top:22px}
+.set-group-name{margin:0;font:10px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3)}
+.set-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 20px;
+  padding:16px 0;border-top:1px solid var(--line)}
+.set-group-name + .set-row{margin-top:10px}
+.set-text{display:block;min-width:0}
+.set-text b{display:block;font:700 15px var(--display);text-transform:uppercase;letter-spacing:.02em;color:var(--ink)}
+.set-text span{display:block;margin-top:5px;font:12px/1.45 var(--body);color:var(--ink-3)}
+.set-ctl{display:flex;align-items:center;justify-content:flex-end;gap:12px}
+
+/* Segmented rows borrow the setup sheet's steps, tightened for a dialog and
+   marked in red rather than filled in white. */
+.set-seg{margin:0;gap:4px;flex-wrap:nowrap}
+.set-seg .step{flex:0 0 auto;min-width:60px;min-height:44px;padding:9px 10px;line-height:1.25}
+.set-seg .step.on{background:var(--red-wash);border-color:var(--red);color:var(--ink);font-weight:600}
+.set-seg .step i{display:block;font-style:normal;font:500 13px var(--mono);color:var(--ink-3);margin-bottom:3px}
+.set-seg .step.on i{color:var(--red-hi)}
+
+/* The custom sheet's switch, boxed and compact, with its state in words as
+   well as in the pill. Doubled up on .tog, which is written further down the
+   sheet and would otherwise win back its full-width row. */
+.tog.set-tog{min-height:44px;padding:8px 12px;gap:10px;border:1px solid var(--line-2);border-radius:2px}
+.tog.set-tog .sw{order:0}
+.sw-state{font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);min-width:56px}
+.tog.set-tog.on .sw-state{color:var(--ink)}
+
+/* A native range, dressed: grey track, red behind the thumb, big enough to hit. */
+.set-range{-webkit-appearance:none;appearance:none;width:140px;max-width:100%;height:28px;
+  margin:0;background:transparent;cursor:pointer;touch-action:none}
+.set-range::-webkit-slider-runnable-track{height:4px;border-radius:2px;
+  background:linear-gradient(90deg,var(--red) var(--fill,90%),var(--line-2) var(--fill,90%))}
+.set-range::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;margin-top:-6px;
+  border-radius:50%;background:var(--ink);border:1px solid rgba(0,0,0,.55);box-shadow:0 1px 4px rgba(0,0,0,.6)}
+.set-range::-moz-range-track{height:4px;border-radius:2px;background:var(--line-2)}
+.set-range::-moz-range-progress{height:4px;border-radius:2px;background:var(--red)}
+.set-range::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--ink);
+  border:1px solid rgba(0,0,0,.55);box-shadow:0 1px 4px rgba(0,0,0,.6)}
+.set-val{font:500 15px var(--mono);color:var(--ink);min-width:52px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* Low emphasis on purpose: it is the one control here that undoes work. */
+.set-reset-group{margin-top:8px;padding-top:24px;border-top:1px solid var(--line-2)}
+.set-reset{appearance:none;-webkit-appearance:none;cursor:pointer;width:100%;min-height:44px;padding:13px;
+  border:1px solid var(--line-2);border-radius:2px;background:transparent;
+  font:10px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);
+  transition:border-color var(--d-1) var(--ease),color var(--d-1) var(--ease),background var(--d-1) var(--ease)}
+@media (hover:hover){.set-reset:hover{border-color:var(--ink);color:var(--ink)}}
+.set-reset.armed{border-color:var(--red);color:var(--ink);background:var(--red-wash)}
+.set-note{margin:10px 0 0;font:11px/1.5 var(--body);color:var(--ink-3)}
 
 /* 8 HOME — typography alongside a moving, banked strip of asphalt */
 #home{background:var(--ground);overflow:hidden}
@@ -370,6 +453,8 @@ svg.ic{width:21px;height:21px;fill:none;stroke:var(--ink-2);stroke-width:1.8;
 .best-strip .v em{font:11px var(--mono);color:var(--ink-2);margin-left:4px}
 .keys{display:none;gap:12px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 body.desk .keys{display:flex}.keys-k{display:none}
+/* Settings hides the hint row without touching anything a player needs. */
+body.no-hints .keys{display:none}
 .key-pair{display:inline-flex;align-items:center;gap:4px}
 .keycap{font:10px var(--mono);color:var(--ink-2);border:1px solid var(--line-2);border-radius:3px;padding:4px;min-width:20px;text-align:center}
 .keys .lbl{font:10px var(--mono);color:var(--ink-2)}
@@ -895,6 +980,17 @@ body.local #shell{width:100vw;height:100dvh;max-width:none;border-radius:0;trans
   #carTurn{font-size:10px}#pickRoster{font-size:9px;gap:10px}
   #garage{display:flex;gap:18px}.tabs{flex-direction:row;gap:2px;border-right:0;border-bottom:1px solid var(--line-2);padding:0;flex-shrink:0}.tab{flex:1;min-width:0;text-align:center;font-size:9px;padding:8px 4px;border-left:0;border-bottom:2px solid transparent}.tab.on{border-color:var(--red)}#garageBody{flex:1}.info.car{grid-template-columns:80px 1fr;gap:14px}
   #langCard{padding:24px}
+  /* Settings becomes the screen: no gutter, insets carried by the card itself. */
+  #settingsWrap{padding:0}
+  #settingsCard{max-width:none;height:100%;max-height:none;border-radius:0;border-inline:0;border-bottom:0}
+  .set-head{padding:calc(18px + var(--safe-t)) calc(20px + var(--safe-r)) 16px calc(20px + var(--safe-l))}
+  .set-head .display{font-size:26px}
+  .set-body{padding:0 calc(20px + var(--safe-r)) calc(24px + var(--safe-b)) calc(20px + var(--safe-l))}
+  .set-row{grid-template-columns:minmax(0,1fr);gap:12px}
+  .set-ctl{justify-content:flex-start}
+  .set-seg{width:100%}.set-seg .step{flex:1 1 0;min-width:0}
+  .set-tog{width:100%;justify-content:space-between}.set-tog .sw{order:2}
+  .set-range{flex:1;width:auto}.set-val{min-width:auto}
 }
 /* A landscape phone scrolls the decision area while keeping Back and Continue reachable. */
 @media (max-height:500px) and (min-width:600px){
@@ -903,38 +999,86 @@ body.local #shell{width:100vw;height:100dvh;max-width:none;border-radius:0;trans
   .mode-grid{min-height:230px}.mode-grid .mode-mark{min-height:60px;margin-bottom:14px}.mode-grid .mode-name{font-size:19px}.mode-grid .mode-desc{font-size:11px}
   .difficulty-scale{margin-top:4px}.difficulty-scale .mode{gap:10px;padding:12px}.diff-mark{height:65px}.difficulty-number{font-size:28px}
   .player-grid{margin-top:12px}.split-preview{height:100px}.style-grid{min-height:250px}.showroom{min-height:280px}.car-art{height:75px}#carHero{height:180px}.car-feature-copy p{font-size:11px}.setup-foot{margin-top:8px;padding-top:8px}.setup-foot .btn{min-height:44px}
+  #settingsWrap{padding-block:10px}.set-head{padding:14px 20px 12px}.set-head .display{font-size:22px}
+  .set-body{padding:0 20px 16px}.set-group{padding-top:14px}.set-row{padding:12px 0}
+  .set-text span{font-size:11px}
 }
 
 /* ============================================================
    15  MOTION & CONTRAST
    ============================================================ */
+/* Both preferences are three-state: the system's answer, or the player's own
+   overruling it in either direction. js/settings.js writes data-motion and
+   data-contrast on <html>; with no script at all the attributes are absent and
+   the system rules apply on their own, exactly as they did before.
+     System   - no attribute matches "full"/"off", so the media rule stands
+     Reduced/On  - the attribute rule applies whatever the system says
+     Full/Off - the attribute opts the media rule out
+   Anything drawn frame by frame from JS asks core.js's motionReduced(), which
+   resolves the same three states, so the canvas and the stylesheet agree. */
 @media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{
+  :root:not([data-motion="full"]) *,
+  :root:not([data-motion="full"]) *::before,
+  :root:not([data-motion="full"]) *::after{
     animation-duration:.01ms!important;
     animation-iteration-count:1!important;
     transition-duration:.01ms!important;
     scroll-behavior:auto!important;
   }
-  .lane-line{animation:none}
+  :root:not([data-motion="full"]) .lane-line{animation:none}
   /* the states that were carried by movement keep a still form */
-  #airWrap.wound{animation:none}
-  .readout .pos.mine::before{animation:none;opacity:1}
+  :root:not([data-motion="full"]) #airWrap.wound{animation:none}
+  :root:not([data-motion="full"]) .readout .pos.mine::before{animation:none;opacity:1}
 }
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after{
+  animation-duration:.01ms!important;
+  animation-iteration-count:1!important;
+  transition-duration:.01ms!important;
+  scroll-behavior:auto!important;
+}
+:root[data-motion="reduced"] .lane-line{animation:none}
+:root[data-motion="reduced"] #airWrap.wound{animation:none}
+:root[data-motion="reduced"] .readout .pos.mine::before{animation:none;opacity:1}
+
+/* Higher contrast is the same palette worked harder: type, hairlines, the
+   washes that carry hover and selection, and the glass itself. No new hues. */
 @media (prefers-contrast:more){
-  :root{
+  :root:not([data-contrast="off"]){
     --line:rgba(255,255,255,.22);
     --line-2:rgba(255,255,255,.34);
+    --line-3:rgba(255,255,255,.46);
     --ink-2:#C8CCD2;
     --ink-3:#9AA0A8;
+    --wash:rgba(255,255,255,.09);
+    --wash-2:rgba(255,255,255,.16);
+    --red-wash:rgba(229,38,45,.28);
     --glass-1:linear-gradient(180deg,rgba(24,26,30,.94),rgba(8,9,11,.96));
+    --glass-2:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.07));
     --glass-3:rgba(8,9,11,.88);
   }
 }
+:root[data-contrast="on"]{
+  --line:rgba(255,255,255,.22);
+  --line-2:rgba(255,255,255,.34);
+  --line-3:rgba(255,255,255,.46);
+  --ink-2:#C8CCD2;
+  --ink-3:#9AA0A8;
+  --wash:rgba(255,255,255,.09);
+  --wash-2:rgba(255,255,255,.16);
+  --red-wash:rgba(229,38,45,.28);
+  --glass-1:linear-gradient(180deg,rgba(24,26,30,.94),rgba(8,9,11,.96));
+  --glass-2:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.07));
+  --glass-3:rgba(8,9,11,.88);
+}
 @media (forced-colors:active){
-  .panel-card,#langCard,.mode,.car-opt,.info,.opt,.tog,.step{
+  .panel-card,#langCard,#settingsCard,.mode,.car-opt,.info,.opt,.tog,.step,.set-reset{
     border:1px solid CanvasText;
   }
   .btn:focus-visible,.icon-btn:focus-visible,.mode:focus-visible{outline:2px solid Highlight}
+  .set-seg .step.on{outline:2px solid Highlight}
+  .set-range{forced-color-adjust:auto}
 }
 
 @media (forced-colors:active){.car-opt.cursor,.car-opt.preview,.step.on,.tab.on{outline:2px solid Highlight}.diff-mark i{border:1px solid CanvasText}.diff .diff-mark i:first-child,.lv2 .diff-mark i:nth-child(-n+2),.lv3 .diff-mark i:nth-child(-n+3),.lv4 .diff-mark i{background:Highlight;forced-color-adjust:none}}
