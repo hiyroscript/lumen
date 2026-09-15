@@ -3,7 +3,7 @@
 ## Executed
 
 - `node tools/check.mjs`: passes; one existing informational warning for translation keys referenced dynamically. Includes duplicate-ID validation.
-- `node tools/menu-check.mjs`: 53 passing behavior checks, executing the real scripts and event handlers against DOM/Canvas test doubles.
+- `node tools/menu-check.mjs`: 70 passing behavior checks (53 at the time of the redesign, 17 added with Settings), executing the real scripts and event handlers against DOM/Canvas test doubles.
 - `git diff --check`: passes.
 
 The behavior checks cover first-run language and saved language changes; Home
@@ -51,3 +51,40 @@ edges and striped kerbs, composed as a banked diagonal road. Reduced motion is
 the intentional exception. Gameplay source, tuning, race timing and save semantics
 are preserved; only the keyboard dispatch around menu button activation changes
 outside the menu modules.
+
+---
+
+# Settings system validation
+
+## Executed
+
+- `node tools/check.mjs`: passes; the same single informational warning for
+  translation keys referenced dynamically.
+- `node tools/menu-check.mjs`: 70 passing behavior checks. The seventeen new ones
+  cover opening Settings as a modal, Home staying unreachable behind it, Tab and
+  Shift+Tab wrapping inside it, the sound switch against `soundOn` and the master
+  gain, volume persistence and its effect on the gain, all three motion states
+  against `motionReduced()` and `data-motion`, contrast, control hints, changing
+  language without closing the panel, the two-press restore and what it leaves
+  alone, and closing by backdrop and by Escape with focus returning to
+  `#btnSettings`.
+- Headless Chromium (Playwright against the system browser, nothing added to the
+  repo) over a local `http-server`: first run, language choice, Settings opened
+  from Home, every preference exercised through its own control, a race started
+  with sound off, pause, quit, and a reload to confirm the panel paints from
+  storage rather than from what it was left showing. No page errors in the
+  console. Panel geometry measured at 1280×800, 1900×1000, 520×900, 390×844 and
+  740×380: the card is capped inside the gutter at every one, its body scrolls,
+  the document itself never scrolls, and `Restore default settings` is reachable.
+- `prefers-reduced-motion: reduce` emulated: `motionReduced()` follows the system
+  on **System**, is forced true on **Reduced**, and is false on **Full**, with the
+  Home road's `animation-name` going `none` / `roadScroll` to match.
+
+## Still required
+
+The sandbox blocks Google Fonts, so the headless pass rendered in fallback faces:
+Archivo and IBM Plex line breaks, and long French labels in the segmented rows,
+still want a look on a real connection. Also unchecked here: real touch dragging
+of the volume slider, VoiceOver/NVDA on the switches and segmented groups, and a
+browser without `backdrop-filter` (the opaque fallback now covers `#settingsCard`
+and both dialog backdrops, but it has not been observed).

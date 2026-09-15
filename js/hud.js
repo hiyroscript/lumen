@@ -352,7 +352,7 @@ function hudActions(o){
       const fh = Math.max(2, (bw - 2)*k);
       const fy = iy + bw - 1 - fh;
       const g = ctx.createLinearGradient(0, fy, 0, fy + fh);
-      if(ready && !NO_MOTION){
+      if(ready && !motionReduced()){
         const pulse = 0.86 + 0.14*(0.5 + 0.5*Math.sin(G.raceT*4.2));
         ctx.globalAlpha = pulse;
       }
@@ -390,7 +390,7 @@ function hudActions(o){
   const pulse = Math.sin(k*Math.PI);              /* the trade flash, out and back */
   ctx.save();
   ctx.translate(ix + bw/2, iy + bw/2);
-  if(!NO_MOTION && k > 0) ctx.scale(1 + pulse*0.18, 1 + pulse*0.18);
+  if(!motionReduced() && k > 0) ctx.scale(1 + pulse*0.18, 1 + pulse*0.18);
   ctx.translate(-(ix + bw/2), -(iy + bw/2));
   if(col){ ctx.shadowColor = withA(col, 0.5); ctx.shadowBlur = 18; }
   hudGlass(ix, iy, bw, bw, 12, o.item ? 0.88 : 0.78);
@@ -582,7 +582,7 @@ function hudEffects(who, o){
       ctx.save();
       ctx.globalAlpha = a;
       ctx.translate(W/2, H*0.40);
-      if(!NO_MOTION) ctx.scale(0.88 + Math.min(1, k/0.25)*0.12, 0.88 + Math.min(1, k/0.25)*0.12);
+      if(!motionReduced()) ctx.scale(0.88 + Math.min(1, k/0.25)*0.12, 0.88 + Math.min(1, k/0.25)*0.12);
       ctx.fillStyle = "#B96BFF";
       ctx.font = "760 26px " + HUD_DISPLAY;
       ctx.textBaseline = "middle";
@@ -1016,7 +1016,7 @@ function paintItemBox(){
     box._swapK = k;
     const pulse = Math.sin(k*Math.PI);                  /* out and back within the flash */
     box.style.filter = k > 0 ? "brightness(" + (1 + pulse*0.85).toFixed(3) + ")" : "";
-    box.style.transform = k > 0 && !NO_MOTION ? "scale(" + (1 + pulse*0.18).toFixed(3) + ")" : "";
+    box.style.transform = k > 0 && !motionReduced() ? "scale(" + (1 + pulse*0.18).toFixed(3) + ")" : "";
   }
 }
 

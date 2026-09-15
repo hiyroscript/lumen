@@ -101,15 +101,29 @@ function buildGarage(){
 const SETUP_IDS = ["modes", "players", "pads", "style", "custom", "diffs", "cars"];
 let menuScreen = "home", menuFocus = {}, modalFocus = null;
 function menuButtons(root){
-  return Array.from(root.querySelectorAll('button:not(:disabled), [tabindex="0"]')).filter(function(el){
+  return Array.from(root.querySelectorAll('button:not(:disabled), input:not(:disabled), [tabindex="0"]')).filter(function(el){
     return !el.closest("[inert]") && el.getClientRects().length && getComputedStyle(el).visibility !== "hidden";
   });
 }
+/* Every dialog that can sit over a menu, topmost first: the first-run language
+   picker outranks Settings, which outranks the two race panels. One list, so
+   the focus gate, the Tab trap and Escape always agree on what is in front -
+   and the next dialog is one entry here rather than three chains of ors. */
+const MODAL_IDS = ["langWrap", "settingsWrap", "pausePanel", "overPanel"];
+function activeModal(){
+  for(let i=0;i<MODAL_IDS.length;i++){
+    const el = document.getElementById(MODAL_IDS[i]);
+    if(el && el.classList.contains("on")) return el;
+  }
+  return null;
+}
 function gateFocus(){
-  const modal = $("#langWrap.on") || $("#pausePanel.on") || $("#overPanel.on");
-  const langUp = $("#langWrap").classList.contains("on");
+  const modal = activeModal();
+  /* A dialog that lives outside the screens covers every one of them. The race
+     panels sit inside #race and gate the instruments instead. */
+  const over = !!modal && !modal.closest(".screen");
   document.querySelectorAll(".screen").forEach(function(el){
-    el.inert = langUp || el.id !== menuScreen;
+    el.inert = over || el.id !== menuScreen;
   });
   const hud = $(".hud");
   if(hud) hud.inert = !!modal;
@@ -164,7 +178,7 @@ function show(id){
 /* Tab stays in the active dialog or screen. Escape follows the same Back
    actions as pointer controls; Enter/Space keep native button activation. */
 function menuKeydown(e){
-  const modal = $("#langWrap.on") || $("#pausePanel.on") || $("#overPanel.on");
+  const modal = activeModal();
   const root = modal || document.getElementById(menuScreen);
   if(!root) return;
   if(e.key === "Tab"){
@@ -177,7 +191,11 @@ function menuKeydown(e){
   if(e.key === "Escape" && menuScreen !== "race"){
     e.preventDefault();
     if(modal){
-      if(lang){ $("#langWrap").classList.remove("on"); gateFocus(); }
+      /* One keypress, one action: the dialog closes and nothing behind it moves.
+         The first-run picker has nothing to fall back to until a language has
+         been chosen, so it stays. */
+      if(modal.id === "settingsWrap") closeSettings();
+      else if(modal.id === "langWrap" && lang){ $("#langWrap").classList.remove("on"); gateFocus(); }
       return;
     }
     const back = root.querySelector('[data-i18n-aria="navBack"], [data-i18n-aria="navClose"]');

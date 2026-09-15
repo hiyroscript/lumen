@@ -52,7 +52,18 @@ function withA(hex, a){
 }
 
 const DESKTOP = !!(window.matchMedia && window.matchMedia("(hover:hover) and (pointer:fine)").matches);
-/* Anything drawn frame by frame from JS sits outside the reduced-motion rule in
-   the stylesheet, so it has to ask for itself. */
-const NO_MOTION = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion:reduce)").matches);
+
+/* Reduced motion: the system asks, the player decides. The preference is one of
+   "system", "reduced" or "full"; js/settings.js owns it, writes it here and
+   mirrors it on to <html data-motion> for the stylesheet. Anything drawn frame
+   by frame from JS sits outside the stylesheet's rule, so it asks
+   motionReduced() rather than reading a media query of its own - one answer for
+   the CSS and the canvas alike. */
+const MOTION_QUERY = window.matchMedia ? window.matchMedia("(prefers-reduced-motion:reduce)") : null;
+let motionPref = "system";
+function motionReduced(){
+  if(motionPref === "reduced") return true;
+  if(motionPref === "full") return false;
+  return !!(MOTION_QUERY && MOTION_QUERY.matches);
+}
 const LANDSCAPE = false;   /* the road always runs up the screen */

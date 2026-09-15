@@ -33,8 +33,8 @@ const STR = {
   again:        {en:"Race again",                  fr:"Relancer"},
   home:         {en:"Home",                        fr:"Accueil"},
   pickLang:     {en:"Choose your language",        fr:"Choisissez votre langue"},
-  pickLangSub:  {en:"You can change this at any time from the home screen.",
-                 fr:"Vous pouvez la changer \u00e0 tout moment depuis l'accueil."},
+  pickLangSub:  {en:"You can change this at any time in Settings.",
+                 fr:"Vous pouvez la changer \u00e0 tout moment dans les param\u00e8tres."},
   trackCity:    {en:"City",                        fr:"Ville"},
   trackDesert:  {en:"Desert",                      fr:"D\u00e9sert"},
   trackSpace:   {en:"Rainbow space",               fr:"Espace arc-en-ciel"},
@@ -254,13 +254,51 @@ const STR = {
   padMissing:   {en:"Not connected", fr:"Non connectée"},
   controller:   {en:"Controller", fr:"Manette"},
 
+  /* ---- settings ----
+     Everything the player can set about the game rather than about a race.
+     The state words - On, Off, System - are shared by the switches and the
+     segmented rows, so a preference reads the same wherever it appears. */
+  settings:     {en:"Settings",                    fr:"Param\u00e8tres"},
+  setEyebrow:   {en:"Preferences",                 fr:"Pr\u00e9f\u00e9rences"},
+  setGeneral:   {en:"General",                     fr:"G\u00e9n\u00e9ral"},
+  setLanguage:  {en:"Language",                    fr:"Langue"},
+  setLanguageDesc:{en:"The whole interface changes as you choose.",
+                 fr:"Toute l'interface change d\u00e8s votre choix."},
+  setAudio:     {en:"Audio",                       fr:"Audio"},
+  setSound:     {en:"Sound",                       fr:"Son"},
+  setSoundDesc: {en:"Enable game audio.",          fr:"Activer le son du jeu."},
+  setVolume:    {en:"Master volume",               fr:"Volume g\u00e9n\u00e9ral"},
+  setVolumeDesc:{en:"Applies to every sound the game makes.",
+                 fr:"S'applique \u00e0 tous les sons du jeu."},
+  setAccess:    {en:"Accessibility",               fr:"Accessibilit\u00e9"},
+  setMotion:    {en:"Reduced motion",              fr:"Animations r\u00e9duites"},
+  setMotionDesc:{en:"System follows your device. Reduced stills the interface and the road.",
+                 fr:"Syst\u00e8me suit votre appareil. R\u00e9duites fige l'interface et la route."},
+  setSystem:    {en:"System",                      fr:"Syst\u00e8me"},
+  setReduced:   {en:"Reduced",                     fr:"R\u00e9duites"},
+  setFull:      {en:"Full",                        fr:"Compl\u00e8tes"},
+  setContrast:  {en:"High contrast",               fr:"Contraste \u00e9lev\u00e9"},
+  setContrastDesc:{en:"Stronger type, borders and edges between surfaces.",
+                 fr:"Texte, bordures et contours renforc\u00e9s."},
+  setOn:        {en:"On",                          fr:"Activ\u00e9"},
+  setOff:       {en:"Off",                         fr:"D\u00e9sactiv\u00e9"},
+  setInterface: {en:"Interface",                   fr:"Interface"},
+  setHints:     {en:"Show control hints",          fr:"Afficher les commandes"},
+  setHintsDesc: {en:"The keyboard row along the bottom of the home screen.",
+                 fr:"La rang\u00e9e de touches en bas de l'accueil."},
+  setRestore:   {en:"Restore default settings",    fr:"R\u00e9tablir les r\u00e9glages par d\u00e9faut"},
+  setRestoreDesc:{en:"Sound, volume, motion, contrast and hints go back to their defaults. Your language and your best run are kept.",
+                 fr:"Son, volume, animations, contraste et commandes reviennent par d\u00e9faut. Votre langue et votre record sont conserv\u00e9s."},
+  setRestoreAsk:{en:"Press again to restore the defaults.",
+                 fr:"Appuyez encore pour r\u00e9tablir les r\u00e9glages."},
+  setRestoreDone:{en:"Settings restored.",         fr:"R\u00e9glages r\u00e9tablis."},
+
   /* ---- interface furniture ----
      Icon-only controls carry their name in aria-label rather than on screen,
      so the label has to be translated like any other string. */
   navBack:      {en:"Back",                        fr:"Retour"},
   navClose:     {en:"Close",                       fr:"Fermer"},
-  navLang:      {en:"Language",                    fr:"Langue"},
-  navSound:     {en:"Sound",                       fr:"Son"},
+  navSettings:  {en:"Settings",                    fr:"Param\u00e8tres"},
   navPause:     {en:"Pause",                       fr:"Pause"},
   hudItem:      {en:"Item",                        fr:"Objet"},
   controlsHead: {en:"Controls",                    fr:"Commandes"},
@@ -296,6 +334,18 @@ function applyLang(){
   paintLocalGate();
   if($("#cars").classList.contains("on")) paintPicks();
 }
+/* The one way a language is ever chosen. The first-run picker and the Settings
+   row both come through here, so neither can save or repaint in a way the other
+   does not. An unsupported code changes nothing. */
+function chooseLang(code){
+  const next = supportedLang(code);
+  if(!next) return false;
+  lang = next;
+  store.set("seren.lang", lang);
+  applyLang();
+  return true;
+}
+
 /* Local play is a couch mode: it wants a keyboard-and-mouse machine with pads
    plugged into it. Rather than hide it on a phone - which reads as a missing
    feature - it is shown greyed with the reason where its description goes. */

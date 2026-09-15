@@ -51,14 +51,11 @@
       <i class="fade bot"></i>
     </div>
 
+    <!-- One utility control. Language, sound and the rest live behind it. -->
     <header class="topbar">
-      <button class="icon-btn" id="btnLang" data-i18n-aria="navLang" aria-label="Language">
-        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15 0 18-2.6-3-2.6-15.4 0-18Z"/></svg>
-      </button>
       <span class="spacer"></span>
-      <button class="icon-btn" id="btnSound" data-i18n-aria="navSound" aria-label="Sound">
-        <svg class="ic" id="icSoundOn" viewBox="0 0 24 24"><path d="M5 9.5h3.5L13 5.5v13L8.5 14.5H5z"/><path d="M16.5 9c1.2 1.6 1.2 4.4 0 6"/><path d="M19 6.5c2.2 3 2.2 8 0 11"/></svg>
-        <svg class="ic off" id="icSoundOff" viewBox="0 0 24 24"><path d="M5 9.5h3.5L13 5.5v13L8.5 14.5H5z"/><path d="m17 9.5 4 5"/><path d="m21 9.5-4 5"/></svg>
+      <button class="icon-btn" id="btnSettings" data-i18n-aria="navSettings" aria-label="Settings">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M4 8h5"/><path d="M13 8h7"/><circle cx="11" cy="8" r="2"/><path d="M4 16h9"/><path d="M17 16h3"/><circle cx="15" cy="16" r="2"/></svg>
       </button>
     </header>
 
@@ -534,7 +531,115 @@ bubbles</button>
   </section>
 
   <!-- ============================================================
-       5. LANGUAGE
+       5. SETTINGS  —  every player preference, over whatever is behind it
+       ============================================================ -->
+  <div id="settingsWrap" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div id="settingsCard">
+      <header class="set-head">
+        <div>
+          <span class="eyebrow" data-i18n="setEyebrow">Preferences</span>
+          <h2 class="display" id="settingsTitle" data-i18n="settings">Settings</h2>
+        </div>
+        <button class="icon-btn quiet" id="btnCloseSettings" data-i18n-aria="navClose" aria-label="Close">
+          <svg class="ic" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </header>
+
+      <!-- Rows are written here and only ever painted from stored state by
+           paintSettings(); nothing reads a preference back off the DOM. -->
+      <div class="set-body" id="settingsBody">
+
+        <section class="set-group">
+          <h3 class="set-group-name" data-i18n="setGeneral">General</h3>
+          <div class="set-row">
+            <span class="set-text">
+              <b id="setLangName" data-i18n="setLanguage">Language</b>
+              <span data-i18n="setLanguageDesc">The whole interface changes as you choose.</span>
+            </span>
+            <span class="set-ctl steps set-seg" role="group" aria-labelledby="setLangName">
+              <button class="step" data-set="lang" data-val="en"><i>EN</i>English</button>
+              <button class="step" data-set="lang" data-val="fr"><i>FR</i>Fran&ccedil;ais</button>
+            </span>
+          </div>
+        </section>
+
+        <section class="set-group">
+          <h3 class="set-group-name" data-i18n="setAudio">Audio</h3>
+          <div class="set-row">
+            <span class="set-text">
+              <b id="setSoundName" data-i18n="setSound">Sound</b>
+              <span data-i18n="setSoundDesc">Enable game audio.</span>
+            </span>
+            <span class="set-ctl">
+              <button class="tog set-tog" id="setSoundSw" role="switch" aria-checked="true" aria-labelledby="setSoundName" data-set="sound">
+                <span class="sw"><i></i></span><span class="sw-state" id="setSoundState">On</span>
+              </button>
+            </span>
+          </div>
+          <div class="set-row">
+            <span class="set-text">
+              <b id="setVolName" data-i18n="setVolume">Master volume</b>
+              <span data-i18n="setVolumeDesc">Applies to every sound the game makes.</span>
+            </span>
+            <span class="set-ctl">
+              <input class="set-range" id="setVolRange" type="range" min="0" max="100" step="1" value="90" aria-labelledby="setVolName">
+              <output class="set-val" id="setVolVal" for="setVolRange">90%</output>
+            </span>
+          </div>
+        </section>
+
+        <section class="set-group">
+          <h3 class="set-group-name" data-i18n="setAccess">Accessibility</h3>
+          <div class="set-row">
+            <span class="set-text">
+              <b id="setMotionName" data-i18n="setMotion">Reduced motion</b>
+              <span data-i18n="setMotionDesc">System follows your device. Reduced stills the interface and the road.</span>
+            </span>
+            <span class="set-ctl steps set-seg" role="group" aria-labelledby="setMotionName">
+              <button class="step" data-set="motion" data-val="system" data-i18n="setSystem">System</button>
+              <button class="step" data-set="motion" data-val="reduced" data-i18n="setReduced">Reduced</button>
+              <button class="step" data-set="motion" data-val="full" data-i18n="setFull">Full</button>
+            </span>
+          </div>
+          <div class="set-row">
+            <span class="set-text">
+              <b id="setContrastName" data-i18n="setContrast">High contrast</b>
+              <span data-i18n="setContrastDesc">Stronger type, borders and edges between surfaces.</span>
+            </span>
+            <span class="set-ctl steps set-seg" role="group" aria-labelledby="setContrastName">
+              <button class="step" data-set="contrast" data-val="system" data-i18n="setSystem">System</button>
+              <button class="step" data-set="contrast" data-val="on" data-i18n="setOn">On</button>
+              <button class="step" data-set="contrast" data-val="off" data-i18n="setOff">Off</button>
+            </span>
+          </div>
+        </section>
+
+        <section class="set-group">
+          <h3 class="set-group-name" data-i18n="setInterface">Interface</h3>
+          <div class="set-row">
+            <span class="set-text">
+              <b id="setHintsName" data-i18n="setHints">Show control hints</b>
+              <span data-i18n="setHintsDesc">The keyboard row along the bottom of the home screen.</span>
+            </span>
+            <span class="set-ctl">
+              <button class="tog set-tog" id="setHintsSw" role="switch" aria-checked="true" aria-labelledby="setHintsName" data-set="hints">
+                <span class="sw"><i></i></span><span class="sw-state" id="setHintsState">On</span>
+              </button>
+            </span>
+          </div>
+        </section>
+
+        <section class="set-group set-reset-group">
+          <button class="set-reset" id="btnSetReset" data-i18n="setRestore">Restore default settings</button>
+          <p class="set-note" id="setResetNote" aria-live="polite" data-i18n="setRestoreDesc">Sound, volume, motion, contrast and hints go back to their defaults. Your language and your best run are kept.</p>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       6. LANGUAGE  —  first launch only; Settings owns it afterwards
        ============================================================ -->
   <div id="langWrap" role="dialog" aria-modal="true" data-i18n-aria="pickLang">
     <div id="langCard">
@@ -561,6 +666,7 @@ bubbles</button>
 <script defer src="js/audio.js"></script>
 <script defer src="js/runtime.js"></script>
 <script defer src="js/ui.js"></script>
+<script defer src="js/settings.js"></script>
 <script defer src="js/local.js"></script>
 <script defer src="js/ai.js"></script>
 <script defer src="js/mechanics.js"></script>

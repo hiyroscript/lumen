@@ -6,7 +6,7 @@ and a rainbow strip of deep space — dodging puddles, meteors and tumbleweeds,
 grabbing items out of mystery bubbles, and barging each other into the barriers.
 
 No install, no build step, no dependencies. One HTML file, one stylesheet and
-fourteen JavaScript files, drawn entirely with hand-written Canvas 2D.
+fifteen JavaScript files, drawn entirely with hand-written Canvas 2D.
 
 **▶ [Play it](https://hiyroscript.github.io/seren/)** · a game by hiyroscript
 
@@ -367,27 +367,49 @@ sheet) → each player picks a car in turn with their own pad → race.
 
 ## Settings and saved data
 
-Three active values in `localStorage`:
+The sliders icon in the top right of the home screen opens **Settings**, a panel
+over the moving road with every preference in it:
+
+| Group | Setting | Does |
+| --- | --- | --- |
+| General | Language | English or Français, applied to the whole interface as you press it — the panel included, and without a reload |
+| Audio | Sound | On or off, the one switch for every sound the game makes |
+| Audio | Master volume | 0–100%, straight on to the master gain, live |
+| Accessibility | Reduced motion | System / Reduced / Full |
+| Accessibility | High contrast | System / On / Off |
+| Interface | Show control hints | The keyboard row along the bottom of the home screen |
+
+At the foot is **Restore default settings**, which asks once and then resets
+those preferences only — your language and your personal best are kept.
+
+Six values in `localStorage`, and nothing else is ever written:
 
 | Key | Holds |
 | --- | --- |
 | `seren.lang` | `en` or `fr` |
 | `seren.sound` | `1` or `0` |
+| `seren.volume` | `0`–`100`, default `90` |
+| `seren.motion` | `system`, `reduced` or `full` |
+| `seren.contrast` | `system`, `on` or `off` |
+| `seren.controlHints` | `1` or `0` |
 | `seren.best` | your furthest distance, in metres |
 
 Existing saves from the previous name are copied from `redline.*` on startup
 when the corresponding `seren.*` value is absent. Existing Seren values take
-priority, and the old keys remain as a backup. All new saves use `seren.*`.
+priority, and the old keys remain as a backup. All new saves use `seren.*`. A
+saved value that is not one of the ones listed above — an older build, a hand
+edit — falls back to its default rather than reaching the game.
 
 If `localStorage` is unavailable — a private window, blocked site data — the game
 falls back to an in-memory store and keeps working for the session.
 
-**Language.** English and French, switchable any time from the globe on the home
-screen. The first visit asks.
+**Language.** English and French. The first visit asks before anything else;
+after that it lives in Settings.
 
 **Sound.** All generated with the Web Audio API — no audio files. The context is
 created lazily on your first interaction, so browsers never refuse it for starting
-outside a user gesture. The speaker icon toggles it.
+outside a user gesture. Everything plays through one master gain, which is the
+volume when sound is on and silence when it is off.
 
 ## The interface
 
@@ -438,8 +460,10 @@ same constants — see
 ## Accessibility
 
 - **Reduced motion.** `prefers-reduced-motion: reduce` flattens the page's
-  animations. Things drawn frame-by-frame on the canvas sit outside CSS, so they
-  ask for the preference themselves — the item-box swap flash, for instance,
+  animations, and Settings can overrule it either way — Reduced stills the
+  interface on a device that never asked, Full restores the animation for a
+  player who would rather have it. Things drawn frame-by-frame on the canvas sit
+  outside CSS, so they ask the same resolved answer — the item-box swap flash, for instance,
   becomes a brightness pulse with the box held still. Every state that is
   normally carried by movement also has a still form: a charged ultimate stays
   red, your row in the standings stays ticked, a wound-up launch stays lit.
@@ -453,14 +477,17 @@ same constants — see
   screen behind it `inert`, and a pause or a result makes the instruments
   `inert`, so tabbing cannot walk out of the thing in front of you.
 - **Language.** Every string in the interface is translated, including the
-  reference pages and the `aria-label` on every icon-only control — pause, back,
-  close, sound, language, and the two squares you spend.
+  reference pages, every setting and its description, and the `aria-label` on
+  every icon-only control — pause, back, close, settings, and the two squares you
+  spend.
 - **Touch.** Every target is at least 40px on its short side, the two HUD squares
   are 56px, and the layout pads itself out of the safe-area insets on all four
   sides.
 - **Contrast.** `prefers-contrast: more` firms up the hairlines, the secondary
-  ink and the glass. `forced-colors: active` falls back to system colours with
-  real borders.
+  ink, the hover and selection washes and the glass — and High contrast in
+  Settings applies the same treatment on demand, or turns it off. The palette
+  does not change: black, white, grey and red, worked harder.
+  `forced-colors: active` falls back to system colours with real borders.
 - **Desktop scaling.** Menus use the full viewport and adapt their compositions
   to its width and height. The race retains its original portrait shell scaling
   and landscape layout, with a matching Canvas backing store.
@@ -516,7 +543,7 @@ job unchanged. It verifies:
 - every stylesheet and script in `index.html` exists, is deferred, and is in the
   documented dependency order, with no inline `<style>` or `<script>` left behind
 - every JavaScript file parses
-- every top-level name is unique across all fourteen files, and none shadows a
+- every top-level name is unique across all fifteen files, and none shadows a
   browser global
 - every literal `#id` selector in the JavaScript resolves to an element that
   exists in `index.html`
@@ -529,8 +556,8 @@ job unchanged. It verifies:
 Run it before you commit. It takes well under a second.
 
 `node tools/menu-check.mjs` also checks menu state and event wiring using
-DOM/Canvas test doubles, including localization, setup, simulated controllers,
-car turns and pause/results. Browser visuals and hardware still need separate
+DOM/Canvas test doubles, including localization, every Settings preference and
+what it reaches, setup, simulated controllers, car turns and pause/results. Browser visuals and hardware still need separate
 checks; see [the redesign QA record](docs/MENU-REDESIGN-QA.md).
 
 ## Project layout
@@ -541,11 +568,11 @@ css/app.css         the entire stylesheet
 js/                 the game, in load order (see below)
 tools/check.mjs     dependency-free validator for the invariants below
 docs/               ARCHITECTURE.md, TUNING.md and the screenshots
-upd                 the current menu redesign brief
+upd                 the current brief
 .nojekyll           tells GitHub Pages to serve the tree verbatim
 ```
 
-The fourteen scripts load in a fixed, dependency-safe order with `defer`, so each
+The fifteen scripts load in a fixed, dependency-safe order with `defer`, so each
 may rely on the ones above it and nothing starts before every declaration exists.
 
 | File | Owns |
@@ -556,6 +583,7 @@ may rely on the ones above it and nothing starts before every declaration exists
 | `audio.js` | the lazily-created Web Audio context, tones, noise, engine |
 | `runtime.js` | canvas and context, road and split-view geometry, the game state object, layout/resize |
 | `ui.js` | screen switching and focus gating, garage, custom setup, the car board, select-screen art |
+| `settings.js` | every player preference, where it is stored, what applies it, and the Settings dialog |
 | `local.js` | seats, player colours, pad discovery, the menu pad loops |
 | `ai.js` | the bot mind: sense, weigh, act |
 | `mechanics.js` | contact, lanes, boost, the launch, wrecks, effects, ultimates, items, hazards, particles |

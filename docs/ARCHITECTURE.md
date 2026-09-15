@@ -2,7 +2,7 @@
 
 How SEREN is put together, and where to change what.
 
-The whole game is fourteen classic `<script defer>` files, one stylesheet and one
+The whole game is fifteen classic `<script defer>` files, one stylesheet and one
 HTML shell. There is no build step, no bundler, no package manager and no
 dependency. If you can serve a directory, you can develop it.
 
@@ -25,10 +25,10 @@ dependency. If you can serve a directory, you can develop it.
 
 ## The loading contract
 
-`index.html` ends with fourteen tags in exactly this order:
+`index.html` ends with fifteen tags in exactly this order:
 
 ```
-core → i18n → data → audio → runtime → ui → local → ai → mechanics → race → render → hud → input → main
+core → i18n → data → audio → runtime → ui → settings → local → ai → mechanics → race → render → hud → input → main
 ```
 
 `defer` buys two guarantees: the document is fully parsed before any of them run,
@@ -41,6 +41,7 @@ The order is a real dependency order for anything that executes *at load time*:
 | `i18n.js` | `store` from `core.js` |
 | `runtime.js` | `$` from `core.js`, `ULT_TIME` from `data.js` (it is in the `G` literal), and `#cv` in the DOM |
 | `ui.js`, `audio.js` | `store` from `core.js` |
+| `settings.js` | `store` and `clamp` from `core.js` — it reads every saved preference at load |
 | `input.js` | `cv` from `runtime.js` (it registers listeners on it) |
 
 Everything else is function bodies, which do not care about order because they do
@@ -193,13 +194,20 @@ a periodic road pattern at or above the top of the current view.
 
 ### `core.js`
 `store` (localStorage with a memory fallback), `$`, `clamp`, `lerp`, `rand`,
-`randi`, `withA` (hex → rgba), and three capability flags: `DESKTOP`, `NO_MOTION`,
-`LANDSCAPE`. Plus `SPLASH_IMAGE`, `SPLASH_MS` and `TRAFFIC_ENABLED`.
+`randi`, `withA` (hex → rgba), and the capability flags: `DESKTOP`, `LANDSCAPE`,
+and `motionReduced()` over `MOTION_QUERY` and `motionPref`. Plus `SPLASH_IMAGE`,
+`SPLASH_MS` and `TRAFFIC_ENABLED`.
+
+`motionReduced()` is the single answer to "should this move?" — it resolves the
+player's `system` / `reduced` / `full` choice (written here by `settings.js`)
+against `prefers-reduced-motion`. Anything drawn frame by frame from JS sits
+outside the stylesheet's rule and asks it; the stylesheet answers the same
+question from `<html data-motion>`. Never read the media query anywhere else.
 
 Nothing here owns a game system. If a helper knows what a car is, it does not
 belong here.
 
-### `i18n.js` — 294 lines
+### `i18n.js` — 360 lines
 `STR` is a flat map of key → `{en, fr}`. `t(k)` returns the current language, and
 falls back to English and then to the key itself — a missing string shows as a
 visibly wrong key rather than taking down the screen that asked for it.
@@ -208,12 +216,16 @@ visibly wrong key rather than taking down the screen that asked for it.
 
 - `[data-i18n]` writes the string into `textContent`.
 - `[data-i18n-aria]` writes it into `aria-label`. Icon-only controls — pause,
-  back, close, sound, language, the ultimate and item squares — carry their name
+  back, close, settings, the ultimate and item squares — carry their name
   nowhere else, so that label has to be translated like any other copy. Never
   hard-code an `aria-label` in the HTML; give it a key.
 
+`chooseLang(code)` is the only way the language ever changes: it validates,
+saves `seren.lang` and repaints. The first-run picker and the Settings row both
+call it, so neither can save or repaint in a way the other does not.
+
 Adding a language means adding a third code to every entry, adding a
-`.lang-opt` button, and nothing else.
+`.lang-opt` button and a Settings segment, and nothing else.
 
 ### `data.js` — 366 lines
 Every definition and every tuning number: `CARS`, `DIFFS`, `TEMPERS`, `EFFECTS`,
@@ -224,11 +236,16 @@ Loaded before `runtime.js` because the `G` literal reads `ULT_TIME`. Nothing her
 has behaviour of its own — `makeTemper`, `bubbleR`, `rockLead` and `rockAlt` are
 accessors on the numbers beside them.
 
-### `audio.js` — 62 lines
+### `audio.js` — 74 lines
 Everything is generated; there are no audio files. `audio()` creates the context
 on first call and caches it, which keeps creation inside a user gesture so
 browsers do not refuse it. `tone()` and `noise()` no-op when sound is off or the
 context could not be made, so callers never have to check.
+
+Every voice is connected through the one `master` gain, and `masterGain()` is
+what it should be: `0` when sound is off, the player's level when it is on.
+`setSound()` and `setVolume()` are the two doors — nothing multiplies a volume
+into an individual effect, and a node already playing follows the change.
 
 ### `runtime.js` — 176 lines
 The canvas, the two contexts (`roadCtx` and the swappable `ctx`), the road
@@ -250,10 +267,15 @@ elsewhere.
   destinations. Home stays visible underneath to retain the moving road, while
   its title and controls fade away. The `menu` body class gives menus the full
   viewport; entering a race restores the existing race shell and scaling.
-- `gateFocus()` makes every inactive screen inert, gates the HUD during pause or
-  results, and moves focus into and out of dialogs. `menuKeydown()` contains Tab
-  within the active surface and routes Escape to its Back control. Native button
-  activation owns Enter and Space in menus.
+- `activeModal()` walks `MODAL_IDS` — the language picker, Settings, pause and
+  results, topmost first — and is the one answer to "what is in front?".
+  `gateFocus()` and `menuKeydown()` both ask it, so a new dialog is one entry in
+  that list rather than three chains of ors.
+- `gateFocus()` makes every inactive screen inert (a dialog outside the screens
+  covers all of them; the race panels only gate the HUD), and moves focus into
+  and out of dialogs. `menuKeydown()` contains Tab within the active surface and
+  routes Escape to its Back control — or to the dialog in front, one keypress for
+  one action. Native button activation owns Enter and Space in menus.
 - `setupSummary()` reads the mode, player count, style, bots and difficulty from
   `G`. It is presentation only. `paintCustom()` still writes through the original
   rules and restores focus after rebuilding controls.
@@ -263,6 +285,29 @@ elsewhere.
   Previewing never commits a pick. The board remains three columns for gamepads.
 - `infoCard()` creates reference entries with shared data; the index uses proper
   tab semantics and arrow-key navigation.
+
+### `settings.js` — 156 lines
+Player preferences and the dialog that edits them. One authoritative value per
+preference, held in `settings` and written straight to `store`; nothing reads a
+preference back off the DOM.
+
+- `SETTINGS_KEYS`, `SETTINGS_DEFAULTS` and `SETTINGS_ALLOWED` are the contract.
+  `settingValue()` validates on the way in, so a hand-edited or out-of-date key
+  falls back to its default rather than travelling further into the game.
+- `getSetting()` / `setSetting()` are the only accessors. `setSetting()`
+  validates, saves, applies and repaints, in that order.
+- `applySettings()` hands each value to whatever carries it out: `setSound()` and
+  `setVolume()` in `audio.js`, `motionPref` in `core.js`, `data-motion` and
+  `data-contrast` on `<html>`, and the `no-hints` body class. It runs at boot and
+  after every change, so the game can never be running on a value the player no
+  longer has.
+- `paintSettings()` writes that same state on to the controls — segments,
+  switches, the slider and the restore row — and is the only thing that touches
+  them. Call it; never set a control by hand.
+- `openSettings()` / `closeSettings()` own visible state, paint, focus and inert
+  behaviour together, through `gateFocus()`.
+- `restoreSettings()` resets the keys in `SETTINGS_KEYS` and nothing else: the
+  personal best and the language in use are not this button's to throw away.
 
 ### `local.js` — 161 lines
 Seats and player colours (`seatOf`, `seatCol`), the pad primitives (`padPoll`,
@@ -349,9 +394,9 @@ input path ends at one of them.
 autorepeat from re-arming a fresh meter without the player lifting a finger.
 Keeping them apart is what makes a cancelled hold behave.
 
-### `main.js` — 170 lines
+### `main.js` — 216 lines
 Boot, in order: splash image, desktop class, `deskFit`, `applyLang`, `paintBest`,
-`setSound`, the splash timeout, every menu listener, the window resize and
+`applySettings`, the splash timeout, every menu listener, the window resize and
 visibility listeners, and `settle()` — repeated once after layout and once after
 fonts, in case the first read landed before the stylesheet applied.
 
@@ -373,8 +418,13 @@ fonts, in case the first read landed before the stylesheet applied.
 6. **`W` is one view, not the canvas.** Anything measuring off `FULLW` in world
    code is a split-screen bug waiting to happen.
 7. **Nothing boots outside `main.js`.**
+8. **A preference has one home.** It is stored once, read through
+   `getSetting()`, written through `setSetting()`, applied by `applySettings()`
+   and drawn by `paintSettings()`. A control is a view of it, never a second copy
+   of it — the moment the DOM, the store and the running game each hold their own
+   answer, two of them are wrong.
 
-These seven are judgement calls — `tools/check.mjs` cannot check any of them. What
+These eight are judgement calls — `tools/check.mjs` cannot check any of them. What
 it does check is the layer underneath: that the files load in the right order,
 that names do not collide, and that every selector, string and table entry the
 code reaches for actually exists.
@@ -427,6 +477,24 @@ quietly lapsed cannot leave its label behind. Mark it `bad: true` if Cleansed
 should wipe it. `col` is the pill's swatch and the garage dot; it is never the
 only thing carrying the meaning, so a dark one is fine.
 
+### A setting
+
+1. `SETTINGS_KEYS`, `SETTINGS_DEFAULTS` and `SETTINGS_ALLOWED` in `settings.js` —
+   the key, its default and what it may be.
+2. `applySettings()` — hand the value to whatever actually carries it out. If
+   that is a system of its own, give the system a setter and call it; do not
+   reach into its internals from here.
+3. `index.html` — a `.set-row` in the right `.set-group`, with `data-set` (and
+   `data-val` per option on a segmented row). Name and description carry
+   `data-i18n` keys; a control with no visible text carries `data-i18n-aria` or
+   an `aria-labelledby` pointing at the row's name.
+4. `paintSettings()` — nothing, if it is a segment or a switch: both are painted
+   generically. Anything else gets a line here, reading the stored value.
+5. `i18n.js` — the new strings, in both languages.
+
+The delegated listener in `main.js` already routes any `[data-set]` row, so a new
+segment or switch needs no new listener.
+
 ### A screen
 
 A `<section class="screen">` with an id. `show()` handles visibility generically.
@@ -466,7 +534,8 @@ What has been used, and is worth repeating after a substantial change:
 - Serve the directory and drive it in a headless browser
   ([Playwright](https://playwright.dev/) against the system Chromium works well
   without adding anything to the repo). The flows worth covering are the ones in
-  the modes list: boot, language and sound persistence, the garage tabs, each
+  the modes list: boot, the first-run language choice, every Settings preference
+  and its persistence across a reload, the garage tabs, each
   mode's path to the grid, the countdown, lanes, boost, brake/launch/cooldown,
   pause/resume, leave, the personal best, and a four-player split.
 - For anything touching gameplay numbers, diff against the previous build rather
@@ -478,7 +547,7 @@ What has been used, and is worth repeating after a substantial change:
   `axes[i]`.
 
 Menu behavior can also be checked with `node tools/menu-check.mjs`. It executes
-all fourteen scripts against small DOM/Canvas test doubles, drives the actual
+all fifteen scripts against small DOM/Canvas test doubles, drives the actual
 event handlers, and supplies simulated Gamepad snapshots. It does not validate
 CSS layout, browser rendering or real controller hardware. See
 [MENU-REDESIGN-QA.md](MENU-REDESIGN-QA.md) for the remaining visual test matrix.
