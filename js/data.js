@@ -1,6 +1,6 @@
 "use strict";
 
-/* REDLINE - the game's definitions and tuning numbers. Cars, difficulties,
+/* SEREN - the game's definitions and tuning numbers. Cars, difficulties,
    temperaments, effects, items, tracks and every constant the systems read.
    Loaded before runtime.js because the global state object is built from
    some of these. Nothing here has behaviour of its own. */

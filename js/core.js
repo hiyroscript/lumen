@@ -1,6 +1,6 @@
 "use strict";
 
-/* REDLINE - low-level utilities shared by every other file.
+/* SEREN - low-level utilities shared by every other file.
    Storage with a memory fallback, the tiny maths/DOM helpers, and the two
    capability flags the rest of the game reads. Nothing here owns a game
    system. */

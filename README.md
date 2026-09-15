@@ -1,4 +1,4 @@
-# REDLINE
+# SEREN
 
 A three-lane arcade racer that runs in a browser tab. Six cars, each with its own
 ultimate, race up a road that never stops speeding up — through a city, a desert
@@ -373,9 +373,9 @@ Three values in `localStorage`, and nothing else:
 
 | Key | Holds |
 | --- | --- |
-| `redline.lang` | `en` or `fr` |
-| `redline.sound` | `1` or `0` |
-| `redline.best` | your furthest distance, in metres |
+| `seren.lang` | `en` or `fr` |
+| `seren.sound` | `1` or `0` |
+| `seren.best` | your furthest distance, in metres |
 
 If `localStorage` is unavailable — a private window, blocked site data — the game
 falls back to an in-memory store and keeps working for the session.

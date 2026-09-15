@@ -1,6 +1,6 @@
 "use strict";
 
-/* REDLINE - boot. Everything above defines a system; this connects them and
+/* SEREN - boot. Everything above defines a system; this connects them and
    starts them. It loads last, so every declaration it touches already
    exists. */
 
@@ -30,7 +30,7 @@ setTimeout(function(){
 document.querySelectorAll(".lang-opt").forEach(function(b){
   b.addEventListener("click", function(){
     lang = b.getAttribute("data-lang");
-    store.set("redline.lang", lang);
+    store.set("seren.lang", lang);
     applyLang();
     $("#langWrap").classList.remove("on");
     tone(660, .09, "square", .1);
