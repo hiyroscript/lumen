@@ -6,29 +6,66 @@
 
 /* the reference pages behind Cars & more */
 let garageTab = "cars";
+/* One card shape for every reference entry: an optional kind chip and odds
+   pill on the head row, a name, a paragraph, and an optional meta row. Every
+   tab builds the same card, so the four pages read as one index rather than
+   four layouts. */
+function infoCard(o){
+  let head = "";
+  if(o.chip || o.odds || o.dot){
+    head += '<div class="info-head">';
+    if(o.dot) head += '<span class="eff-dot" style="background:' + o.dot + '"></span>';
+    head += '<h3>' + o.name + '</h3>';
+    if(o.chip) head += o.chip;
+    if(o.odds) head += '<span class="odds">' + o.odds + '</span>';
+    head += '</div>';
+  } else {
+    head += '<div class="info-head"><h3>' + o.name + '</h3></div>';
+  }
+  return '<div class="info' + (o.cls ? " " + o.cls : "") + '">' +
+         (o.art || "") +
+         (o.art ? '<div class="info-body">' : "") +
+         head +
+         '<p>' + o.body + '</p>' +
+         (o.meta || "") +
+         (o.art ? '</div>' : "") +
+         '</div>';
+}
 function buildGarage(){
   const body = $("#garageBody");
   let html = "";
   if(garageTab === "cars"){
+    /* The art is the same drawCar the road uses, painted after the page is
+       written - so the reference shows the car you will actually be driving. */
     CAR_IDS.forEach(function(id){
       const c = CARS[id];
-      html += '<div class="info"><h3>' + t(c.key) + '</h3>' +
-              '<p>' + t(id + "Ult") + '</p>' +
-              '<div class="tagrow" style="color:' + c.accent + '">' +
-              ULT_EFFECTS[c.power].map(function(e){ return t(EFFECTS[e].key); }).join(" &middot; ") +
-              '</div></div>';
+      html += infoCard({
+        cls:"car",
+        art:'<span class="car-art"><canvas class="car-cv" data-car="' + id + '" aria-hidden="true"></canvas></span>',
+        name:t(c.key),
+        body:t(id + "Ult"),
+        meta:'<div class="tagrow">' +
+             ULT_EFFECTS[c.power].map(function(e){ return t(EFFECTS[e].key); }).join(" &middot; ") +
+             '</div>'
+      });
     });
   } else if(garageTab === "tracks"){
     TRACK_IDS.forEach(function(id){
-      html += '<div class="info"><span class="kind track">' + t("kindTrack") + '</span>' +
-              '<h3>' + t(TRACKS[id].key) + '</h3><p>' + t(id + "Info") + '</p></div>';
+      html += infoCard({
+        chip:'<span class="kind track">' + t("kindTrack") + '</span>',
+        name:t(TRACKS[id].key), body:t(id + "Info")
+      });
     });
     ["puddle","meteor","weed"].forEach(function(id){
-      html += '<div class="info"><span class="kind trap">' + t("kindTrap") + '</span>' +
-              '<h3>' + t(id + "Name") + '</h3><p>' + t(id + "Info") + '</p></div>';
+      html += infoCard({
+        chip:'<span class="kind trap">' + t("kindTrap") + '</span>',
+        name:t(id + "Name"), body:t(id + "Info")
+      });
     });
-    html += '<div class="info"><span class="kind pickup">' + t("kindBubble") + '</span>' +
-            '<h3>' + t("bubbleName") + '</h3><p>' + t("bubbleInfo") + '</p></div>';
+    html += infoCard({
+      chip:'<span class="kind pickup">' + t("kindBubble") + '</span>',
+      name:t("bubbleName"), body:t("bubbleInfo")
+    });
   } else if(garageTab === "items"){
     html += '<h2 class="sect">' + t("itemsHead") + '</h2>' +
             '<p class="lede">' + t("itemsLede") + '</p>';
@@ -41,27 +78,50 @@ function buildGarage(){
     }).forEach(function(id){
       const r = RARITY[ITEMS[id].rarity];
       const pct = (r.weight/total*100).toFixed(1).replace(/\.0$/, "");
-      html += '<div class="info">' +
-              '<span class="kind item" style="background:' + r.col + ';color:#0B0B0C">' +
-              t("rarity" + cap(ITEMS[id].rarity)) + '</span>' +
-              '<span class="odds">' + pct + '%</span>' +
-              '<h3>' + t(ITEMS[id].key) + '</h3>' +
-              '<p>' + t(ITEMS[id].key + "Info") + '</p></div>';
+      html += infoCard({
+        chip:'<span class="kind item" style="background:' + r.col + ';color:#0B0B0C">' +
+             t("rarity" + cap(ITEMS[id].rarity)) + '</span>',
+        odds:pct + "%",
+        name:t(ITEMS[id].key), body:t(ITEMS[id].key + "Info")
+      });
     });
     html += '<p class="soon">' + t("oddsNote") + '</p>';
   } else {
+    /* An effect is named as well as swatched: the colour is a reminder of what
+       you saw on the road, never the only way to tell two of them apart. */
     for(const id in EFFECTS){
-      html += '<div class="info"><h3 style="color:' + EFFECTS[id].col + '">' + t(EFFECTS[id].key) +
-              '</h3><p>' + t(id + "Info") + '</p></div>';
+      html += infoCard({ dot:EFFECTS[id].col, name:t(EFFECTS[id].key), body:t(id + "Info") });
     }
   }
   body.innerHTML = html;
+  if(garageTab === "cars") paintCarIcons();
+}
+
+/* The seven setup steps. All of them are sheets over the home screen, which is
+   why home stays on underneath them. */
+const SHEET_IDS = ["modes", "players", "pads", "style", "custom", "diffs", "cars"];
+
+/* What the keyboard and the pointer may reach.
+
+   A sheet is modal, so the home screen it is drawn over has to stop taking
+   focus and clicks while staying visible - it is the backdrop. The language
+   dialog is modal over everything, and a pause or a result is modal over the
+   instruments. `inert` is exactly that: still painted, no longer reachable.
+   Called from show() and from every place a panel opens or closes. */
+function gateFocus(){
+  const langUp = $("#langWrap").classList.contains("on");
+  const sheetUp = SHEET_IDS.some(function(id){ return $("#" + id).classList.contains("on"); });
+  const panelUp = $("#pausePanel").classList.contains("on") ||
+                  $("#overPanel").classList.contains("on");
+  document.querySelectorAll(".screen").forEach(function(el){
+    el.inert = langUp || (sheetUp && el.id === "home");
+  });
+  const hud = $(".hud");
+  if(hud) hud.inert = langUp || panelUp;
 }
 
 function show(id){
-  const sheet = id === "modes" || id === "cars" || id === "diffs" ||
-                id === "players" || id === "pads" ||
-                id === "style" || id === "custom";
+  const sheet = SHEET_IDS.indexOf(id) >= 0;
   $("#home").classList.toggle("on", id === "home" || sheet);
   $("#modes").classList.toggle("on", id === "modes");
   $("#players").classList.toggle("on", id === "players");
@@ -72,6 +132,7 @@ function show(id){
   $("#garage").classList.toggle("on", id === "garage");
   $("#cars").classList.toggle("on", id === "cars");
   $("#race").classList.toggle("on", id === "race");
+  gateFocus();
   if(id === "pads" || (id === "cars" && G.local)) uiStart();
 }
 

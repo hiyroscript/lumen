@@ -3,244 +3,270 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#0B0B0C">
+<meta name="theme-color" content="#050506">
 <title>SEREN — Endless Run</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..900&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
 <div id="shell">
 
   <!-- ============================================================
-       1. SPLASH  (black, centred art, credit line at the bottom)
+       1. SPLASH  —  the mark on black, a loading hairline, a credit
        ============================================================ -->
   <section id="splash">
     <div id="splashArt">
       <!-- Your own image is injected here. Fallback mark below. -->
       <svg viewBox="0 0 120 120" width="100%" height="100%" aria-label="SEREN">
-        <rect x="6" y="6" width="108" height="108" rx="26" fill="none" stroke="#E21B22" stroke-width="4"/>
+        <rect x="6" y="6" width="108" height="108" rx="26" fill="none" stroke="#E5262D" stroke-width="4"/>
         <g transform="translate(60 60)">
-          <rect x="-17" y="-32" width="34" height="64" rx="11" fill="#E21B22"/>
-          <rect x="-24" y="-20" width="7" height="17" rx="3" fill="#F4F4F6"/>
-          <rect x="17" y="-20" width="7" height="17" rx="3" fill="#F4F4F6"/>
-          <rect x="-24" y="8" width="7" height="18" rx="3" fill="#F4F4F6"/>
-          <rect x="17" y="8" width="7" height="18" rx="3" fill="#F4F4F6"/>
-          <rect x="-11" y="-13" width="22" height="22" rx="6" fill="#0B0B0C"/>
-          <rect x="-13" y="-30" width="26" height="7" rx="3.5" fill="#0B0B0C"/>
+          <rect x="-17" y="-32" width="34" height="64" rx="11" fill="#E5262D"/>
+          <rect x="-24" y="-20" width="7" height="17" rx="3" fill="#F2F3F4"/>
+          <rect x="17" y="-20" width="7" height="17" rx="3" fill="#F2F3F4"/>
+          <rect x="-24" y="8" width="7" height="18" rx="3" fill="#F2F3F4"/>
+          <rect x="17" y="8" width="7" height="18" rx="3" fill="#F2F3F4"/>
+          <rect x="-11" y="-13" width="22" height="22" rx="6" fill="#050506"/>
+          <rect x="-13" y="-30" width="26" height="7" rx="3.5" fill="#050506"/>
         </g>
       </svg>
     </div>
     <div id="splashBar"><i></i></div>
-    <div id="splashCredit">a game by hiyroscript</div>
+    <div id="splashCredit" data-i18n="byLine">a game by hiyroscript</div>
   </section>
 
   <!-- ============================================================
        2. HOME
        ============================================================ -->
   <section id="home" class="screen">
-    <div class="topbar">
-      <button class="icon-btn" id="btnLang" aria-label="Language">
+
+    <!-- the signature: a live asphalt ribbon running the whole screen -->
+    <div id="ribbon" aria-hidden="true">
+      <i class="lane-line l1"></i>
+      <i class="lane-line l2"></i>
+      <i class="kerb left"></i>
+      <i class="kerb right"></i>
+      <i class="fade top"></i>
+      <i class="fade bot"></i>
+    </div>
+
+    <header class="topbar">
+      <button class="icon-btn" id="btnLang" data-i18n-aria="navLang" aria-label="Language">
         <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.6 2.6 15 0 18-2.6-3-2.6-15.4 0-18Z"/></svg>
       </button>
       <span class="spacer"></span>
-      <button class="icon-btn" id="btnSound" aria-label="Sound">
+      <button class="icon-btn" id="btnSound" data-i18n-aria="navSound" aria-label="Sound">
         <svg class="ic" id="icSoundOn" viewBox="0 0 24 24"><path d="M5 9.5h3.5L13 5.5v13L8.5 14.5H5z"/><path d="M16.5 9c1.2 1.6 1.2 4.4 0 6"/><path d="M19 6.5c2.2 3 2.2 8 0 11"/></svg>
-        <svg class="ic" id="icSoundOff" viewBox="0 0 24 24" style="display:none"><path d="M5 9.5h3.5L13 5.5v13L8.5 14.5H5z"/><path d="m17 9.5 4 5"/><path d="m21 9.5-4 5"/></svg>
+        <svg class="ic off" id="icSoundOff" viewBox="0 0 24 24"><path d="M5 9.5h3.5L13 5.5v13L8.5 14.5H5z"/><path d="m17 9.5 4 5"/><path d="m21 9.5-4 5"/></svg>
       </button>
-    </div>
+    </header>
 
     <div class="home-head">
       <h1 class="display home-title">Se<span class="t2">ren</span></h1>
-      <div class="home-sub">
+      <p class="home-sub">
         <span class="eyebrow" data-i18n="byLine">a game by hiyroscript</span>
         <span class="rule"></span>
-      </div>
+      </p>
     </div>
 
-    <div id="ribbon">
-      <div class="lane-line l1"></div>
-      <div class="lane-line l2"></div>
-      <div class="fade top"></div>
-      <div class="home-mid">
+    <div class="home-mid">
+      <div class="home-actions">
         <button class="btn btn-primary" id="btnStart">
           <svg class="ic" viewBox="0 0 24 24"><path d="M5 21V4"/><path d="M5 5h13l-2.2 3.6L18 12H5"/><path d="M9 5v7M13 5.4v6.6"/></svg>
           <span data-i18n="start">Start race</span>
         </button>
-        <button class="btn btn-ghost" id="btnGarage" style="margin-top:12px;background:rgba(11,11,12,.55);color:#fff;border-color:rgba(255,255,255,.35)">
-          <svg class="ic" viewBox="0 0 24 24" style="stroke:#fff"><path d="M4 16v-3.2L6 8h12l2 4.8V16"/><path d="M4 16h16"/><circle cx="7.5" cy="16.5" r="1.6"/><circle cx="16.5" cy="16.5" r="1.6"/></svg>
+        <button class="btn btn-ghost" id="btnGarage">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M4 16v-3.2L6 8h12l2 4.8V16"/><path d="M4 16h16"/><circle cx="7.5" cy="16.5" r="1.6"/><circle cx="16.5" cy="16.5" r="1.6"/></svg>
           <span data-i18n="garage">Cars &amp; more</span>
         </button>
       </div>
     </div>
-    <div class="home-foot">
+
+    <footer class="home-foot">
       <div class="best-strip">
         <span class="k" data-i18n="best">Best run</span>
-        <span class="v"><span id="homeBest">0</span> m</span>
+        <span class="v"><span id="homeBest">0</span><em>m</em></span>
       </div>
       <div class="keys">
-        <span class="key">&#8592;</span><span class="key">&#8594;</span>
-        <span class="lbl" data-i18n="k1">lanes</span>
-        <span class="key">&#8593;</span><span class="lbl" data-i18n="k2">boost</span>
-        <span class="key">&#8595;</span><span class="lbl" data-i18n="k6">launch</span>
-        <span class="key">Shift</span><span class="lbl" data-i18n="k4">ultimate</span>
-        <span class="key">E</span><span class="lbl" data-i18n="k5">item</span>
-        <span class="key">P</span><span class="lbl" data-i18n="k3">pause</span>
+        <span class="keys-k" data-i18n="controlsHead">Controls</span>
+        <span class="key-pair"><span class="keycap">&#8592;</span><span class="keycap">&#8594;</span><span class="lbl" data-i18n="k1">lanes</span></span>
+        <span class="key-pair"><span class="keycap">&#8593;</span><span class="lbl" data-i18n="k2">boost</span></span>
+        <span class="key-pair"><span class="keycap">&#8595;</span><span class="lbl" data-i18n="k6">launch</span></span>
+        <span class="key-pair"><span class="keycap">Shift</span><span class="lbl" data-i18n="k4">ultimate</span></span>
+        <span class="key-pair"><span class="keycap">E</span><span class="lbl" data-i18n="k5">item</span></span>
+        <span class="key-pair"><span class="keycap">P</span><span class="lbl" data-i18n="k3">pause</span></span>
       </div>
-    </div>
+    </footer>
   </section>
 
   <!-- ============================================================
        3. MODE SHEET
        ============================================================ -->
-  <section id="modes" class="screen">
-    <div id="modeCard">
+  <section id="modes" class="screen sheet-screen">
+    <div class="sheet">
       <div class="sheet-head">
         <h2 class="display" data-i18n="chooseMode">Choose a mode</h2>
-        <button class="icon-btn" id="btnCloseModes" aria-label="Close">
+        <button class="icon-btn quiet" id="btnCloseModes" data-i18n-aria="navClose" aria-label="Close">
           <svg class="ic" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
         </button>
       </div>
-      <button class="mode" id="modeEndless">
-        <span class="mode-mark">
-          <svg class="ic" viewBox="0 0 24 24"><path d="M4 16v-3.2L6 8h12l2 4.8V16"/><path d="M4 16h16"/><circle cx="7.5" cy="16.5" r="1.6"/><circle cx="16.5" cy="16.5" r="1.6"/><path d="M8 8V5h8v3"/></svg>
-        </span>
-        <span style="flex:1">
-          <span class="mode-name" data-i18n="endless">Endless run</span>
-          <span class="mode-desc" data-i18n="endlessDesc">Three lanes, dense traffic, no finish line. Go as far as you can.</span>
-        </span>
-        <svg class="ic" viewBox="0 0 24 24" style="flex:0 0 auto"><path d="m9 5 7 7-7 7"/></svg>
-      </button>
-      <button class="mode" id="modeLocal" style="margin-top:10px">
-        <span class="mode-mark">
-          <svg class="ic" viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M12 6v12"/><path d="M7 11.5h2.5"/><path d="M8.25 10.25v2.5"/><circle cx="15.6" cy="11" r="1"/><circle cx="17.4" cy="12.6" r="1"/></svg>
-        </span>
-        <span style="flex:1">
-          <span class="mode-name" data-i18n="local">Local play</span>
-          <span class="mode-desc" data-i18n="localDesc">Two to four of you on one screen, on controllers. Computer only.</span>
-        </span>
-        <svg class="ic" viewBox="0 0 24 24" style="flex:0 0 auto"><path d="m9 5 7 7-7 7"/></svg>
-      </button>
-      <button class="mode" id="modeBots" style="margin-top:10px">
-        <span class="mode-mark">
-          <svg class="ic" viewBox="0 0 24 24"><path d="M5 20V7l7-3 7 3v13"/><path d="M5 20h14"/><path d="M9 20v-5h6v5"/><path d="M9.5 10.5h5"/></svg>
-        </span>
-        <span style="flex:1">
-          <span class="mode-name" data-i18n="bots">Race against bots</span>
-          <span class="mode-desc" data-i18n="botsDesc">Two rivals, five minutes, then three tracks to the flag.</span>
-        </span>
-        <svg class="ic" viewBox="0 0 24 24" style="flex:0 0 auto"><path d="m9 5 7 7-7 7"/></svg>
-      </button>
+      <div class="sheet-body">
+        <div class="list">
+          <button class="mode" id="modeEndless">
+            <span class="mode-mark">
+              <svg class="ic" viewBox="0 0 24 24"><path d="M4 16v-3.2L6 8h12l2 4.8V16"/><path d="M4 16h16"/><circle cx="7.5" cy="16.5" r="1.6"/><circle cx="16.5" cy="16.5" r="1.6"/><path d="M8 8V5h8v3"/></svg>
+            </span>
+            <span class="mode-text">
+              <span class="mode-name" data-i18n="endless">Endless run</span>
+              <span class="mode-desc" data-i18n="endlessDesc">Three lanes, dense traffic, no finish line. Go as far as you can.</span>
+            </span>
+            <svg class="ic chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+          </button>
+          <button class="mode" id="modeBots">
+            <span class="mode-mark">
+              <svg class="ic" viewBox="0 0 24 24"><path d="M5 20V7l7-3 7 3v13"/><path d="M5 20h14"/><path d="M9 20v-5h6v5"/><path d="M9.5 10.5h5"/></svg>
+            </span>
+            <span class="mode-text">
+              <span class="mode-name" data-i18n="bots">Race against bots</span>
+              <span class="mode-desc" data-i18n="botsDesc">Two rivals, five minutes, then three tracks to the flag.</span>
+            </span>
+            <svg class="ic chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+          </button>
+          <button class="mode" id="modeLocal">
+            <span class="mode-mark">
+              <svg class="ic" viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M12 6v12"/><path d="M7 11.5h2.5"/><path d="M8.25 10.25v2.5"/><circle cx="15.6" cy="11" r="1"/><circle cx="17.4" cy="12.6" r="1"/></svg>
+            </span>
+            <span class="mode-text">
+              <span class="mode-name" data-i18n="local">Local play</span>
+              <span class="mode-desc" data-i18n="localDesc">Two to four of you on one screen, on controllers. Computer only.</span>
+            </span>
+            <svg class="ic chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ============================================================
        3-1. LOCAL: HOW MANY
        ============================================================ -->
-  <section id="players" class="screen">
-    <div id="modeCard">
+  <section id="players" class="screen sheet-screen">
+    <div class="sheet">
       <div class="sheet-head">
-        <h2 class="display" data-i18n="chooseCount">How many playing?</h2>
-        <button class="icon-btn" id="btnClosePlayers" aria-label="Back">
+        <button class="icon-btn quiet lead" id="btnClosePlayers" data-i18n-aria="navBack" aria-label="Back">
           <svg class="ic" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg>
         </button>
+        <h2 class="display" data-i18n="chooseCount">How many playing?</h2>
       </div>
-      <p class="lede" data-i18n="countLede">The screen is split evenly between you. Six cars race either way, so the bots fill whatever is left.</p>
-      <button class="mode" id="count2">
-        <span class="seat-chips"><i style="background:#FF3B3B"></i><i style="background:#3B8CFF"></i></span>
-        <span style="flex:1">
-          <span class="mode-name" data-i18n="p2">2 players</span>
-          <span class="mode-desc" data-i18n="p2Desc">Two screens, four bots.</span>
-        </span>
-        <svg class="ic" viewBox="0 0 24 24" style="flex:0 0 auto"><path d="m9 5 7 7-7 7"/></svg>
-      </button>
-      <button class="mode" id="count3" style="margin-top:10px">
-        <span class="seat-chips"><i style="background:#FF3B3B"></i><i style="background:#3B8CFF"></i><i style="background:#35D06B"></i></span>
-        <span style="flex:1">
-          <span class="mode-name" data-i18n="p3">3 players</span>
-          <span class="mode-desc" data-i18n="p3Desc">Three screens, three bots.</span>
-        </span>
-        <svg class="ic" viewBox="0 0 24 24" style="flex:0 0 auto"><path d="m9 5 7 7-7 7"/></svg>
-      </button>
-      <button class="mode" id="count4" style="margin-top:10px">
-        <span class="seat-chips"><i style="background:#FF3B3B"></i><i style="background:#3B8CFF"></i><i style="background:#35D06B"></i><i style="background:#FFCE2B"></i></span>
-        <span style="flex:1">
-          <span class="mode-name" data-i18n="p4">4 players</span>
-          <span class="mode-desc" data-i18n="p4Desc">Four screens, two bots.</span>
-        </span>
-        <svg class="ic" viewBox="0 0 24 24" style="flex:0 0 auto"><path d="m9 5 7 7-7 7"/></svg>
-      </button>
+      <div class="sheet-body">
+        <p class="lede" data-i18n="countLede">The screen is split evenly between you. Six cars race either way, so the bots fill whatever is left.</p>
+        <div class="list">
+          <button class="mode" id="count2">
+            <span class="seat-chips"><i class="p1"></i><i class="p2"></i></span>
+            <span class="mode-text">
+              <span class="mode-name" data-i18n="p2">2 players</span>
+              <span class="mode-desc" data-i18n="p2Desc">Two screens, four bots.</span>
+            </span>
+            <svg class="ic chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+          </button>
+          <button class="mode" id="count3">
+            <span class="seat-chips"><i class="p1"></i><i class="p2"></i><i class="p3"></i></span>
+            <span class="mode-text">
+              <span class="mode-name" data-i18n="p3">3 players</span>
+              <span class="mode-desc" data-i18n="p3Desc">Three screens, three bots.</span>
+            </span>
+            <svg class="ic chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+          </button>
+          <button class="mode" id="count4">
+            <span class="seat-chips"><i class="p1"></i><i class="p2"></i><i class="p3"></i><i class="p4"></i></span>
+            <span class="mode-text">
+              <span class="mode-name" data-i18n="p4">4 players</span>
+              <span class="mode-desc" data-i18n="p4Desc">Four screens, two bots.</span>
+            </span>
+            <svg class="ic chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ============================================================
        3-2. LOCAL: CONTROLLERS
        ============================================================ -->
-  <section id="pads" class="screen">
-    <div id="modeCard">
+  <section id="pads" class="screen sheet-screen">
+    <div class="sheet">
       <div class="sheet-head">
-        <h2 class="display" data-i18n="checkPads">Controllers</h2>
-        <button class="icon-btn" id="btnClosePads" aria-label="Back">
+        <button class="icon-btn quiet lead" id="btnClosePads" data-i18n-aria="navBack" aria-label="Back">
           <svg class="ic" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg>
         </button>
+        <h2 class="display" data-i18n="checkPads">Controllers</h2>
+        <span class="tally" id="padCount" role="status" aria-label="0 / 2">0 / 2</span>
       </div>
-      <p class="lede" data-i18n="padsLede">Pair each controller over Bluetooth, then press a button on it. The browser only sees a pad once it has been used.</p>
-      <div id="padList"></div>
-      <p class="pad-note" id="padCount">0 / 2</p>
-      <button class="btn btn-primary off" id="btnPadsGo">
-        <svg class="ic" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
-        <span data-i18n="padsGo">Continue</span>
-      </button>
+      <div class="sheet-body">
+        <p class="lede" data-i18n="padsLede">Pair each controller over Bluetooth, then press a button on it. The browser only sees a pad once it has been used.</p>
+        <div id="padList"></div>
+        <p class="note" id="padHint"></p>
+      </div>
+      <div class="sheet-foot">
+        <button class="btn btn-primary off" id="btnPadsGo">
+          <span data-i18n="padsGo">Continue</span>
+          <svg class="ic" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+        </button>
+      </div>
     </div>
   </section>
 
   <!-- ============================================================
        3-3. LOCAL: STANDARD OR CUSTOM
        ============================================================ -->
-  <section id="style" class="screen">
-    <div id="modeCard">
+  <section id="style" class="screen sheet-screen">
+    <div class="sheet">
       <div class="sheet-head">
-        <h2 class="display" data-i18n="chooseStyle">How do you want to race?</h2>
-        <button class="icon-btn" id="btnCloseStyle" aria-label="Back">
+        <button class="icon-btn quiet lead" id="btnCloseStyle" data-i18n-aria="navBack" aria-label="Back">
           <svg class="ic" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg>
         </button>
+        <h2 class="display" data-i18n="chooseStyle">How do you want to race?</h2>
       </div>
-      <button class="mode" id="styleStandard">
-        <span class="mode-mark">
-          <svg class="ic" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M4 8h16"/><path d="M6 8v9a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/></svg>
-        </span>
-        <span style="flex:1">
-          <span class="mode-name" data-i18n="standardPlay">Standard play</span>
-          <span class="mode-desc" data-i18n="standardDesc">The full game. Six cars, every trap, every pickup. Pick how hard the bots push and go.</span>
-        </span>
-        <svg class="ic" viewBox="0 0 24 24" style="flex:0 0 auto"><path d="m9 5 7 7-7 7"/></svg>
-      </button>
-      <button class="mode" id="styleCustom" style="margin-top:10px">
-        <span class="mode-mark">
-          <svg class="ic" viewBox="0 0 24 24"><path d="M5 6h14"/><path d="M5 12h14"/><path d="M5 18h14"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg>
-        </span>
-        <span style="flex:1">
-          <span class="mode-name" data-i18n="customPlay">Custom play</span>
-          <span class="mode-desc" data-i18n="customDesc">Set the road up your way: how many bots, and which of the toys are on the table.</span>
-        </span>
-        <svg class="ic" viewBox="0 0 24 24" style="flex:0 0 auto"><path d="m9 5 7 7-7 7"/></svg>
-      </button>
+      <div class="sheet-body">
+        <div class="list">
+          <button class="mode" id="styleStandard">
+            <span class="mode-mark">
+              <svg class="ic" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M4 8h16"/><path d="M6 8v9a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/></svg>
+            </span>
+            <span class="mode-text">
+              <span class="mode-name" data-i18n="standardPlay">Standard play</span>
+              <span class="mode-desc" data-i18n="standardDesc">The full game. Six cars, every trap, every pickup. Pick how hard the bots push and go.</span>
+            </span>
+            <svg class="ic chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+          </button>
+          <button class="mode" id="styleCustom">
+            <span class="mode-mark">
+              <svg class="ic" viewBox="0 0 24 24"><path d="M5 6h14"/><path d="M5 12h14"/><path d="M5 18h14"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg>
+            </span>
+            <span class="mode-text">
+              <span class="mode-name" data-i18n="customPlay">Custom play</span>
+              <span class="mode-desc" data-i18n="customDesc">Set the road up your way: how many bots, and which of the toys are on the table.</span>
+            </span>
+            <svg class="ic chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ============================================================
        3-4. LOCAL: CUSTOM SETUP
        ============================================================ -->
-  <section id="custom" class="screen">
-    <div id="modeCard">
+  <section id="custom" class="screen sheet-screen">
+    <div class="sheet">
       <div class="sheet-head">
-        <h2 class="display" data-i18n="customHead">Set up the race</h2>
-        <button class="icon-btn" id="btnCloseCustom" aria-label="Back">
+        <button class="icon-btn quiet lead" id="btnCloseCustom" data-i18n-aria="navBack" aria-label="Back">
           <svg class="ic" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg>
         </button>
+        <h2 class="display" data-i18n="customHead">Set up the race</h2>
       </div>
-      <div id="customBody">
+      <div class="sheet-body" id="customBody">
         <div class="opt">
           <div class="opt-head">
             <span class="opt-name" data-i18n="botCount">Bots</span>
@@ -257,87 +283,116 @@
         </div>
         <div id="toggles"></div>
       </div>
-      <button class="btn btn-primary" id="btnCustomGo" style="margin-top:16px">
-        <svg class="ic" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
-        <span data-i18n="customGo">Choose cars</span>
-      </button>
+      <div class="sheet-foot">
+        <button class="btn btn-primary" id="btnCustomGo">
+          <span data-i18n="customGo">Choose cars</span>
+          <svg class="ic" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+        </button>
+      </div>
     </div>
   </section>
 
   <!-- ============================================================
        3a. DIFFICULTY
        ============================================================ -->
-  <section id="diffs" class="screen">
-    <div id="modeCard">
+  <section id="diffs" class="screen sheet-screen">
+    <div class="sheet">
       <div class="sheet-head">
-        <h2 class="display" data-i18n="chooseDiff">How hard should they push?</h2>
-        <button class="icon-btn" id="btnCloseDiffs" aria-label="Back">
+        <button class="icon-btn quiet lead" id="btnCloseDiffs" data-i18n-aria="navBack" aria-label="Back">
           <svg class="ic" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg>
         </button>
+        <h2 class="display" data-i18n="chooseDiff">How hard should they push?</h2>
       </div>
-      <button class="car-opt" id="diffEasy"><span class="diff-mark"><i></i></span><span style="flex:1">
-        <span class="mode-name" data-i18n="diffEasy">Easy</span>
-        <span class="mode-desc" data-i18n="easyDesc">Slow to spot trouble.</span></span></button>
-      <button class="car-opt" id="diffMedium"><span class="diff-mark"><i></i><i></i></span><span style="flex:1">
-        <span class="mode-name" data-i18n="diffMedium">Medium</span>
-        <span class="mode-desc" data-i18n="mediumDesc">Race you fairly.</span></span></button>
-      <button class="car-opt" id="diffHard"><span class="diff-mark"><i></i><i></i><i></i></span><span style="flex:1">
-        <span class="mode-name" data-i18n="diffHard">Hard</span>
-        <span class="mode-desc" data-i18n="hardDesc">Block and barge.</span></span></button>
-      <button class="car-opt" id="diffBrutal"><span class="diff-mark"><i></i><i></i><i></i><i></i></span><span style="flex:1">
-        <span class="mode-name" data-i18n="diffBrutal">Brutal</span>
-        <span class="mode-desc" data-i18n="brutalDesc">Miss nothing.</span></span></button>
+      <div class="sheet-body">
+        <div class="list">
+          <button class="mode diff" id="diffEasy">
+            <span class="diff-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            <span class="mode-text">
+              <span class="mode-name" data-i18n="diffEasy">Easy</span>
+              <span class="mode-desc" data-i18n="easyDesc">Slow to spot trouble.</span>
+            </span>
+            <svg class="ic chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+          </button>
+          <button class="mode diff lv2" id="diffMedium">
+            <span class="diff-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            <span class="mode-text">
+              <span class="mode-name" data-i18n="diffMedium">Medium</span>
+              <span class="mode-desc" data-i18n="mediumDesc">Race you fairly.</span>
+            </span>
+            <svg class="ic chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+          </button>
+          <button class="mode diff lv3" id="diffHard">
+            <span class="diff-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            <span class="mode-text">
+              <span class="mode-name" data-i18n="diffHard">Hard</span>
+              <span class="mode-desc" data-i18n="hardDesc">Block and barge.</span>
+            </span>
+            <svg class="ic chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+          </button>
+          <button class="mode diff lv4" id="diffBrutal">
+            <span class="diff-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            <span class="mode-text">
+              <span class="mode-name" data-i18n="diffBrutal">Brutal</span>
+              <span class="mode-desc" data-i18n="brutalDesc">Miss nothing.</span>
+            </span>
+            <svg class="ic chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ============================================================
        3b. CAR SELECT
        ============================================================ -->
-  <section id="cars" class="screen">
-    <div id="modeCard">
+  <section id="cars" class="screen sheet-screen">
+    <div class="sheet">
       <div class="sheet-head">
-        <h2 class="display" data-i18n="chooseCar">Choose your car</h2>
-        <button class="icon-btn" id="btnCloseCars" aria-label="Back">
+        <button class="icon-btn quiet lead" id="btnCloseCars" data-i18n-aria="navBack" aria-label="Back">
           <svg class="ic" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg>
         </button>
+        <h2 class="display" data-i18n="chooseCar">Choose your car</h2>
       </div>
 
-      <div id="carTurn"><i></i><span></span></div>
+      <div class="sheet-body">
+        <div id="carTurn"><i></i><span></span></div>
 
-      <button class="btn btn-ghost" id="carRandom">
-        <svg class="ic" viewBox="0 0 24 24"><path d="M4 7h5l6 10h5"/><path d="M4 17h5l2.2-3.6"/><path d="M16.5 4.5 20 7l-3.5 2.5"/><path d="M16.5 14.5 20 17l-3.5 2.5"/></svg>
-        <span data-i18n="randomCar">Surprise me</span>
-      </button>
-
-      <!-- The art is painted by the same code that draws the car on the road,
-           so an icon can never drift away from its model. -->
-      <div class="car-grid">
-        <button class="car-opt " id="carRedd">
-          <span class="car-art"><canvas class="car-cv" data-car="redd" aria-hidden="true"></canvas></span>
-          <span class="mode-name" data-i18n="redd">Redd</span>
-        </button>
-        <button class="car-opt phantom" id="carPhantom">
-          <span class="car-art"><canvas class="car-cv" data-car="phantom" aria-hidden="true"></canvas></span>
-          <span class="mode-name" data-i18n="phantom">Phantom</span>
-        </button>
-        <button class="car-opt " id="carBolt">
-          <span class="car-art"><canvas class="car-cv" data-car="bolt" aria-hidden="true"></canvas></span>
-          <span class="mode-name" data-i18n="bolt">Bolt</span>
-        </button>
-        <button class="car-opt timestamp" id="carTimestamp">
-          <span class="car-art"><canvas class="car-cv" data-car="timestamp" aria-hidden="true"></canvas></span>
-          <span class="mode-name" data-i18n="timestamp">Timestamp</span>
-        </button>
-        <button class="car-opt rose" id="carRose">
-          <span class="car-art"><canvas class="car-cv" data-car="rose" aria-hidden="true"></canvas></span>
-          <span class="mode-name" data-i18n="rose">Rose</span>
-        </button>
-        <button class="car-opt siren" id="carSiren">
-          <span class="car-art"><canvas class="car-cv" data-car="siren" aria-hidden="true"></canvas></span>
-          <span class="mode-name" data-i18n="siren">Siren</span>
-        </button>
+        <!-- The art is painted by the same code that draws the car on the road,
+             so an icon can never drift away from its model. -->
+        <div class="car-grid">
+          <button class="car-opt" id="carRedd">
+            <span class="car-art"><canvas class="car-cv" data-car="redd" aria-hidden="true"></canvas></span>
+            <span class="car-name" data-i18n="redd">Redd</span>
+          </button>
+          <button class="car-opt" id="carPhantom">
+            <span class="car-art"><canvas class="car-cv" data-car="phantom" aria-hidden="true"></canvas></span>
+            <span class="car-name" data-i18n="phantom">Phantom</span>
+          </button>
+          <button class="car-opt" id="carBolt">
+            <span class="car-art"><canvas class="car-cv" data-car="bolt" aria-hidden="true"></canvas></span>
+            <span class="car-name" data-i18n="bolt">Bolt</span>
+          </button>
+          <button class="car-opt" id="carTimestamp">
+            <span class="car-art"><canvas class="car-cv" data-car="timestamp" aria-hidden="true"></canvas></span>
+            <span class="car-name" data-i18n="timestamp">Timestamp</span>
+          </button>
+          <button class="car-opt" id="carRose">
+            <span class="car-art"><canvas class="car-cv" data-car="rose" aria-hidden="true"></canvas></span>
+            <span class="car-name" data-i18n="rose">Rose</span>
+          </button>
+          <button class="car-opt" id="carSiren">
+            <span class="car-art"><canvas class="car-cv" data-car="siren" aria-hidden="true"></canvas></span>
+            <span class="car-name" data-i18n="siren">Siren</span>
+          </button>
+        </div>
       </div>
 
+      <div class="sheet-foot">
+        <button class="btn btn-ghost" id="carRandom">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M4 7h5l6 10h5"/><path d="M4 17h5l2.2-3.6"/><path d="M16.5 4.5 20 7l-3.5 2.5"/><path d="M16.5 14.5 20 17l-3.5 2.5"/></svg>
+          <span data-i18n="randomCar">Surprise me</span>
+        </button>
+      </div>
     </div>
   </section>
 
@@ -345,16 +400,14 @@
        3c. CARS & MORE
        ============================================================ -->
   <section id="garage" class="screen">
-    <div class="topbar">
-      <button class="icon-btn" id="btnCloseGarage" aria-label="Back">
+    <header class="topbar">
+      <button class="icon-btn" id="btnCloseGarage" data-i18n-aria="navBack" aria-label="Back">
         <svg class="ic" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg>
       </button>
+      <h1 class="topbar-title display" data-i18n="garage">Cars &amp; more</h1>
       <span class="spacer"></span>
-    </div>
-    <div class="home-head" style="padding-bottom:14px">
-      <h1 class="display" style="font-size:34px" data-i18n="garage">Cars &amp; more</h1>
-    </div>
-    <div class="tabs">
+    </header>
+    <div class="tabs" role="tablist">
       <button class="tab on" id="tabCars" data-i18n="tabCars">Cars</button>
       <button class="tab" id="tabTracks" data-i18n="tabTracks">Tracks
 traps</button>
@@ -370,39 +423,57 @@ bubbles</button>
        ============================================================ -->
   <section id="race" class="screen">
     <canvas id="cv"></canvas>
+
     <div class="hud">
-      <div class="hud-top">
-        <button class="icon-btn" id="btnPause" aria-label="Pause">
+      <div class="hud-tl">
+        <button class="icon-btn hud-btn" id="btnPause" data-i18n-aria="navPause" aria-label="Pause">
           <svg class="ic" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg>
         </button>
-        <div class="readout">
-          <div class="k" data-i18n="distance">Distance</div>
-          <div class="v"><span id="hudDist">0</span></div>
+        <div id="gauges">
+          <span id="trackName">City</span>
+          <span id="raceClock"></span>
+        </div>
+      </div>
+
+      <div class="readout">
+        <div class="k" data-i18n="distance">Distance</div>
+        <div class="v"><span id="hudDist">0</span><em>m</em></div>
+        <div class="ladder">
           <div class="pos" id="posRow1"><span class="p" id="pos1">1st</span><span class="n" id="pos1n">0</span></div>
           <div class="pos" id="posRow2"><span class="p" id="pos2">2nd</span><span class="n" id="pos2n">0</span></div>
           <div class="pos" id="posRow3"><span class="p" id="pos3">3rd</span><span class="n" id="pos3n">0</span></div>
           <div class="pos" id="posRow4"><span class="p" id="pos4">4th</span><span class="n" id="pos4n">0</span></div>
           <div class="pos" id="posRow5"><span class="p" id="pos5">5th</span><span class="n" id="pos5n">0</span></div>
           <div class="pos" id="posRow6"><span class="p" id="pos6">6th</span><span class="n" id="pos6n">0</span></div>
-          <div class="b"><span data-i18n="bestShort">Best</span> <span id="hudBest">0</span></div>
         </div>
+        <div class="b"><span data-i18n="bestShort">Best</span> <span id="hudBest">0</span></div>
       </div>
-      <div id="gauges"><span id="trackName">City</span><span id="raceClock"></span></div>
+
       <div id="effList"></div>
-      <div id="immuneTag"></div>
+      <div id="immuneTag"><span></span></div>
       <div id="cleanseTag"></div>
+
       <div id="hudActions">
-        <button id="ultPct" aria-label="Use ultimate">0%</button>
-        <button id="itemBox" aria-label="Use item"><span id="itemIcon"></span></button>
+        <button id="ultPct" data-i18n-aria="ultimate" aria-label="Ultimate">
+          <i id="ultFill"></i>
+          <span id="ultNum">0%</span>
+        </button>
+        <button id="itemBox" data-i18n-aria="hudItem" aria-label="Item"><span id="itemIcon"></span></button>
       </div>
-      <div id="airWrap"><div id="airFill"></div><i id="airZone"></i><i id="airWind"></i><i id="airMark"></i></div>
-      <div id="boostWrap"><div id="boostFill"></div></div>
+
+      <div id="meterRail">
+        <div id="airWrap"><i id="airZone"></i><div id="airFill"></div><i id="airWind"></i><i id="airMark"></i></div>
+        <div id="boostWrap"><div id="boostFill"></div></div>
+      </div>
     </div>
+
     <div id="flash"></div>
 
     <div id="count">
-      <div class="gantry"><i></i><i></i><i></i></div>
-      <div id="countNum">3</div>
+      <div class="count-card">
+        <div class="gantry"><i></i><i></i><i></i></div>
+        <div id="countNum">3</div>
+      </div>
     </div>
 
     <div class="panel" id="pausePanel">
@@ -431,11 +502,11 @@ bubbles</button>
         <div class="stats">
           <div class="stat hot">
             <div class="k" data-i18n="distance">Distance</div>
-            <div class="v"><span id="ovDist">0</span> m</div>
+            <div class="v"><span id="ovDist">0</span><em>m</em></div>
           </div>
           <div class="stat">
             <div class="k" data-i18n="bestShort">Best</div>
-            <div class="v"><span id="ovBest">0</span> m</div>
+            <div class="v"><span id="ovBest">0</span><em>m</em></div>
           </div>
         </div>
         <div class="stack">
@@ -459,7 +530,7 @@ bubbles</button>
     <div id="langCard">
       <span class="eyebrow">Langue / Language</span>
       <h2 class="display" data-i18n="pickLang">Choose your language</h2>
-      <p data-i18n="pickLangSub">You can change this at any time from the home screen.</p>
+      <p class="lead" data-i18n="pickLangSub">You can change this at any time from the home screen.</p>
       <div class="lang-row">
         <button class="lang-opt" data-lang="en"><span class="lang-code">EN</span> English</button>
         <button class="lang-opt" data-lang="fr"><span class="lang-code">FR</span> Fran&ccedil;ais</button>

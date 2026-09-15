@@ -120,6 +120,9 @@ function padsLost(seats){
   }
   const lead = $("#pauseLead");
   if(lead) lead.textContent = t("padGone").replace("{n}", String(lost + 1));
+  /* The same panel, but this is not a pause anybody asked for. The class is
+     what says so; resuming and starting a race both clear it. */
+  $("#pausePanel").classList.add("alert");
   pause(true);
   return true;
 }

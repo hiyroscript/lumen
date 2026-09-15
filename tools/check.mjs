@@ -250,6 +250,13 @@ else {
     used.add(m[1]);
     if (!keys.has(m[1])) fail(`data-i18n="${m[1]}" in index.html has no string`);
   }
+  /* Icon-only controls carry their name in aria-label, translated on the same
+     sweep. A missing string there is a control nobody on a screen reader can
+     name, which is exactly as broken as a blank button. */
+  for (const m of html.matchAll(/\bdata-i18n-aria="([^"]+)"/g)) {
+    used.add(m[1]);
+    if (!keys.has(m[1])) fail(`data-i18n-aria="${m[1]}" in index.html has no string`);
+  }
   for (const n of ORDER) {
     if (!sources[n]) continue;
     for (const m of sources[n].matchAll(/\bt\(\s*"([A-Za-z][\w]*)"\s*\)/g)) {
@@ -282,10 +289,15 @@ for (const scenario of [
     const labels = [...html.matchAll(/\bdata-i18n="([^"]+)"/g)].map(([, key]) => ({
       key, textContent: "static fallback", getAttribute() { return key; }
     }));
+    const aria = [...html.matchAll(/\bdata-i18n-aria="([^"]+)"/g)].map(([, key]) => ({
+      key, label: "static fallback",
+      getAttribute() { return key; },
+      setAttribute(name, value) { if (name === "aria-label") this.label = value; }
+    }));
     const track = { textContent: "static track" };
     const document = {
       documentElement: {},
-      querySelectorAll: () => labels,
+      querySelectorAll: selector => selector === "[data-i18n-aria]" ? aria : labels,
       querySelector: selector => selector === "#trackName" ? track
         : selector === "#cars" ? { classList: { contains: () => false } } : null
     };
@@ -301,6 +313,10 @@ for (const scenario of [
     for (const label of labels) {
       assert.equal(label.textContent, STR[label.key][language], label.key);
       assert.ok(label.textContent.trim(), `${label.key} must not be blank`);
+    }
+    for (const control of aria) {
+      assert.equal(control.label, STR[control.key][language], control.key);
+      assert.ok(control.label.trim(), `${control.key} must not be blank`);
     }
     assert.equal(track.textContent, STR.trackCity[language]);
     // Exercise the actual renderer's fallback for incomplete and unknown keys,

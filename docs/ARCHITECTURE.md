@@ -61,20 +61,20 @@ from `race.js` without ceremony.
 
 The consequences, stated plainly:
 
-- `function` declarations become properties of `window` (347 of them).
+- `function` declarations become properties of `window` (357 of them).
 - `const` / `let` become global lexical bindings — visible everywhere, but not on
-  `window` (179 of them).
+  `window` (200 of them).
 - **Every top-level name must be unique across all fourteen files.** A duplicate
   `const` is a `SyntaxError` that kills the page; a duplicate `function` silently
   wins.
-- None of the 526 current names collides with a browser global. Keep it that way —
+- None of the 557 current names collides with a browser global. Keep it that way —
   avoid `name`, `status`, `length`, `top`, `self`, `origin`, `event`, `screen`,
   `history`, `location`, `find`, `focus`, `blur`, `open`, `close`, `print`, `stop`.
 
 `node tools/check.mjs` enforces both, so you do not have to remember them.
 
 This was a deliberate trade for staying build-free. Hiding the internals again
-means either a bundler or rewriting 526 cross-file references as imports.
+means either a bundler or rewriting 557 cross-file references as imports.
 
 ## The `who` convention
 
@@ -199,13 +199,20 @@ a periodic road pattern at or above the top of the current view.
 Nothing here owns a game system. If a helper knows what a car is, it does not
 belong here.
 
-### `i18n.js` — 275 lines
+### `i18n.js` — 294 lines
 `STR` is a flat map of key → `{en, fr}`. `t(k)` returns the current language, and
 falls back to English and then to the key itself — a missing string shows as a
 visibly wrong key rather than taking down the screen that asked for it.
 
-`applyLang()` sweeps `[data-i18n]` elements and repaints the language-dependent
-screens. Adding a language means adding a third code to every entry, adding a
+`applyLang()` sweeps two attributes and repaints the language-dependent screens:
+
+- `[data-i18n]` writes the string into `textContent`.
+- `[data-i18n-aria]` writes it into `aria-label`. Icon-only controls — pause,
+  back, close, sound, language, the ultimate and item squares — carry their name
+  nowhere else, so that label has to be translated like any other copy. Never
+  hard-code an `aria-label` in the HTML; give it a key.
+
+Adding a language means adding a third code to every entry, adding a
 `.lang-opt` button, and nothing else.
 
 ### `data.js` — 366 lines
@@ -233,10 +240,22 @@ geometry, the split-view geometry, `G`, the rule readers (`defaultRules`,
 the select-screen thumbnails come out of the same `drawCar` the road uses, then
 puts it back in a `finally`.
 
-### `ui.js` — 250 lines
+### `ui.js` — 311 lines
 Screen switching (`show(id)` toggles `.on` classes — there is no router), the
 garage, the custom setup sheet, the car board, the personal best, and the
 select-screen car art. Gameplay logic does not live here.
+
+Two things here are about the interface rather than about a screen:
+
+- `gateFocus()` decides what the keyboard and the pointer may reach. The seven
+  setup steps in `SHEET_IDS` are sheets drawn *over* the home screen, which
+  therefore stays `.on` underneath them; a pause or a result is drawn over the
+  instruments. In both cases the thing underneath has to stay visible — it is
+  the backdrop — and stop taking focus, which is exactly what the `inert`
+  attribute does. Call it from anywhere a modal surface opens or closes; `show()`
+  already does.
+- `infoCard()` is the one card shape every reference page builds, so the four
+  tabs of Cars & more read as one index rather than as four layouts.
 
 ### `local.js` — 161 lines
 Seats and player colours (`seatOf`, `seatCol`), the pad primitives (`padPoll`,
@@ -288,16 +307,30 @@ translate per column.
 
 This file reads game state and never changes it.
 
-### `hud.js` — 924 lines
+### `hud.js` — 1,088 lines
 Two HUDs that must agree. The DOM one is painted over the canvas (`paintHUD`,
-`paintItemBox`, the effect labels); the canvas one is drawn per column in local
+`paintItemBox`, the effect pills); the canvas one is drawn per column in local
 play (`drawSeatHud` and friends), because four copies of the DOM HUD would be four
-stylesheets to keep in step. Every number, colour and position in the canvas HUD
-is read off the page's own HUD so the two cannot drift.
+stylesheets to keep in step.
 
-The effect labels are one element per effect for the life of the page, held in a
+What keeps them from drifting is a block of named constants near the top —
+`HUD_EDGE`, `HUD_TOP`, `HUD_READ_W`, `HUD_ACT`, `HUD_ACT_GAP`, `HUD_ACT_BOT`,
+`HUD_RAIL_*`, `HUD_PILL_*` and the ink ramp — plus four functions that derive the
+rest: `hudSide()` (the instrument band's inset), `hudFoot()` (how far the bottom
+row stands off), `readWidth()` and `readMetrics()` (the standings panel, which
+narrows on a narrow view and tightens on a short one). **Each of those has a twin
+in `css/app.css`**, and the stylesheet says so where it does. Change one, change
+the other, or a phone and a split-screen column stop showing the same race.
+
+`hudGlass()` is the page's glass as close as a canvas gets it: there is no blur
+to be had, so the dark fill carries the contrast the blur would have carried and
+the hairline plus the top highlight carry the shape.
+
+The effect pills are one element per effect for the life of the page, held in a
 map and revived rather than recreated, hard-capped at six. There is no path that
-can produce an unbounded number of nodes.
+can produce an unbounded number of nodes. The pill's label is set in the
+interface's own white and the effect's colour is a swatch beside it, which is why
+Slippery — whose colour is very nearly black — needs no special case.
 
 ### `input.js` — 251 lines
 Keyboard, pointer and controller, each translated into the same mechanics call.
@@ -326,6 +359,8 @@ fonts, in case the first read landed before the stylesheet applied.
    through the same function, not a copy.
 4. **The canvas HUD mirrors the DOM HUD.** A change to one needs the same change
    in the other, or a phone and a split-screen column stop showing the same race.
+   The shared numbers are the `HUD_*` constants in `hud.js` and their twins in
+   `css/app.css`; they are the contract, not a coincidence.
 5. **A winner is out of play.** Finished cars are off every target list and
    nothing can reach them.
 6. **`W` is one view, not the canvas.** Anything measuring off `FULLW` in world
@@ -354,7 +389,9 @@ code reaches for actually exists.
 7. `i18n.js` — `<id>` (its name) and `<id>Ult` (its description), in both
    languages.
 8. `index.html` — a `.car-opt` button with `id="car<Id>"` containing
-   `<canvas class="car-cv" data-car="<id>">`.
+   `<canvas class="car-cv" data-car="<id>">` and a `<span class="car-name">`.
+   Nothing else: the Cars & more entry is built from `CARS` and picks the art up
+   through the same `canvas.car-cv` hook.
 9. `main.js` — a click listener for the new button.
 10. `ai.js` — a branch in `botUltValue` so bots know what the ultimate is worth.
 
@@ -380,7 +417,17 @@ both read `RARITY`, so they cannot disagree.
 `EFFECTS` in `data.js`, an `<id>Info` string, and a line in `syncEffects` in
 `hud.js` — which is the only place the labels are derived, so an effect that has
 quietly lapsed cannot leave its label behind. Mark it `bad: true` if Cleansed
-should wipe it.
+should wipe it. `col` is the pill's swatch and the garage dot; it is never the
+only thing carrying the meaning, so a dark one is fine.
+
+### A screen
+
+A `<section class="screen">` with an id, a line in `show()`, and — if it is one of
+the setup steps drawn over the home screen — its id in `SHEET_IDS` so `gateFocus()`
+knows to make the backdrop inert. Sheets get `class="screen sheet-screen"` and a
+`.sheet` inside with `.sheet-head` / `.sheet-body` / `.sheet-foot`; the stylesheet
+does the rest, including turning the bottom sheet into a centred dialog on a wide
+window.
 
 ## Checking your work
 
@@ -394,8 +441,9 @@ node tools/check.mjs
 Plain Node, no dependencies, no `package.json`, exits non-zero on failure. It
 covers the script order and `defer`, syntax, the uniqueness of every top-level
 name, browser-global collisions, every literal `#id` selector against the real
-DOM, translation completeness and key resolution, and the wiring of every car,
-effect and item.
+DOM, translation completeness and key resolution — for `[data-i18n]` and
+`[data-i18n-aria]` alike, so an icon-only button cannot ship with an untranslated
+name — and the wiring of every car, effect and item.
 
 That is the cheap half. It cannot tell you whether the game still *plays* the
 same — for that, see below.

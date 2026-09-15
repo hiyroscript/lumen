@@ -1,688 +1,1285 @@
 /* ============================================================
-   SEREN — design tokens
+   SEREN
+   A dark, restrained interface for a fast game.
+
+   One system, four screens deep: black ground, white type, a neutral
+   grey ramp for structure, and red as the only accent. Elevated
+   surfaces - sheets, panels, the instruments over the road - are
+   glass: tonal, blurred, hairline-edged, never decorative.
+
+   Sections
+     1  Tokens
+     2  Base
+     3  Type
+     4  Surfaces        the glass recipe, and what it does without blur
+     5  Controls        buttons, icon buttons, steps, switches
+     6  Splash
+     7  Language
+     8  Home
+     9  Sheets          modes, players, pads, style, custom, diffs, cars
+    10  Cars & more
+    11  Race HUD
+    12  Countdown
+    13  Panels          pause, results
+    14  Responsive
+    15  Motion & contrast
+   ============================================================ */
+
+/* ============================================================
+   1  TOKENS
    ============================================================ */
 :root{
-  --black:#0B0B0C;
-  --asphalt:#16171B;
-  --asphalt-2:#1D1F24;
-  --gray-050:#F4F4F6;
-  --gray-100:#E8E9EC;
-  --gray-200:#DCDEE3;
-  --gray-300:#C9CCD3;
-  --icon:#3A3D42;
-  --muted:#767A83;
-  --red:#E21B22;
-  --red-dark:#B3151B;
-  --red-press:#FF7A7F;
-  --green:#2FBF63;
+  /* ground -> surface, darkest first */
+  --void:#050506;
+  --ground:#0A0B0C;
+  --asphalt:#141518;
 
-  --r-sm:10px;
-  --r-md:14px;
-  --r-lg:20px;
+  /* ink */
+  --ink:#F4F5F6;
+  --ink-2:#A7ACB3;
+  --ink-3:#71767E;
+  --ink-4:#4C5158;
 
+  /* hairlines and washes, always alpha so they sit on any ground */
+  --line:rgba(255,255,255,.09);
+  --line-2:rgba(255,255,255,.16);
+  --line-3:rgba(255,255,255,.28);
+  --wash:rgba(255,255,255,.04);
+  --wash-2:rgba(255,255,255,.07);
+
+  /* the accent, and nothing beside it */
+  --red:#E5262D;
+  --red-hi:#FF4A50;
+  --red-lo:#B3151B;
+  --red-wash:rgba(229,38,45,.14);
+
+  /* gameplay colours - these say what the game is doing, not what the
+     interface is. They are the one sanctioned exception to the ramp. */
+  --go:#2FBF63;
+  --go-hi:#7CF7A6;
+  --gold:#FFD86B;
+
+  /* glass: one recipe, three weights */
+  --glass-blur:blur(26px) saturate(150%);
+  --glass-blur-sm:blur(14px) saturate(140%);
+  --glass-1:linear-gradient(180deg,rgba(32,35,41,.72),rgba(10,11,13,.80));
+  --glass-2:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.035));
+  --glass-3:linear-gradient(180deg,rgba(9,10,12,.74),rgba(9,10,12,.82));
+  --glass-edge:inset 0 1px 0 rgba(255,255,255,.10);
+  --lift-3:0 28px 70px -18px rgba(0,0,0,.85),0 2px 10px rgba(0,0,0,.5);
+
+  /* geometry */
+  --r-1:8px;
+  --r-2:12px;
+  --r-3:16px;
+  --r-4:22px;
+  --r-pill:999px;
+
+  --s-1:4px;  --s-2:8px;  --s-3:12px; --s-4:16px;
+  --s-5:20px; --s-6:26px; --s-7:34px; --s-8:44px;
+
+  --pad:20px;                       /* screen gutter */
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-l:env(safe-area-inset-left,0px);
+  --safe-r:env(safe-area-inset-right,0px);
+
+  /* type */
   --display:'Archivo','Arial Narrow',Helvetica,Arial,sans-serif;
   --body:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
   --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
 
-  --pad:22px;
-  --safe-t:env(safe-area-inset-top,0px);
-  --safe-b:env(safe-area-inset-bottom,0px);
+  --fs-title:20px;
+  --fs-body:14px;
+  --fs-small:12.5px;
+  --fs-meta:10px;
+
+  /* motion */
+  --ease:cubic-bezier(.22,.78,.28,1);
+  --d-1:.13s;
+  --d-2:.22s;
+  --d-3:.34s;
 }
 
+/* ============================================================
+   2  BASE
+   ============================================================ */
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0;padding:0}
 body{
-  background:var(--black);
+  background:var(--void);
   font-family:var(--body);
-  color:var(--icon);
+  font-size:var(--fs-body);
+  color:var(--ink-2);
   overflow:hidden;
   overscroll-behavior:none;
   -webkit-user-select:none;user-select:none;
   -webkit-text-size-adjust:100%;
+  text-rendering:optimizeLegibility;
 }
 
-/* Portrait-first shell. On desktop it stays a centered column. */
+/* Portrait-first shell. On a computer it stays a centred column until the
+   window goes landscape, where the race takes the full width. */
 #shell{
   position:relative;
   width:100%;max-width:520px;
   height:100dvh;height:100vh;height:100dvh;
   margin:0 auto;
-  background:var(--gray-100);
+  background:var(--ground);
   overflow:hidden;
-  box-shadow:0 0 0 1px rgba(0,0,0,.5), 0 40px 90px rgba(0,0,0,.55);
+  isolation:isolate;
 }
 
+/* A screen that is not showing is hidden outright rather than merely faded.
+   Opacity alone left every control on every other screen in the tab order, so
+   a keyboard user leaving the home screen walked into four invisible sheets.
+   The visibility switch is delayed by the length of the fade, so the screen
+   still fades out before it goes. */
 .screen{
   position:absolute;inset:0;
   display:flex;flex-direction:column;
-  opacity:0;pointer-events:none;
-  transition:opacity .32s ease;
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity var(--d-3) var(--ease),visibility 0s linear var(--d-3);
   z-index:1;
 }
-.screen.on{opacity:1;pointer-events:auto;z-index:2}
+.screen.on{
+  opacity:1;visibility:visible;pointer-events:auto;z-index:2;
+  transition:opacity var(--d-3) var(--ease),visibility 0s;
+}
+/* A screen kept on as the backdrop behind a sheet stays visible and stops
+   being reachable. ui.js sets it; this is only the fallback for a browser
+   that has not implemented the attribute. */
+.screen[inert]{pointer-events:none}
+
+.spacer{flex:1}
+
+/* the page's own scrollbars, made to belong */
+.sheet-body,#garageBody{scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
+.sheet-body::-webkit-scrollbar,#garageBody::-webkit-scrollbar{width:6px}
+.sheet-body::-webkit-scrollbar-thumb,#garageBody::-webkit-scrollbar-thumb{
+  background:var(--line-2);border-radius:3px}
 
 /* ============================================================
-   Type
+   3  TYPE
+   Five roles and no more: display, action, body, meta, readout.
    ============================================================ */
 .display{
   font-family:var(--display);
-  font-variation-settings:'wdth' 122,'wght' 800;
-  font-weight:800;
+  font-variation-settings:'wdth' 118,'wght' 780;
+  font-weight:780;
   text-transform:uppercase;
-  letter-spacing:.02em;
-  line-height:.92;
-  color:var(--black);
+  letter-spacing:.005em;
+  line-height:.96;
+  color:var(--ink);
+  margin:0;
+  text-wrap:balance;
 }
 .eyebrow{
   font-family:var(--mono);
-  font-size:11px;letter-spacing:.22em;text-transform:uppercase;
-  color:var(--muted);
+  font-size:var(--fs-meta);
+  font-weight:500;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--ink-3);
 }
-.num{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums}
+.lede,.lead{
+  margin:0 0 var(--s-4);
+  font-size:var(--fs-small);
+  line-height:1.5;
+  color:var(--ink-2);
+  max-width:46ch;
+}
+.note{
+  margin:var(--s-3) 0 0;
+  font-family:var(--mono);
+  font-size:var(--fs-meta);
+  letter-spacing:.08em;
+  line-height:1.6;
+  color:var(--ink-3);
+}
 
 /* ============================================================
-   Buttons
+   4  SURFACES
+   ============================================================ */
+/* Where the browser cannot blur, the same surface goes opaque instead of
+   translucent - the layering survives, the readability never depends on it. */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .sheet,.panel-card,#langCard,.hud-btn,#gauges,#effList span,
+  #ultPct,#itemBox,#meterRail,.count-card,#immuneTag span{
+    background:linear-gradient(180deg,#1C1F24,#0B0C0E)!important;
+  }
+  .hud-btn,#gauges,#effList span,#ultPct,#itemBox,#meterRail{
+    background:#121316!important;
+  }
+  .readout{background:linear-gradient(180deg,rgba(5,6,7,.88),rgba(5,6,7,.72))!important}
+}
+
+/* ============================================================
+   5  CONTROLS
    ============================================================ */
 .btn{
-  appearance:none;border:0;cursor:pointer;
+  appearance:none;-webkit-appearance:none;border:0;cursor:pointer;
   font-family:var(--display);
-  font-variation-settings:'wdth' 118,'wght' 750;
-  text-transform:uppercase;letter-spacing:.06em;
-  display:flex;align-items:center;justify-content:center;gap:12px;
-  transition:background .12s ease, transform .09s ease, color .12s ease, box-shadow .12s ease;
+  font-variation-settings:'wdth' 112,'wght' 720;
+  font-weight:720;
+  text-transform:uppercase;letter-spacing:.055em;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;min-height:52px;padding:15px 20px;
+  font-size:15px;line-height:1;
+  border-radius:var(--r-2);
+  position:relative;
+  transition:background var(--d-1) var(--ease),
+             border-color var(--d-1) var(--ease),
+             color var(--d-1) var(--ease),
+             transform var(--d-1) var(--ease),
+             box-shadow var(--d-1) var(--ease);
 }
-.btn:focus-visible{outline:3px solid var(--black);outline-offset:3px}
+.btn .ic{width:19px;height:19px;flex:0 0 auto}
+.btn span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 .btn-primary{
   background:var(--red);color:#fff;
-  width:100%;padding:20px 22px;font-size:19px;
-  border-radius:var(--r-md);
-  box-shadow:0 6px 0 var(--red-dark);
+  box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 8px 24px -8px rgba(229,38,45,.7);
 }
-.btn-primary:active{background:var(--red-press);transform:translateY(4px);box-shadow:0 2px 0 var(--red-dark)}
-.btn-primary svg{stroke:#fff}
+.btn-primary .ic{stroke:#fff}
+@media (hover:hover){.btn-primary:hover{background:var(--red-hi)}}
+.btn-primary:active{background:var(--red-lo);transform:translateY(1px);
+  box-shadow:0 1px 0 rgba(255,255,255,.1) inset}
 
 .btn-ghost{
-  background:transparent;color:var(--icon);
-  width:100%;padding:17px 22px;font-size:15px;
-  border-radius:var(--r-md);
-  border:2px solid var(--gray-300);
+  background:var(--glass-2);color:var(--ink);
+  border:1px solid var(--line-2);
+  -webkit-backdrop-filter:var(--glass-blur-sm);
+  backdrop-filter:var(--glass-blur-sm);
+  box-shadow:var(--glass-edge);
 }
-.btn-ghost:active{background:var(--red-press);border-color:var(--red-press);color:#fff}
-.btn-ghost:active svg{stroke:#fff}
+.btn-ghost .ic{stroke:var(--ink)}
+@media (hover:hover){.btn-ghost:hover{background:var(--wash-2);border-color:var(--line-3)}}
+.btn-ghost:active{background:var(--wash);transform:translateY(1px)}
+
+.btn[disabled],.btn.off{opacity:.34;pointer-events:none}
+
+/* One focus treatment for the whole interface: a white ring with a dark
+   halo behind it, so it is visible on glass, on red and on the road. */
+.btn:focus-visible,.icon-btn:focus-visible,.mode:focus-visible,
+.car-opt:focus-visible,.step:focus-visible,.tog:focus-visible,
+.tab:focus-visible,.lang-opt:focus-visible,#ultPct:focus-visible,
+#itemBox:focus-visible{
+  outline:2px solid #fff;
+  outline-offset:2px;
+  box-shadow:0 0 0 5px rgba(0,0,0,.65);
+}
 
 .icon-btn{
-  appearance:none;border:0;cursor:pointer;
-  width:44px;height:44px;border-radius:var(--r-sm);
-  background:var(--gray-050);
+  appearance:none;-webkit-appearance:none;border:1px solid var(--line);cursor:pointer;
+  width:42px;height:42px;flex:0 0 auto;border-radius:var(--r-2);
+  background:var(--glass-2);
   display:flex;align-items:center;justify-content:center;
-  transition:background .12s ease,transform .09s ease;
+  -webkit-backdrop-filter:var(--glass-blur-sm);
+  backdrop-filter:var(--glass-blur-sm);
+  box-shadow:var(--glass-edge);
+  transition:background var(--d-1) var(--ease),border-color var(--d-1) var(--ease),
+             transform var(--d-1) var(--ease);
 }
-.icon-btn:active{background:var(--red-press);transform:scale(.94)}
-.icon-btn:active svg{stroke:#fff}
-.icon-btn:focus-visible{outline:3px solid var(--black);outline-offset:2px}
-svg.ic{width:22px;height:22px;fill:none;stroke:var(--icon);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+@media (hover:hover){.icon-btn:hover{background:var(--wash-2);border-color:var(--line-2)}}
+.icon-btn:active{background:var(--wash);transform:scale(.94)}
+.icon-btn.quiet{background:transparent;border-color:transparent;box-shadow:none}
+@media (hover:hover){.icon-btn.quiet:hover{background:var(--wash-2)}}
+
+svg.ic{width:21px;height:21px;fill:none;stroke:var(--ink-2);stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;display:block}
+.icon-btn .ic{stroke:var(--ink)}
+.ic.off{display:none}
 
 /* ============================================================
-   1. Splash
+   6  SPLASH
    ============================================================ */
-#splash{position:absolute;inset:0;display:flex;background:var(--black);align-items:center;justify-content:center;opacity:1;pointer-events:auto;z-index:20;transition:opacity .42s ease}
+#splash{
+  position:absolute;inset:0;display:flex;background:var(--void);
+  align-items:center;justify-content:center;
+  opacity:1;pointer-events:auto;z-index:30;
+  transition:opacity .42s var(--ease);
+}
 #splash.out{opacity:0;pointer-events:none}
 #splashArt{
-  width:min(56vw,220px);height:min(56vw,220px);
+  width:min(52vw,196px);height:min(52vw,196px);
   display:flex;align-items:center;justify-content:center;
-  animation:rise .9s cubic-bezier(.2,.8,.25,1) both;
+  animation:rise .9s var(--ease) both;
 }
 #splashArt img{width:100%;height:100%;object-fit:contain;display:block}
-@keyframes rise{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
 #splashCredit{
-  position:absolute;left:0;right:0;bottom:calc(34px + var(--safe-b));
+  position:absolute;left:0;right:0;bottom:calc(32px + var(--safe-b));
   text-align:center;
-  font-family:var(--mono);font-size:12px;letter-spacing:.18em;
-  color:#6A6E76;
+  font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:lowercase;
+  color:var(--ink-4);
   animation:fadeIn .8s .5s both;
 }
-#splashBar{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(78px + var(--safe-b));width:64px;height:3px;background:#26282D;border-radius:2px;overflow:hidden}
-#splashBar i{display:block;height:100%;width:0;background:var(--red);animation:load 2.1s .15s cubic-bezier(.4,0,.2,1) forwards}
+#splashBar{
+  position:absolute;left:50%;transform:translateX(-50%);
+  bottom:calc(72px + var(--safe-b));
+  width:56px;height:2px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden;
+}
+#splashBar i{display:block;height:100%;width:0;background:var(--red);
+  animation:load 2.1s .15s var(--ease) forwards}
 @keyframes load{to{width:100%}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
 /* ============================================================
-   2. Language dialog
+   7  LANGUAGE
    ============================================================ */
 #langWrap{
-  position:absolute;inset:0;z-index:30;
-  background:rgba(11,11,12,.62);
+  position:absolute;inset:0;z-index:40;
+  background:rgba(5,5,6,.72);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   display:none;align-items:flex-end;justify-content:center;
-  padding:16px;padding-bottom:calc(16px + var(--safe-b));
+  padding:var(--s-3);
+  padding-bottom:calc(var(--s-3) + var(--safe-b));
 }
 #langWrap.on{display:flex}
 #langCard{
-  width:100%;background:var(--gray-050);border-radius:var(--r-lg);
-  padding:26px 22px 22px;
-  animation:slideUp .34s cubic-bezier(.2,.8,.25,1) both;
+  width:100%;max-width:440px;border-radius:var(--r-4);
+  padding:var(--s-6) var(--s-5) var(--s-5);
+  background:var(--glass-1);
+  border:1px solid var(--line);
+  box-shadow:var(--glass-edge),var(--lift-3);
+  -webkit-backdrop-filter:var(--glass-blur);
+  backdrop-filter:var(--glass-blur);
+  animation:slideUp var(--d-3) var(--ease) both;
 }
-@keyframes slideUp{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
-#langCard h2{margin:10px 0 4px;font-size:26px}
-#langCard p{margin:0 0 20px;font-size:14px;color:var(--muted);line-height:1.45}
-.lang-row{display:flex;flex-direction:column;gap:10px}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+#langCard .display{margin:10px 0 6px;font-size:26px}
+#langCard .lead{margin:0 0 var(--s-5)}
+.lang-row{display:flex;flex-direction:column;gap:var(--s-2)}
 .lang-opt{
   appearance:none;cursor:pointer;width:100%;
-  display:flex;align-items:center;gap:14px;
-  padding:16px 18px;border-radius:var(--r-md);
-  background:var(--gray-100);border:2px solid transparent;
-  font-family:var(--body);font-size:16px;font-weight:600;color:var(--black);
-  transition:background .12s ease,transform .09s ease,color .12s ease;
+  display:flex;align-items:center;gap:var(--s-3);
+  min-height:54px;padding:14px 16px;border-radius:var(--r-2);
+  background:var(--glass-2);border:1px solid var(--line);
+  font-family:var(--body);font-size:15px;font-weight:500;color:var(--ink);
+  transition:background var(--d-1) var(--ease),border-color var(--d-1) var(--ease),
+             transform var(--d-1) var(--ease);
 }
-.lang-opt:active{background:var(--red-press);color:#fff;transform:scale(.985)}
-.lang-opt:active .lang-code{background:#fff;color:var(--red)}
-.lang-opt:focus-visible{outline:3px solid var(--black);outline-offset:2px}
+@media (hover:hover){.lang-opt:hover{background:var(--wash-2);border-color:var(--line-2)}}
+.lang-opt:active{background:var(--red-wash);border-color:var(--red);transform:scale(.99)}
 .lang-code{
-  font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.08em;
-  background:var(--black);color:#fff;border-radius:6px;padding:5px 8px;min-width:38px;text-align:center;
+  font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.1em;
+  background:var(--ink);color:var(--void);border-radius:6px;
+  padding:5px 8px;min-width:36px;text-align:center;
 }
 
 /* ============================================================
-   3. Home
+   8  HOME
    ============================================================ */
-#home{background:var(--gray-100)}
-.topbar{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:calc(14px + var(--safe-t)) var(--pad) 0;
-  gap:10px;
-}
-.topbar .spacer{flex:1}
-.home-head{padding:26px var(--pad) 0}
-.home-title{font-size:clamp(46px,15vw,68px)}
-.home-title .t2{color:var(--red)}
-.home-sub{margin-top:12px;display:flex;align-items:center;gap:10px}
-.rule{height:2px;background:var(--gray-300);flex:1}
+#home{background:var(--ground)}
 
-/* the signature: a live asphalt ribbon with the car idling on it */
+.topbar{
+  position:relative;z-index:2;
+  display:flex;align-items:center;gap:var(--s-3);
+  padding:calc(var(--s-3) + var(--safe-t)) calc(var(--pad) + var(--safe-r))
+          0 calc(var(--pad) + var(--safe-l));
+}
+.topbar-title{font-size:15px;letter-spacing:.06em}
+
+/* the asphalt, running the full height behind everything */
 #ribbon{
-  position:relative;flex:1;min-height:0;margin:22px 0 0;
-  background:var(--asphalt);
-  overflow:hidden;
+  position:absolute;inset:0;z-index:0;overflow:hidden;
+  background:
+    radial-gradient(130% 62% at 50% 46%,rgba(255,255,255,.055),transparent 68%),
+    var(--asphalt);
 }
-#ribbon:before,#ribbon:after{
-  content:"";position:absolute;top:0;bottom:0;width:14px;background:var(--gray-200);
+#ribbon .kerb{
+  position:absolute;top:0;bottom:0;width:14px;
+  background:linear-gradient(90deg,rgba(255,255,255,.02),rgba(255,255,255,.085));
+  border-right:1px solid rgba(255,255,255,.16);
 }
-#ribbon:before{left:0}#ribbon:after{right:0}
+#ribbon .kerb.left{left:0}
+#ribbon .kerb.right{right:0;transform:scaleX(-1)}
 .lane-line{
-  position:absolute;top:-140px;bottom:-140px;width:5px;
-  background:repeating-linear-gradient(to bottom,#EDEDF0 0 34px,transparent 34px 74px);
-  opacity:.75;
-  animation:scroll 1.15s linear infinite;
+  position:absolute;top:-160px;bottom:-160px;width:4px;
+  background:repeating-linear-gradient(to bottom,
+    rgba(255,255,255,.46) 0 36px,transparent 36px 78px);
+  animation:scroll 1.2s linear infinite;
 }
 .lane-line.l1{left:33.33%}
 .lane-line.l2{left:66.66%}
-@keyframes scroll{to{transform:translateY(74px)}}
-.home-mid{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);padding:0 26px}
-#ribbon .fade{position:absolute;left:0;right:0;height:70px;pointer-events:none}
-#ribbon .fade.top{top:0;background:linear-gradient(var(--gray-100),transparent)}
+@keyframes scroll{to{transform:translateY(78px)}}
+#ribbon .fade{position:absolute;left:0;right:0;height:26%;pointer-events:none}
+#ribbon .fade.top{top:0;background:linear-gradient(var(--ground),rgba(10,11,12,.35) 62%,transparent)}
+#ribbon .fade.bot{bottom:0;background:linear-gradient(transparent,rgba(10,11,12,.55) 46%,var(--ground))}
 
-.home-foot{padding:20px var(--pad) calc(24px + var(--safe-b));background:var(--gray-100)}
-.best-strip{
-  display:flex;align-items:baseline;justify-content:space-between;
-  padding:0 2px 14px;
+.home-head{position:relative;z-index:2;padding:var(--s-6) calc(var(--pad) + var(--safe-r)) 0 calc(var(--pad) + var(--safe-l))}
+.home-title{
+  font-size:clamp(46px,16vw,74px);
+  font-variation-settings:'wdth' 122,'wght' 820;
+  letter-spacing:-.005em;
 }
-.best-strip .k{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
-.best-strip .v{font-family:var(--mono);font-weight:600;font-size:20px;color:var(--black)}
+.home-title .t2{color:var(--red)}
+.home-sub{margin:var(--s-3) 0 0;display:flex;align-items:center;gap:var(--s-3)}
+.rule{height:1px;background:var(--line-2);flex:1}
+
+.home-mid{
+  position:relative;z-index:2;flex:1;min-height:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:var(--s-5) calc(var(--pad) + var(--safe-r)) var(--s-5) calc(var(--pad) + var(--safe-l));
+}
+.home-actions{width:100%;max-width:400px;display:flex;flex-direction:column;gap:var(--s-2)}
+.home-actions .btn-primary{min-height:60px;font-size:17px}
+
+.home-foot{
+  position:relative;z-index:2;
+  padding:var(--s-4) calc(var(--pad) + var(--safe-r)) calc(var(--s-5) + var(--safe-b)) calc(var(--pad) + var(--safe-l));
+  border-top:1px solid var(--line);
+  background:linear-gradient(var(--ground),var(--ground));
+}
+.best-strip{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s-4)}
+.best-strip .k{font-family:var(--mono);font-size:var(--fs-meta);letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ink-3)}
+.best-strip .v{font-family:var(--mono);font-weight:600;font-size:19px;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+.best-strip .v em{font-style:normal;font-size:11px;color:var(--ink-3);margin-left:3px}
+
+/* the key legend: only on a machine that has keys */
+.keys{display:none;gap:var(--s-3);margin-top:var(--s-4);align-items:center;flex-wrap:wrap}
+body.desk .keys{display:flex}
+.keys-k{width:100%;font-family:var(--mono);font-size:var(--fs-meta);letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ink-4);margin-bottom:2px}
+.key-pair{display:inline-flex;align-items:center;gap:5px}
+.keycap{
+  font-family:var(--mono);font-size:11px;color:var(--ink-2);
+  background:var(--wash);border:1px solid var(--line-2);
+  border-radius:5px;padding:4px 6px;min-width:24px;text-align:center;line-height:1;
+}
+.keys .lbl{font-size:11px;color:var(--ink-3);font-family:var(--mono);letter-spacing:.04em}
 
 /* ============================================================
-   4. Mode sheet
+   9  SHEETS
+   One shell for every setup step: head, scrolling body, sticky foot.
    ============================================================ */
-#modes{background:rgba(11,11,12,.55);justify-content:flex-end;padding:16px;padding-bottom:calc(16px + var(--safe-b))}
-#modeCard{width:100%;background:var(--gray-050);border-radius:var(--r-lg);padding:22px 20px}
-#modes.on #modeCard{animation:slideUp .3s cubic-bezier(.2,.8,.25,1) both}
-.sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.sheet-head h2{margin:0;font-size:24px}
-.mode{
-  appearance:none;border:0;cursor:pointer;width:100%;text-align:left;
-  background:var(--gray-100);border-radius:var(--r-md);
-  padding:18px;display:flex;align-items:center;gap:16px;
-  transition:background .12s ease,transform .09s ease;
+.sheet-screen{
+  justify-content:flex-end;align-items:center;
+  background:rgba(5,5,6,.62);
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  padding:var(--s-3) calc(var(--s-3) + var(--safe-r))
+          calc(var(--s-3) + var(--safe-b)) calc(var(--s-3) + var(--safe-l));
 }
-.mode:active{background:var(--red-press);transform:scale(.985)}
-.mode:active .mode-name,.mode:active .mode-desc{color:#fff}
-.mode:active .mode-mark{background:#fff}
-.mode:active .mode-mark svg{stroke:var(--red)}
-.mode:focus-visible{outline:3px solid var(--black);outline-offset:2px}
-.mode-mark{width:46px;height:46px;border-radius:var(--r-sm);background:var(--black);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
-.mode-mark svg{stroke:#fff;width:24px;height:24px}
-.mode-name{font-family:var(--display);font-variation-settings:'wdth' 118,'wght' 750;text-transform:uppercase;font-size:18px;letter-spacing:.04em;color:var(--black)}
-.mode-desc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.35}
-.soon{margin:14px 2px 0;font-size:12px;color:var(--muted);text-align:center;font-family:var(--mono);letter-spacing:.06em}
-.sect{margin:0 2px 4px;font-size:13px;font-family:var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
-.lede{margin:0 2px 12px;font-size:13px;line-height:1.45;color:var(--muted)}
+.sheet{
+  width:100%;max-width:520px;
+  max-height:100%;
+  display:flex;flex-direction:column;
+  border-radius:var(--r-4);
+  background:var(--glass-1);
+  border:1px solid var(--line);
+  box-shadow:var(--glass-edge),var(--lift-3);
+  -webkit-backdrop-filter:var(--glass-blur);
+  backdrop-filter:var(--glass-blur);
+  overflow:hidden;
+}
+.sheet-screen.on .sheet{animation:slideUp var(--d-3) var(--ease) both}
 
-.car-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
-.car-opt{
-  appearance:none;border:0;cursor:pointer;width:100%;text-align:center;
-  background:var(--gray-100);border-radius:var(--r-md);
-  padding:9px 5px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;
-  transition:background .12s ease,transform .09s ease;
+.sheet-head{
+  display:flex;align-items:center;gap:var(--s-3);
+  padding:var(--s-4) var(--s-4) var(--s-3);
+  border-bottom:1px solid var(--line);
 }
-.car-opt:active{background:var(--red-press);transform:scale(.96)}
-.car-opt:active .mode-name{color:#fff}
-.car-opt:active .car-art{background:#fff}
-.car-opt:focus-visible{outline:3px solid var(--black);outline-offset:2px}
-.car-opt .mode-name{font-size:14px;letter-spacing:.03em;line-height:1}
+.sheet-head .display{flex:1;font-size:var(--fs-title);min-width:0}
+.sheet-head .icon-btn.lead{margin-left:-6px}
+.sheet-head .tally{
+  font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.08em;
+  color:var(--ink-2);background:var(--wash);border:1px solid var(--line);
+  border-radius:var(--r-pill);padding:4px 10px;flex:0 0 auto;
+}
+.sheet-body{
+  padding:var(--s-4);
+  overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  min-height:0;
+}
+.sheet-foot{
+  padding:var(--s-3) var(--s-4) var(--s-4);
+  border-top:1px solid var(--line);
+  background:linear-gradient(rgba(255,255,255,.02),transparent);
+}
+
+.list{display:flex;flex-direction:column;gap:var(--s-2)}
+
+/* a row you choose */
+.mode{
+  appearance:none;border:1px solid var(--line);cursor:pointer;width:100%;text-align:left;
+  background:var(--glass-2);border-radius:var(--r-3);
+  padding:var(--s-3) var(--s-3);
+  display:flex;align-items:center;gap:var(--s-3);
+  transition:background var(--d-1) var(--ease),border-color var(--d-1) var(--ease),
+             transform var(--d-1) var(--ease);
+}
+@media (hover:hover){
+  .mode:hover{background:var(--wash-2);border-color:var(--line-2)}
+  .mode:hover .chev{stroke:var(--ink);transform:translateX(2px)}
+}
+.mode:active{background:var(--red-wash);border-color:var(--red);transform:scale(.99)}
+.mode.off{opacity:.42;pointer-events:none}
+.mode-mark{
+  width:42px;height:42px;border-radius:var(--r-2);flex:0 0 auto;
+  background:var(--void);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+}
+.mode-mark .ic{stroke:var(--ink);width:21px;height:21px}
+.mode:active .mode-mark{border-color:var(--red)}
+.mode:active .mode-mark .ic{stroke:var(--red-hi)}
+.mode-text{flex:1;min-width:0;display:block}
+.mode-name{
+  display:block;
+  font-family:var(--display);font-variation-settings:'wdth' 112,'wght' 720;
+  font-weight:720;text-transform:uppercase;font-size:15px;letter-spacing:.035em;
+  color:var(--ink);line-height:1.1;
+}
+.mode-desc{display:block;font-size:var(--fs-small);color:var(--ink-3);
+  margin-top:4px;line-height:1.4}
+.chev{width:18px;height:18px;flex:0 0 auto;stroke:var(--ink-4);
+  transition:stroke var(--d-1) var(--ease),transform var(--d-1) var(--ease)}
+
+/* difficulty: four bars, filled to the level - the shape carries the
+   reading, the colour only reinforces it */
+.mode.diff .diff-mark{
+  width:42px;height:42px;border-radius:var(--r-2);flex:0 0 auto;
+  background:var(--void);border:1px solid var(--line);
+  display:flex;align-items:flex-end;justify-content:center;gap:3px;padding:10px 0;
+}
+.mode.diff .diff-mark i{width:4px;border-radius:2px;background:var(--line-3)}
+.mode.diff .diff-mark i:nth-child(1){height:6px}
+.mode.diff .diff-mark i:nth-child(2){height:11px}
+.mode.diff .diff-mark i:nth-child(3){height:16px}
+.mode.diff .diff-mark i:nth-child(4){height:21px}
+.mode.diff .diff-mark i:nth-child(-n+1){background:var(--red)}
+.mode.diff.lv2 .diff-mark i:nth-child(-n+2){background:var(--red)}
+.mode.diff.lv3 .diff-mark i:nth-child(-n+3){background:var(--red)}
+.mode.diff.lv4 .diff-mark i:nth-child(-n+4){background:var(--red)}
+
+/* local play: the four seat colours, as a swatch stack */
+.seat-chips{
+  width:42px;height:42px;flex:0 0 auto;border-radius:var(--r-2);
+  background:var(--void);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;gap:3px;
+}
+.seat-chips i{width:5px;height:18px;border-radius:3px}
+.seat-chips .p1{background:#FF3B3B}
+.seat-chips .p2{background:#3B8CFF}
+.seat-chips .p3{background:#35D06B}
+.seat-chips .p4{background:#FFCE2B}
+
+/* controller list */
+#padList{display:flex;flex-direction:column;gap:6px}
+.pad-row{
+  display:flex;align-items:center;gap:var(--s-3);
+  background:var(--wash);border:1px solid var(--line);
+  border-radius:var(--r-2);padding:11px var(--s-3);
+  transition:border-color var(--d-2) var(--ease),background var(--d-2) var(--ease);
+}
+.pad-row.on{background:var(--wash-2);border-color:var(--line-2)}
+.pad-row .chip-seat{width:5px;height:20px;border-radius:3px;flex:0 0 auto;opacity:.28}
+.pad-row.on .chip-seat{opacity:1}
+.pad-row .who{font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-2);flex:0 0 auto}
+.pad-row .nm{font-size:12px;color:var(--ink-3);flex:1;text-align:right;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pad-row.on .nm{color:var(--ink-2)}
+.pad-row .dot{width:6px;height:6px;border-radius:50%;flex:0 0 auto;
+  background:var(--ink-4)}
+.pad-row.on .dot{background:var(--go)}
+
+/* custom setup */
+.opt{
+  background:var(--wash);border:1px solid var(--line);
+  border-radius:var(--r-3);padding:var(--s-3);margin-bottom:var(--s-2);
+  transition:opacity var(--d-2) var(--ease);
+}
+.opt-head{display:flex;align-items:center;justify-content:space-between;gap:var(--s-3)}
+.opt-name{
+  font-family:var(--display);font-variation-settings:'wdth' 112,'wght' 720;
+  font-weight:720;text-transform:uppercase;font-size:13px;letter-spacing:.05em;
+  color:var(--ink);
+}
+.opt-val{
+  font-family:var(--mono);font-size:11px;font-weight:600;color:var(--ink);
+  background:var(--red);border-radius:var(--r-pill);padding:3px 9px;flex:0 0 auto;
+  font-variant-numeric:tabular-nums;
+}
+.opt-desc{margin:6px 0 0;font-size:12px;line-height:1.45;color:var(--ink-3)}
+.opt.off{opacity:.32;pointer-events:none}
+.steps{display:flex;gap:4px;margin-top:var(--s-3);flex-wrap:wrap}
+.step{
+  appearance:none;border:1px solid var(--line);cursor:pointer;flex:1 1 0;min-width:44px;
+  min-height:40px;
+  background:var(--wash);border-radius:var(--r-1);padding:8px 4px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-2);
+  transition:background var(--d-1) var(--ease),color var(--d-1) var(--ease),
+             border-color var(--d-1) var(--ease),transform var(--d-1) var(--ease);
+}
+@media (hover:hover){.step:hover{background:var(--wash-2);color:var(--ink)}}
+.step:active{transform:scale(.96)}
+.step.on{background:var(--red);border-color:var(--red);color:#fff;font-weight:600}
+
+.tog{
+  appearance:none;border:1px solid var(--line);cursor:pointer;width:100%;text-align:left;
+  background:var(--wash);border-radius:var(--r-3);padding:var(--s-3);
+  display:flex;align-items:center;gap:var(--s-3);margin-bottom:var(--s-2);
+  transition:background var(--d-1) var(--ease),border-color var(--d-1) var(--ease),
+             transform var(--d-1) var(--ease);
+}
+@media (hover:hover){.tog:hover{background:var(--wash-2);border-color:var(--line-2)}}
+.tog:active{transform:scale(.99)}
+.tog .sw{
+  width:40px;height:23px;border-radius:var(--r-pill);background:rgba(255,255,255,.12);
+  border:1px solid var(--line-2);
+  flex:0 0 auto;position:relative;transition:background var(--d-2) var(--ease),
+  border-color var(--d-2) var(--ease);
+}
+.tog .sw i{
+  position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;
+  background:var(--ink-2);transition:transform var(--d-2) var(--ease),background var(--d-2) var(--ease);
+}
+.tog.on .sw{background:var(--red);border-color:var(--red)}
+.tog.on .sw i{transform:translateX(17px);background:#fff}
+.tog .tx{flex:1;min-width:0}
+.tog .tx b{
+  display:block;font-family:var(--display);
+  font-variation-settings:'wdth' 112,'wght' 720;font-weight:720;
+  text-transform:uppercase;font-size:13px;letter-spacing:.05em;color:var(--ink);
+}
+.tog .tx span{display:block;font-size:12px;color:var(--ink-3);margin-top:3px;line-height:1.4}
+
+/* whose turn it is on the car board */
+#carTurn{
+  display:none;align-items:center;gap:var(--s-3);
+  background:var(--wash);border:1px solid var(--line);
+  border-radius:var(--r-2);padding:10px var(--s-3);margin-bottom:var(--s-3);
+}
+#carTurn.on{display:flex}
+#carTurn i{width:5px;height:20px;border-radius:3px;flex:0 0 auto}
+#carTurn span{
+  font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink);
+}
+
+/* the car board */
+.car-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-2)}
+.car-opt{
+  appearance:none;border:1px solid var(--line);cursor:pointer;width:100%;text-align:center;
+  background:var(--glass-2);border-radius:var(--r-3);
+  padding:var(--s-2) 6px 10px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  transition:background var(--d-1) var(--ease),border-color var(--d-1) var(--ease),
+             transform var(--d-1) var(--ease);
+}
+@media (hover:hover){.car-opt:hover{background:var(--wash-2);border-color:var(--line-2)}}
+.car-opt:active{border-color:var(--red);background:var(--red-wash);transform:scale(.97)}
+.car-name{
+  font-family:var(--display);font-variation-settings:'wdth' 112,'wght' 700;
+  font-weight:700;text-transform:uppercase;font-size:12px;letter-spacing:.05em;
+  color:var(--ink);line-height:1;
+}
 .car-art{
-  width:100%;aspect-ratio:1/1;border-radius:var(--r-sm);
-  background:var(--black);display:flex;align-items:center;justify-content:center;
+  width:100%;aspect-ratio:1/1;border-radius:var(--r-2);
+  background:radial-gradient(120% 90% at 50% 30%,#17191D,#0A0B0C 72%);
+  border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
 }
 .car-art canvas{width:100%;height:100%;display:block}
-#garage{background:var(--gray-100)}
-.tabs{display:flex;gap:6px;padding:0 var(--pad) 12px}
-.tab{flex:1;appearance:none;border:0;cursor:pointer;padding:9px 6px;border-radius:var(--r-sm);
-  background:var(--gray-200);font-family:var(--mono);font-size:10px;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--icon);
-  white-space:pre-line;line-height:1.3;text-align:center;
-  display:flex;align-items:center;justify-content:center}
-.tab.on{background:var(--red);color:#fff}
-#garageBody{flex:1;overflow-y:auto;padding:0 var(--pad) calc(24px + var(--safe-b))}
-.info{background:var(--gray-050);border-radius:var(--r-md);padding:14px 16px;margin-bottom:10px}
-.kind{
-  display:inline-block;margin-bottom:6px;padding:3px 7px;border-radius:5px;
-  font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;
-}
-.kind.track{background:var(--gray-200);color:var(--icon)}
-.kind.trap{background:var(--red);color:#fff}
-.odds{float:right;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--black);
-  background:var(--gray-200);border-radius:5px;padding:3px 7px;margin-top:-1px}
-.kind.pickup{background:#7FB3E8;color:#0B0B0C}
-.info h3{margin:0 0 2px;font-family:var(--display);font-variation-settings:'wdth' 118,'wght' 750;
-  text-transform:uppercase;font-size:16px;letter-spacing:.04em;color:var(--black)}
-.info p{margin:4px 0 0;font-size:13px;color:var(--muted);line-height:1.4}
-.info .tagrow{margin-top:6px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
-/* ---- local play ---- */
-.seat-chips{width:46px;height:46px;flex:0 0 auto;border-radius:var(--r-sm);background:var(--black);
-  display:flex;align-items:center;justify-content:center;gap:4px}
-.seat-chips i{width:6px;height:22px;border-radius:3px}
-#padList{margin:0 0 14px}
-.pad-row{display:flex;align-items:center;gap:11px;background:var(--gray-100);
-  border-radius:var(--r-md);padding:11px 14px;margin-bottom:7px}
-.pad-row .chip{width:12px;height:22px;border-radius:3px;flex:0 0 auto;opacity:.3}
-.pad-row.on .chip{opacity:1}
-.pad-row .who{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--black);flex:0 0 auto}
-.pad-row .nm{font-size:12px;color:var(--muted);flex:1;text-align:right;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pad-note{margin:0 2px 12px;font-size:12px;font-family:var(--mono);letter-spacing:.06em;color:var(--muted)}
-/* ---- custom setup ---- */
-#customBody{max-height:min(52vh,430px);overflow-y:auto;padding-right:2px}
-.opt{background:var(--gray-100);border-radius:var(--r-md);padding:13px 14px;margin-bottom:8px}
-.opt-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
-.opt-name{font-family:var(--display);font-variation-settings:'wdth' 118,'wght' 750;
-  text-transform:uppercase;font-size:15px;letter-spacing:.04em;color:var(--black)}
-.opt-val{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--black);
-  background:var(--gray-200);border-radius:5px;padding:2px 8px;flex:0 0 auto}
-.opt-desc{margin:4px 0 0;font-size:12px;line-height:1.4;color:var(--muted)}
-.opt.off{opacity:.4;pointer-events:none}
-.steps{display:flex;gap:5px;margin-top:9px;flex-wrap:wrap}
-.step{
-  appearance:none;border:0;cursor:pointer;flex:1 1 0;min-width:40px;
-  background:var(--gray-200);border-radius:var(--r-sm);padding:9px 4px;
-  font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--icon);transition:background .12s ease,color .12s ease,transform .09s ease;
-}
-.step:active{transform:scale(.95)}
-.step.on{background:var(--red);color:#fff}
-.step:focus-visible{outline:3px solid var(--black);outline-offset:2px}
-.tog{
-  appearance:none;border:0;cursor:pointer;width:100%;text-align:left;
-  background:var(--gray-100);border-radius:var(--r-md);padding:12px 14px;
-  display:flex;align-items:center;gap:12px;margin-bottom:8px;
-  transition:background .12s ease,transform .09s ease;
-}
-.tog:active{transform:scale(.99)}
-.tog:focus-visible{outline:3px solid var(--black);outline-offset:2px}
-.tog .sw{width:40px;height:23px;border-radius:12px;background:var(--gray-300);
-  flex:0 0 auto;position:relative;transition:background .16s ease}
-.tog .sw i{position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;
-  background:#fff;transition:transform .16s cubic-bezier(.2,.8,.25,1)}
-.tog.on .sw{background:var(--green)}
-.tog.on .sw i{transform:translateX(17px)}
-.tog .tx{flex:1}
-.tog .tx b{display:block;font-family:var(--display);
-  font-variation-settings:'wdth' 118,'wght' 750;text-transform:uppercase;
-  font-size:14px;letter-spacing:.04em;color:var(--black);font-weight:400}
-.tog .tx span{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.35}
-.btn[disabled],.btn.off{opacity:.4;pointer-events:none}
-#carTurn{display:none;align-items:center;gap:10px;background:var(--gray-100);
-  border-radius:var(--r-md);padding:10px 14px;margin-bottom:12px}
-#carTurn.on{display:flex}
-#carTurn i{width:15px;height:15px;border-radius:4px;flex:0 0 auto}
-#carTurn span{font-family:var(--display);font-variation-settings:'wdth' 118,'wght' 750;
-  text-transform:uppercase;font-size:15px;letter-spacing:.04em;color:var(--black)}
+/* already driven by somebody else: dimmed, disabled and struck through -
+   never colour alone */
 .car-opt.taken{opacity:.3;pointer-events:none}
-.car-opt.taken .car-art{background:var(--gray-200)}
-.car-opt.cursor{outline:3px solid var(--red);outline-offset:2px}
-#ovBoard{display:none;margin:0 0 16px}
-#ovBoard.on{display:block}
-#ovBoard .r{display:flex;align-items:center;gap:10px;padding:8px 12px;
-  background:var(--gray-050);border-radius:var(--r-sm);margin-bottom:5px}
-#ovBoard .r.seat{background:var(--gray-100)}
-#ovBoard .pl{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--muted);width:34px;flex:0 0 auto}
-#ovBoard .chip{width:12px;height:20px;border-radius:3px;flex:0 0 auto;background:var(--gray-300)}
-#ovBoard .nm{flex:1;font-family:var(--display);font-variation-settings:'wdth' 118,'wght' 700;
-  text-transform:uppercase;font-size:14px;letter-spacing:.03em;color:var(--black);
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#ovBoard .by{font-family:var(--mono);font-size:11px;color:var(--muted);flex:0 0 auto}
-/* the two personal-record cells mean nothing on a shared screen */
-body.local #overPanel .stats{display:none}
-.mode.off{opacity:.45;pointer-events:none}
-/* Four sets of instruments are painted on the canvas, so the page's single
-   set has to get out of the way completely. */
-body.local .hud .readout,body.local #hudActions,body.local #airWrap,
-body.local #boostWrap,body.local #effList,body.local #immuneTag,
-body.local #cleanseTag{display:none!important}
-.diff-mark{width:56px;height:70px;flex:0 0 auto;border-radius:var(--r-sm);background:var(--black);
-  display:flex;align-items:center;justify-content:center;gap:4px}
-.diff-mark i{width:5px;border-radius:3px;background:var(--red)}
-.diff-mark i:nth-child(1){height:14px}.diff-mark i:nth-child(2){height:22px}
-.diff-mark i:nth-child(3){height:30px}.diff-mark i:nth-child(4){height:38px}
-.car-opt:active .diff-mark{background:#fff}
-.car-opt:active .diff-mark i{background:var(--red)}
-#raceClock{
-  display:none;margin-top:7px;font-family:var(--mono);font-weight:600;font-size:13px;
-  color:rgba(255,255,255,.8);text-shadow:0 1px 8px rgba(0,0,0,.85);
-}
-#raceClock.on{display:block}
-#raceClock.final{color:var(--red)}
-/* The square is both the charge readout and the button that spends it. It has to
-   take its own taps, so it opts back into pointer events - the hud around it
-   stays transparent to them, which is what keeps a tap here off the road behind
-   it. Everything from appearance down is undoing what a browser does to a button
-   by default, so it still draws exactly as the readout always did. */
-#ultPct{
-  position:relative;overflow:hidden;pointer-events:auto;
-  display:inline-flex;align-items:center;justify-content:center;
-  width:54px;height:54px;box-sizing:border-box;flex:0 0 auto;
-  appearance:none;-webkit-appearance:none;padding:0;margin:0;
-  cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;
-  -webkit-tap-highlight-color:transparent;
-  border-radius:var(--r-sm);border:2px solid rgba(255,255,255,.28);
-  background:rgba(11,11,12,.62);
-  font-family:var(--mono);font-weight:600;font-size:15px;
-  color:rgba(255,255,255,.78);text-shadow:0 1px 6px rgba(0,0,0,.85);
-  transition:border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .09s ease;
-}
-#ultPct::-moz-focus-inner{border:0;padding:0}
-#ultPct:focus{outline:none}
-#ultPct:focus-visible{outline:2px solid #fff;outline-offset:3px}
-/* the press, same as the item box next to it */
-#ultPct:active{transform:scale(.92)}
-/* Charged: the face stays dark - the outline carries it. White border with a
-   light red ring just outside, so the edge reads as both colours at once, and
-   a red light plays over the square: an inset glow that breathes, an outer
-   bloom, and a shine crossing the face. Every resting value lives on .ready
-   itself rather than in the keyframes, so with reduced motion the square still
-   looks charged, it just stops moving. */
-#ultPct.ready{
-  border-color:#fff;color:#fff;
-  text-shadow:0 0 7px rgba(255,122,127,.9);
-  box-shadow:
-    0 0 0 2px var(--red-press),
-    0 0 13px 2px rgba(226,27,34,.55),
-    inset 0 0 13px 2px rgba(255,60,66,.45);
-  animation:ultGlow 1.15s ease-in-out infinite;
-}
-/* the light sweeping across it */
-#ultPct.ready::after{
-  content:"";position:absolute;top:-60%;left:-140%;
-  width:52%;height:220%;transform:rotate(20deg);pointer-events:none;
-  background:linear-gradient(90deg,
-    rgba(255,255,255,0) 0%,
-    rgba(255,150,155,.5) 42%,
-    rgba(255,255,255,.85) 52%,
-    rgba(255,190,193,.45) 62%,
-    rgba(255,255,255,0) 100%);
-  animation:ultShine 2.4s ease-in-out infinite;
-}
-@keyframes ultGlow{
-  0%,100%{box-shadow:
-    0 0 0 2px var(--red-press),
-    0 0 12px 2px rgba(226,27,34,.5),
-    inset 0 0 12px 2px rgba(255,60,66,.4)}
-  50%    {box-shadow:
-    0 0 0 3px var(--red-press),
-    0 0 26px 7px rgba(226,27,34,.85),
-    inset 0 0 20px 5px rgba(255,60,66,.7)}
-}
-@keyframes ultShine{0%{left:-140%}60%,100%{left:150%}}
+.car-opt.taken .car-name{text-decoration:line-through;text-decoration-thickness:1.5px}
+/* the controller cursor */
+.car-opt.cursor{border-color:var(--red);background:var(--red-wash);
+  box-shadow:0 0 0 1px var(--red),0 8px 24px -10px rgba(229,38,45,.8)}
 
 /* ============================================================
-   5. Race
+   10  CARS & MORE
    ============================================================ */
-#race{background:var(--black)}
+#garage{background:var(--ground)}
+.tabs{
+  display:flex;gap:4px;
+  padding:var(--s-3) calc(var(--pad) + var(--safe-r)) var(--s-3) calc(var(--pad) + var(--safe-l));
+  border-bottom:1px solid var(--line);
+}
+.tab{
+  flex:1;appearance:none;border:1px solid transparent;cursor:pointer;
+  min-height:44px;padding:8px 6px;border-radius:var(--r-1);
+  background:var(--wash);
+  font-family:var(--mono);font-size:var(--fs-meta);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);
+  white-space:pre-line;line-height:1.35;text-align:center;
+  display:flex;align-items:center;justify-content:center;
+  transition:background var(--d-1) var(--ease),color var(--d-1) var(--ease),
+             border-color var(--d-1) var(--ease);
+}
+@media (hover:hover){.tab:hover{background:var(--wash-2);color:var(--ink-2)}}
+.tab.on{background:var(--red);border-color:var(--red);color:#fff;font-weight:600}
+
+#garageBody{
+  flex:1;overflow-y:auto;
+  padding:var(--s-4) calc(var(--pad) + var(--safe-r))
+          calc(var(--s-6) + var(--safe-b)) calc(var(--pad) + var(--safe-l));
+  display:grid;grid-template-columns:1fr;gap:var(--s-2);align-content:start;
+}
+.sect{
+  grid-column:1/-1;
+  margin:0 0 -2px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink);font-weight:500;
+}
+.sect + .lede{grid-column:1/-1;margin-bottom:0}
+.soon{
+  grid-column:1/-1;
+  margin:var(--s-2) 0 0;font-size:11px;color:var(--ink-4);
+  font-family:var(--mono);letter-spacing:.05em;line-height:1.6;
+}
+.info{
+  background:var(--wash);border:1px solid var(--line);
+  border-radius:var(--r-3);padding:var(--s-3) var(--s-4);
+  display:flex;flex-direction:column;
+}
+.info-head{display:flex;align-items:center;gap:var(--s-2);margin-bottom:var(--s-1)}
+.info h3{
+  margin:0;font-family:var(--display);
+  font-variation-settings:'wdth' 112,'wght' 720;font-weight:720;
+  text-transform:uppercase;font-size:15px;letter-spacing:.04em;color:var(--ink);
+  flex:1;min-width:0;
+}
+.info p{margin:5px 0 0;font-size:var(--fs-small);color:var(--ink-2);line-height:1.5}
+.info .tagrow{
+  margin-top:var(--s-2);font-family:var(--mono);font-size:var(--fs-meta);
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);
+}
+.info .car-art{width:62px;height:82px;flex:0 0 auto;aspect-ratio:auto}
+.info.car{flex-direction:row;gap:var(--s-3);align-items:flex-start}
+.info.car .info-body{flex:1;min-width:0}
+.kind{
+  display:inline-flex;align-items:center;
+  padding:3px 8px;border-radius:var(--r-pill);flex:0 0 auto;
+  font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;
+  border:1px solid var(--line-2);color:var(--ink-2);background:var(--wash-2);
+}
+.kind.trap{background:var(--red);border-color:var(--red);color:#fff}
+.kind.pickup{background:var(--wash-2);border-color:var(--line-3);color:var(--ink)}
+.kind.item{border:0}
+.odds{
+  font-family:var(--mono);font-size:11px;font-weight:600;color:var(--ink);
+  background:var(--wash-2);border:1px solid var(--line);
+  border-radius:var(--r-pill);padding:3px 9px;flex:0 0 auto;
+  font-variant-numeric:tabular-nums;
+}
+/* an effect is named and swatched, so it is never colour alone - and the
+   swatch is ringed, so Slippery's near-black reads as a swatch and not as a
+   hole in the card */
+.eff-dot{width:9px;height:9px;border-radius:3px;flex:0 0 auto;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.28)}
+
+/* ============================================================
+   11  RACE HUD
+   The instruments. Everything here is read at a glance at speed, so
+   it stays out of the middle of the road, sits on glass dark enough
+   to hold white text over any track, and never grows past a corner.
+   ============================================================ */
+#race{background:var(--void)}
 #cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
-.hud{position:absolute;inset:0;pointer-events:none}
-.hud-top{
-  position:absolute;left:0;right:0;top:0;
-  padding:calc(12px + var(--safe-t)) 16px 0;
-  display:flex;align-items:flex-start;justify-content:space-between;
+.hud{
+  position:absolute;inset:0;pointer-events:none;z-index:2;
+  /* The instrument band. On a phone it is the screen's own margin; across a
+     wide window it closes in on the road, so the things you spend stay in
+     peripheral vision instead of stranded in the far corners. The reference
+     readouts stay in the corners, where they keep the road clear.
+     js/hud.js computes the same inset for the split-screen copy. */
+  --side:max(14px,calc((100% - 680px) / 2));
 }
-#btnPause{pointer-events:auto;background:rgba(232,233,236,.9)}
-.readout{text-align:right}
-.readout .k{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:#8D919A;text-transform:uppercase}
-.readout .v{font-family:var(--mono);font-weight:600;font-size:34px;color:#fff;line-height:1;margin-top:3px;text-shadow:0 2px 10px rgba(0,0,0,.6)}
-.readout .b{font-family:var(--mono);font-size:11px;color:#8D919A;margin-top:7px;letter-spacing:.1em}
+
+.hud-tl{
+  position:absolute;
+  left:calc(14px + var(--safe-l));top:calc(12px + var(--safe-t));
+  display:flex;flex-direction:column;align-items:flex-start;gap:var(--s-2);
+}
+.hud-btn{pointer-events:auto;background:var(--glass-3);border-color:var(--line-2)}
+
+/* track and clock, one chip */
+#gauges{
+  display:inline-flex;align-items:center;gap:var(--s-2);
+  padding:5px 9px;border-radius:var(--r-1);
+  background:var(--glass-3);border:1px solid var(--line);
+  -webkit-backdrop-filter:var(--glass-blur-sm);backdrop-filter:var(--glass-blur-sm);
+}
+#trackName{
+  font-family:var(--mono);font-size:var(--fs-meta);letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink);
+}
+#raceClock{
+  display:none;font-family:var(--mono);font-weight:600;font-size:12px;
+  color:var(--ink-2);font-variant-numeric:tabular-nums;
+  padding-left:var(--s-2);border-left:1px solid var(--line-2);
+}
+#raceClock.on{display:block}
+#raceClock.final{color:var(--red-hi)}
+
+/* distance and the running order */
+.readout{
+  position:absolute;right:calc(14px + var(--safe-r));top:calc(12px + var(--safe-t));
+  min-width:118px;text-align:right;
+  padding:9px 11px 10px;border-radius:var(--r-2);
+  background:var(--glass-3);border:1px solid var(--line);
+  -webkit-backdrop-filter:var(--glass-blur-sm);backdrop-filter:var(--glass-blur-sm);
+  box-shadow:var(--glass-edge);
+}
+.readout .k{font-family:var(--mono);font-size:9px;letter-spacing:.2em;
+  color:var(--ink-3);text-transform:uppercase}
+.readout .v{
+  font-family:var(--mono);font-weight:600;font-size:32px;color:#fff;
+  line-height:1;margin-top:3px;font-variant-numeric:tabular-nums;
+}
+.readout .v em{font-style:normal;font-size:11px;color:var(--ink-3);margin-left:2px}
+.readout .ladder{
+  margin-top:var(--s-2);padding-top:var(--s-2);border-top:1px solid var(--line);
+  display:flex;flex-direction:column;gap:2px;
+}
+.readout .b{
+  font-family:var(--mono);font-size:10px;color:var(--ink-3);margin-top:7px;
+  letter-spacing:.1em;font-variant-numeric:tabular-nums;
+}
 .readout .pos{
-  display:flex;justify-content:flex-end;align-items:baseline;gap:8px;margin-top:4px;
-  font-family:var(--mono);opacity:.62;
+  position:relative;
+  display:flex;justify-content:flex-end;align-items:baseline;gap:8px;
+  font-family:var(--mono);opacity:.6;
 }
-/* Your own row in the ladder. The rest sit dimmed; yours runs at full strength
-   and breathes - a light passing through the text, so the eye lands on it
-   without having to read all six. brightness() is used rather than a fixed
-   colour so it lifts whatever place colour the row currently carries, gold
-   through white. The lit look also sits on .mine itself and not only in the
-   keyframes, so with reduced motion your row is still the bright one, it just
-   stops moving. */
-.readout .pos.mine{
-  opacity:1;
-  filter:brightness(1.3);
-  text-shadow:0 0 10px rgba(255,255,255,.5);
-  animation:posMine 1.7s ease-in-out infinite;
-}
-.readout .pos .p{font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.85}
-.readout .pos .n{font-size:13px;font-weight:600;min-width:50px;text-align:right}
+.readout .pos .p{font-size:9px;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+.readout .pos .n{font-size:12px;font-weight:600;min-width:46px;text-align:right;
+  font-variant-numeric:tabular-nums}
+/* Your own row. It is marked three ways at once - a red tick on the rail,
+   full opacity, and a slow lift - so it is never brightness alone. */
+.readout .pos.mine{opacity:1}
 .readout .pos.mine .p{opacity:1}
-.readout .pos.mine .n{font-size:14px}
-@keyframes posMine{
-  0%,100%{filter:brightness(1.05);text-shadow:0 0 7px rgba(255,255,255,.3)}
-  50%    {filter:brightness(1.75);text-shadow:0 0 17px rgba(255,255,255,.9)}
+.readout .pos.mine .n{font-size:13px}
+.readout .pos.mine::before{
+  content:"";position:absolute;left:-7px;top:50%;transform:translateY(-50%);
+  width:3px;height:11px;border-radius:2px;background:var(--red);
+  box-shadow:0 0 6px rgba(229,38,45,.8);
+  animation:posMine 1.8s ease-in-out infinite;
 }
-#gauges{position:absolute;left:16px;top:calc(66px + var(--safe-t));pointer-events:none}
-#trackName{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.85)}
+@keyframes posMine{0%,100%{opacity:.75}50%{opacity:1}}
+
+/* what is being done to you: one pill per state */
 #effList{
-  position:absolute;left:16px;bottom:calc(30px + var(--safe-b));
-  display:flex;flex-direction:column-reverse;gap:5px;pointer-events:none;
+  position:absolute;left:calc(var(--side) + var(--safe-l));bottom:calc(46px + var(--safe-b));
+  display:flex;flex-direction:column-reverse;gap:4px;pointer-events:none;
+  align-items:flex-start;
 }
 #effList span{
-  font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
-  text-shadow:0 1px 8px rgba(0,0,0,.9);animation:effIn .25s ease both;
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 9px 4px 7px;border-radius:var(--r-pill);
+  background:var(--glass-3);border:1px solid var(--line-2);
+  -webkit-backdrop-filter:var(--glass-blur-sm);backdrop-filter:var(--glass-blur-sm);
+  font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink);
+  animation:effIn var(--d-2) var(--ease) both;
 }
-#effList span.out{animation:effOut .4s ease forwards}
-@keyframes effIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
-@keyframes effOut{to{opacity:0;transform:translateX(-14px)}}
+#effList span::before{
+  content:"";width:7px;height:7px;border-radius:2px;flex:0 0 auto;
+  background:var(--eff,var(--ink-2));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);
+}
+#effList span.out{animation:effOut .4s var(--ease) forwards}
+@keyframes effIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+@keyframes effOut{to{opacity:0;transform:translateX(-10px)}}
+
 #immuneTag{
-  position:absolute;left:0;right:0;bottom:calc(30px + var(--safe-b));text-align:center;
-  font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;
-  color:#FFD86B;text-shadow:0 1px 8px rgba(0,0,0,.9);display:none;
+  position:absolute;left:0;right:0;bottom:calc(46px + var(--safe-b));
+  text-align:center;display:none;pointer-events:none;
 }
 #immuneTag.on{display:block}
+#immuneTag span{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 11px;border-radius:var(--r-pill);
+  background:rgba(10,11,13,.66);border:1px solid rgba(255,216,107,.55);
+  -webkit-backdrop-filter:var(--glass-blur-sm);backdrop-filter:var(--glass-blur-sm);
+  font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--gold);
+}
+/* the gold edge around the whole view while it lasts */
 #shell.immune::after{
-  content:"";position:absolute;inset:0;pointer-events:none;z-index:40;border-radius:inherit;
-  border:4px solid #FFD86B;animation:immuneEdge 1.1s linear infinite;
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:50;
+  border:3px solid var(--gold);border-radius:inherit;
+  animation:immuneEdge 1.1s steps(2,jump-none) infinite;
 }
-@keyframes immuneEdge{0%,100%{border-color:#FFFFFF}50%{border-color:#FFD86B}}
+@keyframes immuneEdge{0%,100%{border-color:#FFFFFF}50%{border-color:var(--gold)}}
+
 #cleanseTag{
-  position:absolute;left:0;right:0;top:42%;text-align:center;
-  font-family:var(--display);font-variation-settings:'wdth' 118,'wght' 750;
-  text-transform:uppercase;letter-spacing:.1em;font-size:26px;color:#B96BFF;
-  text-shadow:0 2px 18px rgba(0,0,0,.8);opacity:0;pointer-events:none;
+  position:absolute;left:0;right:0;top:40%;text-align:center;
+  font-family:var(--display);font-variation-settings:'wdth' 112,'wght' 760;
+  font-weight:760;text-transform:uppercase;letter-spacing:.08em;font-size:26px;
+  color:#B96BFF;text-shadow:0 2px 20px rgba(0,0,0,.85);
+  opacity:0;pointer-events:none;
 }
-#cleanseTag.on{animation:cleansePop 1s ease both}
-@keyframes cleansePop{0%{opacity:0;transform:scale(.85)}25%{opacity:1;transform:scale(1)}75%{opacity:1}100%{opacity:0}}
-/* The ultimate meter and the item square sit together, bottom right, so both
-   of the things you can spend are in one place instead of opposite corners. */
+#cleanseTag.on{animation:cleansePop 1s var(--ease) both}
+@keyframes cleansePop{0%{opacity:0;transform:scale(.88)}22%{opacity:1;transform:scale(1)}72%{opacity:1}100%{opacity:0}}
+
+/* the two things you spend, together, where the thumb already is */
 #hudActions{
-  position:absolute;right:16px;bottom:calc(30px + var(--safe-b));
-  display:flex;align-items:center;gap:10px;
+  position:absolute;right:calc(var(--side) + var(--safe-r));bottom:calc(46px + var(--safe-b));
+  display:flex;align-items:center;gap:var(--s-2);pointer-events:none;
+}
+#ultPct,#itemBox{
+  position:relative;overflow:hidden;pointer-events:auto;
+  width:56px;height:56px;box-sizing:border-box;flex:0 0 auto;
+  appearance:none;-webkit-appearance:none;padding:0;margin:0;
+  cursor:pointer;touch-action:manipulation;
+  user-select:none;-webkit-user-select:none;
+  border-radius:var(--r-2);border:1px solid var(--line-2);
+  background:var(--glass-3);
+  -webkit-backdrop-filter:var(--glass-blur-sm);backdrop-filter:var(--glass-blur-sm);
+  box-shadow:var(--glass-edge);
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color var(--d-2) var(--ease),box-shadow var(--d-2) var(--ease),
+             background var(--d-2) var(--ease),transform var(--d-1) var(--ease);
+}
+#ultPct::-moz-focus-inner,#itemBox::-moz-focus-inner{border:0;padding:0}
+#ultPct:focus,#itemBox:focus{outline:none}
+#ultPct:active,#itemBox:active{transform:scale(.93)}
+
+/* The charge is the square filling from the bottom: a shape you can read
+   without reading the number, with the number still there for the exact
+   answer. Full, the whole face goes red and the rim goes white. */
+#ultFill{
+  position:absolute;left:0;right:0;bottom:0;height:0%;
+  background:linear-gradient(180deg,rgba(229,38,45,.85),rgba(229,38,45,.5));
+  border-top:1px solid rgba(255,122,127,.9);
+  transition:height .18s linear;
   pointer-events:none;
 }
-#itemBox{
-  position:relative;pointer-events:auto;
-  width:54px;height:54px;box-sizing:border-box;
-  appearance:none;cursor:pointer;
-  border:2px solid rgba(255,255,255,.34);border-radius:var(--r-sm);
-  background:rgba(11,11,12,.62);
-  display:flex;align-items:center;justify-content:center;
-  transition:border-color .18s ease,box-shadow .18s ease,background .18s ease,transform .09s ease;
+#ultNum{
+  position:relative;
+  font-family:var(--mono);font-weight:600;font-size:14px;
+  color:var(--ink-2);font-variant-numeric:tabular-nums;
+  text-shadow:0 1px 6px rgba(0,0,0,.9);
 }
-#itemBox:active{transform:scale(.92)}
-/* the swap flash is written frame by frame, so it must not be eased as well */
-#itemBox.swapping{transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}
-#itemBox.full{background:rgba(11,11,12,.8)}
-#itemBox svg{width:30px;height:30px;display:block}
-#boostWrap{position:absolute;left:16px;right:16px;bottom:calc(14px + var(--safe-b));height:4px;background:rgba(255,255,255,.16);border-radius:3px;overflow:hidden}
-#boostFill{height:100%;width:100%;background:var(--red);border-radius:3px;transition:background .2s ease}
-#boostWrap.full #boostFill{background:var(--red-press)}
-#boostWrap.locked #boostFill{background:rgba(255,255,255,.34)}
-/* The launch meter sits directly above the boost bar: same width, same shape,
-   so the two things you spend by holding read as one stack. It empties as you
-   hold the brake and the notch is the line you have to get under. */
-#airWrap{
-  position:absolute;left:16px;right:16px;bottom:calc(22px + var(--safe-b));
-  height:4px;background:rgba(255,255,255,.16);border-radius:3px;
-  transition:box-shadow .16s ease;
+#ultPct.ready{border-color:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.5),
+  0 0 18px -2px rgba(229,38,45,.75)}
+#ultPct.ready #ultNum{color:#fff}
+#ultPct.ready #ultFill{
+  background:linear-gradient(180deg,var(--red-hi),var(--red));
+  animation:ultReady 1.5s ease-in-out infinite;
 }
-#airFill{
-  position:absolute;left:0;top:0;bottom:0;width:100%;
-  background:var(--green);border-radius:3px;transition:background .2s ease;
-}
-/* Everything left of the notch is the launch zone. Tinted so the target is
-   visible before you ever hold the brake, not only once you are draining. */
-#airZone{
-  position:absolute;left:0;top:0;bottom:0;
-  background:rgba(47,191,99,.30);border-radius:3px 0 0 3px;pointer-events:none;
-}
-#airMark{
-  position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;
-  background:#FFFFFF;border-radius:1px;box-shadow:0 0 4px rgba(0,0,0,.8);
-}
-/* The wind-up fills the emptied track back up, the other way, in white. Same
-   bar, same question - how much launch have I got - so there is one place to
-   look rather than two. */
-#airWind{
-  position:absolute;left:0;top:0;bottom:0;width:0;
-  background:#FFFFFF;border-radius:3px;box-shadow:0 0 8px rgba(255,255,255,.85);
-}
-#airWrap.winding{box-shadow:0 0 12px rgba(255,255,255,.8)}
-#airWrap.wound{box-shadow:0 0 18px rgba(255,233,168,.95);animation:airFull .6s ease-in-out infinite alternate}
-#airWrap.wound #airWind{background:#FFE9A8;box-shadow:0 0 14px rgba(255,210,74,.95)}
-@keyframes airFull{from{opacity:.78}to{opacity:1}}
-@media (prefers-reduced-motion:reduce){#airWrap.wound{animation:none}}
-#airWrap.armed{box-shadow:0 0 10px rgba(47,191,99,.9)}
-#airWrap.armed #airFill{background:#7CF7A6}
-#airWrap.armed #airMark{background:#7CF7A6}
-#airWrap.cooling #airFill{background:rgba(47,191,99,.34)}
-#airWrap.cooling #airMark{background:rgba(255,255,255,.4)}
-#airWrap.air #airFill{background:#FFFFFF}
-#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+@keyframes ultReady{0%,100%{opacity:.86}50%{opacity:1}}
 
-/* countdown gantry */
-#count{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:26px;background:rgba(11,11,12,.42);pointer-events:none}
+#itemBox.full{background:linear-gradient(180deg,rgba(10,11,13,.82),rgba(10,11,13,.7))}
+#itemBox svg{width:28px;height:28px;display:block}
+
+/* The two meters you fill by holding, in one tray: launch above, boost
+   below. One place to look for "how much have I got". */
+#meterRail{
+  position:absolute;left:calc(var(--side) + var(--safe-l));right:calc(var(--side) + var(--safe-r));
+  bottom:calc(12px + var(--safe-b));
+  padding:6px 8px;border-radius:var(--r-1);
+  background:var(--glass-3);border:1px solid var(--line);
+  -webkit-backdrop-filter:var(--glass-blur-sm);backdrop-filter:var(--glass-blur-sm);
+  display:flex;flex-direction:column;gap:5px;pointer-events:none;
+}
+#airWrap,#boostWrap{
+  position:relative;height:5px;border-radius:3px;
+  background:rgba(255,255,255,.14);
+  transition:box-shadow var(--d-2) var(--ease);
+}
+#boostFill{position:absolute;left:0;top:0;bottom:0;width:100%;
+  background:var(--red);border-radius:3px;transition:background var(--d-2) var(--ease)}
+#boostWrap.full #boostFill{background:var(--red-hi)}
+#boostWrap.locked #boostFill{background:rgba(255,255,255,.3)}
+
+#airFill{position:absolute;left:0;top:0;bottom:0;width:100%;
+  background:var(--go);border-radius:3px;transition:background var(--d-2) var(--ease)}
+/* the target you have to get under, visible before you ever hold the brake */
+#airZone{position:absolute;left:0;top:0;bottom:0;
+  background:rgba(47,191,99,.26);border-radius:3px 0 0 3px;pointer-events:none}
+#airMark{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;
+  background:#fff;border-radius:1px;box-shadow:0 0 4px rgba(0,0,0,.9)}
+/* the wind-up refills the emptied track the other way, in white */
+#airWind{position:absolute;left:0;top:0;bottom:0;width:0;
+  background:#fff;border-radius:3px;box-shadow:0 0 8px rgba(255,255,255,.8)}
+#airWrap.winding{box-shadow:0 0 10px rgba(255,255,255,.7)}
+#airWrap.wound{box-shadow:0 0 14px rgba(255,233,168,.9);
+  animation:airFull .6s ease-in-out infinite alternate}
+#airWrap.wound #airWind{background:#FFE9A8;box-shadow:0 0 12px rgba(255,210,74,.9)}
+@keyframes airFull{from{opacity:.8}to{opacity:1}}
+#airWrap.armed{box-shadow:0 0 9px rgba(47,191,99,.85)}
+#airWrap.armed #airFill{background:var(--go-hi)}
+#airWrap.armed #airMark{background:var(--go-hi)}
+#airWrap.cooling #airFill{background:rgba(47,191,99,.3)}
+#airWrap.cooling #airMark{background:rgba(255,255,255,.35)}
+#airWrap.air #airFill{background:#fff}
+
+#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:3}
+
+/* Four sets of instruments are painted on the canvas in local play, so the
+   page's single set has to get out of the way completely. */
+body.local .hud .readout,body.local #hudActions,body.local #meterRail,
+body.local #effList,body.local #immuneTag,body.local #cleanseTag{display:none!important}
+
+/* ============================================================
+   12  COUNTDOWN
+   ============================================================ */
+#count{
+  position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+  background:rgba(5,5,6,.44);pointer-events:none;z-index:4;
+}
 #count.on{display:flex}
-.gantry{display:flex;gap:12px;padding:14px 18px;background:var(--black);border-radius:var(--r-md);box-shadow:0 14px 34px rgba(0,0,0,.5)}
-.gantry i{width:22px;height:22px;border-radius:50%;background:#26282D;transition:background .16s ease,box-shadow .16s ease}
-.gantry i.lit{background:var(--red);box-shadow:0 0 16px rgba(226,27,34,.85)}
-.gantry i.go{background:var(--green);box-shadow:0 0 16px rgba(47,191,99,.8)}
-#countNum{font-family:var(--mono);font-weight:600;font-size:84px;color:#fff;line-height:1;text-shadow:0 4px 24px rgba(0,0,0,.7)}
-#countNum.pop{animation:pop .5s ease both}
-@keyframes pop{0%{transform:scale(.7);opacity:0}35%{transform:scale(1.06);opacity:1}100%{transform:scale(1);opacity:1}}
+.count-card{
+  display:flex;flex-direction:column;align-items:center;gap:var(--s-4);
+  padding:var(--s-5) var(--s-7);border-radius:var(--r-4);
+  background:var(--glass-1);border:1px solid var(--line);
+  box-shadow:var(--glass-edge),var(--lift-3);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+}
+.gantry{display:flex;gap:10px}
+.gantry i{
+  width:16px;height:16px;border-radius:50%;
+  background:rgba(255,255,255,.1);border:1px solid var(--line-2);
+  transition:background var(--d-1) var(--ease),box-shadow var(--d-1) var(--ease),
+             border-color var(--d-1) var(--ease);
+}
+.gantry i.lit{background:var(--red);border-color:var(--red);
+  box-shadow:0 0 14px rgba(229,38,45,.8)}
+.gantry i.go{background:var(--go);border-color:var(--go);
+  box-shadow:0 0 14px rgba(47,191,99,.75)}
+#countNum{
+  font-family:var(--display);font-variation-settings:'wdth' 108,'wght' 820;
+  font-weight:820;font-size:72px;line-height:.9;color:#fff;
+  letter-spacing:.01em;font-variant-numeric:tabular-nums;
+}
+#countNum.pop{animation:pop .5s var(--ease) both}
+@keyframes pop{0%{transform:scale(.72);opacity:0}34%{transform:scale(1.05);opacity:1}100%{transform:scale(1);opacity:1}}
 
-/* pause + over panels */
-.panel{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(11,11,12,.72)}
+/* ============================================================
+   13  PANELS  —  pause and results
+   ============================================================ */
+.panel{
+  position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+  padding:var(--s-5);z-index:5;
+  padding-bottom:calc(var(--s-5) + var(--safe-b));
+  background:rgba(5,5,6,.62);
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+}
 .panel.on{display:flex}
-.panel-card{width:100%;max-width:400px;background:var(--gray-050);border-radius:var(--r-lg);padding:26px 22px;animation:slideUp .28s cubic-bezier(.2,.8,.25,1) both}
-.panel-card h2{margin:0 0 4px;font-size:30px}
-.panel-card .lead{margin:0 0 20px;font-size:14px;color:var(--muted)}
-.stats{display:flex;gap:10px;margin-bottom:20px}
-.stat{flex:1;background:var(--gray-100);border-radius:var(--r-md);padding:14px}
-.stat .k{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
-.stat .v{font-family:var(--mono);font-weight:600;font-size:26px;color:var(--black);margin-top:4px}
-.stat.hot{background:var(--red)}
-.stat.hot .k{color:rgba(255,255,255,.8)}
-.stat.hot .v{color:#fff}
-.stack{display:flex;flex-direction:column;gap:10px}
-#newBest{display:none;align-items:center;gap:8px;margin:0 0 16px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.panel-card{
+  width:100%;max-width:400px;max-height:100%;overflow-y:auto;
+  border-radius:var(--r-4);padding:var(--s-6) var(--s-5) var(--s-5);
+  background:var(--glass-1);border:1px solid var(--line);
+  box-shadow:var(--glass-edge),var(--lift-3);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  animation:slideUp var(--d-2) var(--ease) both;
+}
+.panel-card .display{font-size:28px;margin:0 0 6px}
+.panel-card .lead{margin:0 0 var(--s-5)}
+
+/* A pause nobody asked for - a controller has gone - wears the same panel with
+   the accent doing the telling. The reason is already in the lead line; this
+   makes it read as an interruption rather than as a menu. */
+#pausePanel.alert .panel-card{border-color:rgba(229,38,45,.45)}
+#pausePanel.alert .lead{color:var(--red-hi)}
+
+#ovBoard{display:none;margin:0 0 var(--s-5)}
+#ovBoard.on{display:flex;flex-direction:column;gap:3px}
+#ovBoard .r{
+  display:flex;align-items:center;gap:var(--s-2);padding:8px 11px;
+  background:var(--wash);border:1px solid transparent;border-radius:var(--r-1);
+}
+#ovBoard .r.seat{background:var(--wash-2);border-color:var(--line)}
+#ovBoard .pl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3);width:30px;flex:0 0 auto}
+#ovBoard .r.seat .pl{color:var(--ink-2)}
+#ovBoard .chip-seat{width:4px;height:18px;border-radius:2px;flex:0 0 auto;
+  background:var(--line-3)}
+#ovBoard .nm{
+  flex:1;min-width:0;font-family:var(--display);
+  font-variation-settings:'wdth' 112,'wght' 700;font-weight:700;
+  text-transform:uppercase;font-size:13px;letter-spacing:.04em;color:var(--ink);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+#ovBoard .by{font-family:var(--mono);font-size:10px;color:var(--ink-3);flex:0 0 auto;
+  letter-spacing:.08em;text-transform:uppercase}
+
+#newBest{
+  display:none;align-items:center;gap:7px;margin:0 0 var(--s-4);
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--red-hi);
+}
 #newBest.on{display:flex}
-#newBest svg{stroke:var(--red);width:16px;height:16px}
+#newBest .ic{stroke:var(--red-hi);width:15px;height:15px}
 
-/* desktop control hint */
-.keys{display:none;gap:8px;margin-top:16px;align-items:center;justify-content:center;flex-wrap:wrap}
-body.desk .keys{display:flex}
-.key{font-family:var(--mono);font-size:11px;color:var(--icon);background:var(--gray-050);border:1.5px solid var(--gray-300);border-bottom-width:3px;border-radius:6px;padding:5px 8px;min-width:26px;text-align:center}
-.keys .lbl{font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:.06em}
+.stats{display:flex;gap:var(--s-2);margin-bottom:var(--s-5)}
+.stat{flex:1;background:var(--wash);border:1px solid var(--line);
+  border-radius:var(--r-2);padding:12px 13px}
+.stat .k{font-family:var(--mono);font-size:9px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--ink-3)}
+.stat .v{font-family:var(--mono);font-weight:600;font-size:24px;color:var(--ink);
+  margin-top:4px;font-variant-numeric:tabular-nums}
+.stat .v em{font-style:normal;font-size:11px;color:var(--ink-3);margin-left:2px}
+.stat.hot{background:var(--red);border-color:var(--red)}
+.stat.hot .k{color:rgba(255,255,255,.75)}
+.stat.hot .v{color:#fff}
+.stat.hot .v em{color:rgba(255,255,255,.7)}
 
-/* In a portrait window on a computer the shell stays the column it has always
-   been, scaled up to fill the height. It only ever grows: --desk-k is floored
-   at 1, so a laptop that already filled its height is left alone. */
+.stack{display:flex;flex-direction:column;gap:var(--s-2)}
+
+/* the two personal-record cells mean nothing on a shared screen */
+body.local #overPanel .stats{display:none}
+
+/* ============================================================
+   14  RESPONSIVE
+   ============================================================ */
+
+/* ---- a short viewport: give the road back its height ----
+   Below 480 the race readout compacts too; js/hud.js mirrors these exact
+   numbers for the split-screen copy. */
+@media (max-height:480px){
+  .readout{padding:7px 10px 8px}
+  .readout .v{font-size:24px}
+  .readout .ladder{margin-top:6px;padding-top:6px;gap:0}
+  .readout .pos .n{font-size:11px}
+  .readout .pos.mine .n{font-size:12px}
+  .readout .b{margin-top:5px}
+  #hudActions,#effList,#immuneTag{bottom:calc(40px + var(--safe-b))}
+}
+@media (max-height:680px){
+  .home-title{font-size:clamp(36px,12vw,50px)}
+  .home-head{padding-top:var(--s-4)}
+  #countNum{font-size:56px}
+  .count-card{padding:var(--s-4) var(--s-6);gap:var(--s-3)}
+  .home-actions .btn-primary{min-height:54px}
+}
+
+/* ---- portrait on a computer: the column, scaled up to the window ---- */
 @media (orientation:portrait){
   body.desk #shell{
-    width:min(520px, calc(100dvh * 0.62));
-    height:min(100dvh, 900px);
+    width:min(520px,calc(100dvh * 0.62));
+    height:min(100dvh,900px);
     max-width:none;
-    border-radius:18px;
-    transform:scale(var(--desk-k, 1));
+    border-radius:var(--r-4);
+    transform:scale(var(--desk-k,1));
     transform-origin:center center;
+    box-shadow:0 0 0 1px rgba(255,255,255,.06),0 50px 120px -30px #000;
   }
 }
 
-/* Landscape, phone or computer: the shell stretches across the screen instead
-   of standing as a column. Nothing rotates - the road still runs up the screen
-   and the scene is sized off the height, so the same stretch of road is in
-   front of you. What the extra width buys is more of the world either side.
-   Capped at 2.2:1, which covers phones and 16:9, so an ultrawide gets side
-   bars rather than a letterbox slot. The menus keep their column: only the
-   race uses the full width. */
+/* ---- landscape, phone or computer ----
+   The shell stretches across the screen instead of standing as a column.
+   Nothing rotates: the road still runs up the screen and the scene is sized
+   off the height, so the same stretch of road is in front of you. What the
+   extra width buys is more of the world either side. The menus keep their
+   column - only the race uses the full width. */
 @media (orientation:landscape){
   #shell{
     max-width:none;
-    width:min(100vw, calc(100dvh * 2.2));
+    width:min(100vw,calc(100dvh * 2.2));
     height:100dvh;
     border-radius:0;
     transform:none;
   }
   body{display:flex;align-items:center;justify-content:center}
-  .topbar,.home-head,.home-foot{width:100%}
-  #ribbon{max-width:520px;margin-left:auto;margin-right:auto;width:100%}
-  #modeCard,#langCard,.panel-card{max-width:520px;margin-left:auto;margin-right:auto}
-  #modes,#cars,#diffs,#style,#custom{align-items:center;justify-content:center}
-  #modes #modeCard,#cars #modeCard,#diffs #modeCard,#style #modeCard,#custom #modeCard{width:100%}
-  .tabs,#garageBody{max-width:560px;margin-left:auto;margin-right:auto;width:100%}
-  .home-title{font-size:clamp(38px,7vw,60px)}
+  .home-title{font-size:clamp(34px,6.5vw,58px)}
+  .home-head{padding-top:var(--s-3)}
+  .home-mid{padding-top:var(--s-3);padding-bottom:var(--s-3)}
 }
+
+/* ---- wide: a computer, or a phone on its side ----
+   Not a stretched phone. The setup steps become centred dialogs rather than
+   bottom sheets, the home footer lays out as one row, and the reference
+   pages become a real multi-column index. */
+@media (min-width:760px){
+  :root{--pad:28px}
+  .sheet-screen{align-items:center;padding:var(--s-5)}
+  .sheet{max-width:560px;border-radius:var(--r-4)}
+  .sheet-screen.on .sheet{animation:dialogIn var(--d-2) var(--ease) both}
+  @keyframes dialogIn{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
+  .sheet-head{padding:var(--s-5) var(--s-5) var(--s-4)}
+  .sheet-head .display{font-size:22px}
+  .sheet-body{padding:var(--s-5)}
+  .sheet-foot{padding:var(--s-4) var(--s-5) var(--s-5)}
+  .mode{padding:var(--s-3) var(--s-4)}
+
+  .topbar,.home-foot{
+    width:100%;max-width:1100px;margin-left:auto;margin-right:auto;
+  }
+  /* head and actions sit on the road, not beside it */
+  .home-head,.home-mid{
+    width:100%;max-width:560px;margin-left:auto;margin-right:auto;
+  }
+  .home-head{padding-left:var(--s-6);padding-right:var(--s-6)}
+  #home{
+    background:
+      radial-gradient(120% 64% at 50% 42%,rgba(255,255,255,.035),transparent 68%),
+      var(--ground);
+  }
+  #garage{
+    background:
+      radial-gradient(110% 60% at 50% 0%,rgba(255,255,255,.028),transparent 66%),
+      var(--ground);
+  }
+  .home-foot{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:var(--s-7);flex-wrap:wrap;
+  }
+  .best-strip{flex:0 0 auto;gap:var(--s-3)}
+  .keys{margin-top:0;flex:1;justify-content:flex-end}
+  .keys-k{width:auto;margin:0 var(--s-2) 0 0}
+  #ribbon{
+    left:50%;transform:translateX(-50%);
+    width:min(100%,560px);
+    border-left:1px solid var(--line);border-right:1px solid var(--line);
+  }
+  .panel-card{max-width:440px}
+
+  .tabs{max-width:1100px;margin-left:auto;margin-right:auto;width:100%}
+  #garageBody{
+    max-width:1100px;margin-left:auto;margin-right:auto;width:100%;
+    grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-3);
+  }
+}
+@media (min-width:1180px){
+  #garageBody{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .car-grid{gap:var(--s-3)}
+}
+
+/* ---- local play: the whole window is the game ---- */
 body.local #shell{
   width:100vw;height:100dvh;max-width:none;
-  border-radius:0;transform:none;
+  border-radius:0;transform:none;box-shadow:none;
 }
 body.desk{display:flex;align-items:center;justify-content:center}
-body.desk .topbar,body.desk .home-head,body.desk .home-foot{width:100%}
-body.desk #ribbon{max-width:520px;margin-left:auto;margin-right:auto;width:100%}
-body.desk #modeCard,body.desk #langCard,body.desk .panel-card{max-width:520px;margin-left:auto;margin-right:auto}
-body.desk #modes,body.desk #cars,body.desk #diffs,body.desk #style,body.desk #custom{align-items:center;justify-content:center}
-body.desk #modes #modeCard,body.desk #cars #modeCard,body.desk #diffs #modeCard,body.desk #style #modeCard,body.desk #custom #modeCard{width:100%}
 
+/* ============================================================
+   15  MOTION & CONTRAST
+   ============================================================ */
 @media (prefers-reduced-motion:reduce){
-  *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+    scroll-behavior:auto!important;
+  }
+  .lane-line{animation:none}
+  /* the states that were carried by movement keep a still form */
+  #airWrap.wound{animation:none}
+  .readout .pos.mine::before{animation:none;opacity:1}
 }
-@media (max-height:640px){
-  .home-title{font-size:clamp(38px,12vw,52px)}
-  .home-head{padding-top:16px}
-  #countNum{font-size:64px}
+@media (prefers-contrast:more){
+  :root{
+    --line:rgba(255,255,255,.22);
+    --line-2:rgba(255,255,255,.34);
+    --ink-2:#C8CCD2;
+    --ink-3:#9AA0A8;
+    --glass-1:linear-gradient(180deg,rgba(24,26,30,.94),rgba(8,9,11,.96));
+    --glass-3:rgba(8,9,11,.88);
+  }
+}
+@media (forced-colors:active){
+  .sheet,.panel-card,#langCard,.mode,.car-opt,.info,.opt,.tog,.step{
+    border:1px solid CanvasText;
+  }
+  .btn:focus-visible,.icon-btn:focus-visible,.mode:focus-visible{outline:2px solid Highlight}
 }

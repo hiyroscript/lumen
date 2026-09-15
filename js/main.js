@@ -24,6 +24,7 @@ setTimeout(function(){
   show("home");
   setTimeout(function(){ $("#splash").style.display = "none"; }, 400);
   if(!lang) $("#langWrap").classList.add("on");
+  gateFocus();
 }, SPLASH_MS);
 
 /* ---------------- UI wiring -------------------------------------- */
@@ -33,10 +34,13 @@ document.querySelectorAll(".lang-opt").forEach(function(b){
     store.set("seren.lang", lang);
     applyLang();
     $("#langWrap").classList.remove("on");
+    gateFocus();
     tone(660, .09, "square", .1);
   });
 });
-$("#btnLang").addEventListener("click", function(){ $("#langWrap").classList.add("on"); });
+$("#btnLang").addEventListener("click", function(){
+  $("#langWrap").classList.add("on"); gateFocus();
+});
 $("#btnSound").addEventListener("click", function(){ setSound(!soundOn); if(soundOn) tone(760,.07,"square",.1); });
 $("#btnStart").addEventListener("click", function(){ audio(); show("modes"); });
 $("#btnCloseModes").addEventListener("click", function(){ show("home"); });

@@ -53,15 +53,27 @@ function padsRefresh(){
   for(let i=0;i<G.players;i++){
     const p = pads[i];
     html += '<div class="pad-row' + (p ? " on" : "") + '">' +
-            '<span class="chip" style="background:' + PCOLS[i] + '"></span>' +
+            '<span class="chip-seat" style="background:' + PCOLS[i] + '"></span>' +
             '<span class="who">' + t("playerN") + " " + (i + 1) + '</span>' +
-            '<span class="nm">' + (p ? padName(p) : t("padWaiting")) + '</span></div>';
+            '<span class="nm">' + (p ? padName(p) : t("padWaiting")) + '</span>' +
+            '<span class="dot"></span></div>';
   }
   if(list._html !== html){ list._html = html; list.innerHTML = html; }
   const ok = pads.length >= G.players;
+  /* The tally is a number in the header; what the pad does is a line under the
+     list. They used to be one run-on sentence, which was neither. */
   const cnt = $("#padCount");
-  const line = pads.length + " / " + G.players + " " + t("padsNeed") + " \u00b7 " + t("padCtrls");
-  if(cnt.textContent !== line) cnt.textContent = line;
+  const tally = pads.length + " / " + G.players;
+  if(cnt.textContent !== tally){
+    cnt.textContent = tally;
+    /* The chip is a bare fraction on screen. Spelling it out in the label is
+       what makes it mean something read aloud, and it announces itself as the
+       pads arrive because the chip is a live region. */
+    cnt.setAttribute("aria-label", tally + " " + t("padsNeed"));
+  }
+  const hint = $("#padHint");
+  const line = t("padCtrls");
+  if(hint && hint.textContent !== line) hint.textContent = line;
   $("#btnPadsGo").classList.toggle("off", !ok);
 }
 
