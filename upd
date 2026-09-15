@@ -1,1 +1,352 @@
-Completed: fully renamed/rebranded the game to Seren.
+You are working directly inside the existing GitHub repository `hiyroscript/seren`.
+
+Your task is to perform a complete UI/UX redesign of Seren.
+
+This is not a small visual refresh, a reskin, or a set of isolated CSS improvements. Treat the existing interface as a functional prototype whose game mechanics, content, state management, controls, and architecture must remain intact, but whose complete presentation and interaction layer should be reconsidered as one coherent professional product.
+
+Before changing anything, thoroughly explore the repository and understand how Seren works.
+
+Read the README, architecture documentation, HTML structure, stylesheet, UI code, HUD code, runtime/layout code, input handling, localization system, and the portions of the rendering system that visually intersect with the interface. Understand the complete player journey from launch through race completion, including local multiplayer.
+
+Do not redesign the game from assumptions. Use the existing implementation as the source of truth.
+
+## Core objective
+
+Reimagine Seren's entire interface so that it feels:
+
+* clean
+* minimalist
+* deliberate
+* modern
+* polished
+* premium
+* professional
+* highly readable
+* visually coherent
+* unmistakably designed rather than merely styled
+
+The resulting product should feel like a finished independent racing game with a strong, restrained visual identity.
+
+Do not make it feel like a generic web app, admin dashboard, mobile template, Bootstrap interface, or overly decorative arcade game.
+
+Preserve Seren's personality and sense of speed while making the interface significantly more sophisticated.
+
+## Visual identity
+
+The primary interface palette must be built around:
+
+* black
+* white
+* neutral grays
+* red
+
+Red should act as Seren's principal accent and identity color.
+
+The overall interface should remain restrained. Avoid introducing a large collection of unrelated interface colors simply to differentiate controls.
+
+Gameplay-specific colors that communicate actual game state, car identity, hazards, effects, player identity, or other important mechanics may remain where they are necessary for comprehension. The black / white / gray / red rule primarily defines the interface system and visual chrome rather than forcing the game world itself into monochrome.
+
+The result should have excellent contrast and remain legible over the moving Canvas game.
+
+## Glass treatment
+
+Dialogs, modal surfaces, sheets, overlays, pause states, configuration surfaces, and similar elevated interface layers should use a refined semi-transparent glass treatment.
+
+The glass aesthetic should feel mature and restrained rather than flashy.
+
+Use transparency, tonal layering, blur where appropriate, subtle borders, controlled highlights, and carefully judged depth to make the interface feel integrated with the scene underneath it.
+
+The effect must never compromise readability.
+
+Provide sensible visual behavior on browsers where backdrop blur or related effects are unavailable.
+
+Do not turn every element into glass. Establish a clear hierarchy between background, navigation, content, controls, overlays, and interactive surfaces.
+
+## Design autonomy
+
+Do not wait for a pixel-by-pixel specification.
+
+I specifically want you to make the design decisions.
+
+Audit the existing UI and determine where its hierarchy, density, proportions, typography, navigation, feedback, component consistency, spacing, information architecture, interaction patterns, and visual rhythm can be improved.
+
+Then redesign it as a unified system.
+
+Do not simply preserve every existing layout and repaint it with darker colors.
+
+At the same time, do not arbitrarily change game rules or remove information that players need.
+
+The goal is to improve how Seren communicates the game, not to simplify it by hiding important mechanics.
+
+## Full-product scope
+
+The redesign must cover the complete player-facing experience, not only the home screen.
+
+Review and redesign the full flow including:
+
+* startup and first-run experience
+* language selection
+* home
+* mode selection
+* single-player setup
+* local multiplayer setup
+* controller discovery
+* standard/custom play setup
+* difficulty selection
+* car selection
+* Cars & More / reference content
+* in-race HUD
+* status/effect communication
+* item and ultimate interactions
+* launch/boost information
+* race countdown
+* pause states
+* disconnect/error-like race interruptions
+* results/race-over presentation
+* desktop presentation
+* mobile/touch presentation
+* landscape behavior
+* local multiplayer split-screen presentation
+
+These should feel like parts of one design system.
+
+Do not create one aesthetic for menus and another unrelated aesthetic for gameplay.
+
+## Race HUD
+
+Treat the race HUD as a critical part of the redesign rather than an afterthought.
+
+The game contains a substantial amount of live information, and the HUD needs to remain immediately understandable while the road is moving quickly.
+
+Prioritize information hierarchy, peripheral readability, clear interaction states, and minimal obstruction of gameplay.
+
+Preserve all information and controls required by the mechanics.
+
+Remember that Seren has both a DOM HUD for normal play and Canvas-rendered HUD elements for local split-screen play. They must be redesigned together and should clearly belong to the same system.
+
+Do not update one and leave the other visually inconsistent.
+
+## UX principles
+
+Use the redesign to make Seren easier to understand without making it feel instructional or verbose.
+
+Favor:
+
+* clear hierarchy
+* strong visual grouping
+* predictable navigation
+* consistent interaction behavior
+* meaningful feedback
+* restrained motion
+* clear selected/disabled/ready/active states
+* touch-friendly targets
+* keyboard usability
+* controller usability
+* rapid visual scanning
+* excellent typography
+* consistent spacing and geometry
+
+Avoid:
+
+* unnecessary visual noise
+* excessive gradients
+* gratuitous glow
+* oversized decorative elements
+* excessive borders
+* inconsistent corner radii
+* random card styles
+* redundant labels
+* visual effects that obscure the road
+* tiny low-contrast text
+* over-animation
+* gimmicky cyberpunk styling
+* generic gaming UI clichés
+
+Animations should reinforce interaction, state changes, transitions, readiness, selection, or motion. They should not exist merely because something can animate.
+
+Respect `prefers-reduced-motion`.
+
+## Typography
+
+Establish a disciplined typography system.
+
+It should have clear roles for:
+
+* display/title typography
+* navigation/actions
+* normal explanatory copy
+* compact metadata
+* numerical/readout information
+
+Typography should contribute heavily to Seren's professional character.
+
+Preserve localization requirements. The interface must work cleanly in both English and French, including strings that become longer after translation.
+
+Do not hard-code layouts that only work for the current English copy.
+
+## Responsive behavior
+
+Seren must continue to work across its existing target environments.
+
+The redesign must be intentional on:
+
+* portrait phones
+* landscape phones
+* desktop browsers
+* tall/narrow desktop windows
+* large displays
+* local split-screen configurations
+
+Do not think of desktop as simply a stretched phone interface.
+
+Do not compromise the existing road/camera behavior or gameplay visibility.
+
+Account for safe-area insets and touch interaction.
+
+## Interaction compatibility
+
+Preserve all supported control methods and their behavior:
+
+* keyboard
+* mouse
+* touch/pointer gestures
+* controller/gamepad
+* local multiplayer controllers
+
+Visual changes must not silently break input handling.
+
+Any DOM restructuring that changes IDs, selectors, event targets, or dynamically generated controls must be reflected safely in the relevant JavaScript.
+
+## Preserve game behavior
+
+Do not alter game balance, race mechanics, AI, physics, timings, track behavior, item behavior, ultimate behavior, progression, saved data semantics, or race rules unless a change is absolutely required for interface integration.
+
+This task is primarily a complete UI/UX redesign.
+
+Keep gameplay logic separated from presentation logic.
+
+Do not rewrite unrelated systems simply because you encounter them.
+
+## Existing technical architecture
+
+Respect Seren's current lightweight architecture.
+
+The project intentionally has:
+
+* no framework
+* no package manager
+* no bundler
+* no build step
+* plain HTML
+* plain CSS
+* classic JavaScript files loaded with `defer`
+* Canvas 2D rendering
+
+Do not introduce React, Vue, Svelte, Tailwind, Bootstrap, component frameworks, build tooling, npm dependencies, or a new application architecture merely to accomplish the redesign.
+
+A sophisticated interface should still be achievable within the existing architecture.
+
+If you refactor interface code, keep the project's dependency ordering and shared-scope constraints in mind.
+
+Be particularly careful about introducing duplicate top-level JavaScript declarations because the scripts share one global scope.
+
+## Localization
+
+Do not regress Seren's English/French localization.
+
+Any new visible copy must use the existing translation system.
+
+Do not scatter hard-coded user-facing strings through HTML or JavaScript.
+
+Ensure both languages remain complete and usable.
+
+## Accessibility
+
+Maintain or improve the existing accessibility characteristics.
+
+At minimum:
+
+* preserve keyboard operation
+* preserve visible focus states
+* maintain sufficient contrast
+* respect reduced motion
+* keep touch targets usable
+* preserve semantic buttons where appropriate
+* keep useful ARIA labeling
+* avoid conveying critical information exclusively through color
+
+Professional minimalism must not come at the expense of usability.
+
+## Code quality
+
+Do not solve the redesign with a growing pile of one-off inline styles.
+
+Build a coherent reusable visual system in the stylesheet.
+
+Consolidate repeated patterns and define deliberate tokens for the redesigned interface where useful.
+
+Remove obsolete styling when it is genuinely replaced rather than leaving two competing systems in the codebase.
+
+Keep CSS and JS understandable.
+
+Avoid unnecessary complexity.
+
+## Validation
+
+After implementation, thoroughly test the redesigned flow.
+
+Walk through at least:
+
+1. first visit / language selection
+2. home
+3. Endless race setup
+4. Race against bots setup
+5. each difficulty path
+6. car selection
+7. Cars & More
+8. race start and countdown
+9. active racing HUD
+10. ultimate/item states
+11. pause/resume
+12. results
+13. mobile/portrait
+14. landscape
+15. desktop
+16. local multiplayer setup
+17. custom local race setup
+18. split-screen race HUD
+19. controller disconnect/reconnect presentation
+20. English and French
+
+Run:
+
+`node tools/check.mjs`
+
+Do not consider the work complete until the repository's validation passes.
+
+Check the browser console for runtime errors.
+
+Make sure existing IDs or bindings were not accidentally broken during the redesign.
+
+## Final quality bar
+
+The final result should look like Seren received a complete visual direction from a strong product/UI designer rather than a CSS cleanup.
+
+It should be immediately recognizable as more mature, calmer, more intentional, and more professional.
+
+The interface should support the game instead of competing with it.
+
+Use the black / white / gray / red identity consistently, with red used deliberately rather than everywhere.
+
+Use the semi-transparent glass language especially effectively for dialogs and elevated surfaces.
+
+Maintain enough personality that Seren still feels like a racing game rather than a productivity application.
+
+Make confident decisions.
+
+Do not ask me to specify every component.
+
+Explore the existing game, establish a coherent design language, implement it consistently across the entire experience, and leave the repository in a complete, tested, production-ready state.
+
+
+note: the game Redline has been completely rebranded/renamed to Seren
