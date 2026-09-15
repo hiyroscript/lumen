@@ -1,12 +1,12 @@
 "use strict";
 
-/* SEREN - sound, generated rather than loaded.
+/* REDLINE - sound, generated rather than loaded.
    The context is created lazily on the first call, so it is always born
    inside a user gesture and browsers do not refuse it. */
 
 /* ---------------- sound (generated, no files) -------------------- */
 let actx=null, master=null, engineNode=null;
-let soundOn = store.get("seren.sound") !== "0";
+let soundOn = store.get("redline.sound") !== "0";
 
 function audio(){
   if(actx) return actx;
@@ -54,7 +54,7 @@ function engineStart(){
 function engineSet(r){ if(engineNode) engineNode.o.frequency.value = 46 + r*74; }
 function engineStop(){ if(engineNode){ try{ engineNode.o.stop(); }catch(e){} engineNode = null; } }
 function setSound(on){
-  soundOn = on; store.set("seren.sound", on ? "1" : "0");
+  soundOn = on; store.set("redline.sound", on ? "1" : "0");
   if(master) master.gain.value = on ? 0.9 : 0;
   $("#icSoundOn").style.display  = on ? "" : "none";
   $("#icSoundOff").style.display = on ? "none" : "";

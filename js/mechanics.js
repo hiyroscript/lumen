@@ -1,6 +1,6 @@
 "use strict";
 
-/* SEREN - the rules of the road, shared by every car on it.
+/* REDLINE - the rules of the road, shared by every car on it.
    Contact and collisions, lane changes, boost, the brake and the launch,
    wrecking and respawning, effects, ultimates, items, hazards and particles.
    Player and bot run the same functions here; nothing is duplicated for one

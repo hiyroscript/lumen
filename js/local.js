@@ -1,6 +1,6 @@
 "use strict";
 
-/* SEREN - local play: seats, player colours and the controllers behind
+/* REDLINE - local play: seats, player colours and the controllers behind
    them. Pad discovery and the menu loops that run while the controller and
    car sheets are up live here; per-frame driving input lives in input.js. */
 

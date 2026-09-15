@@ -1,6 +1,6 @@
 "use strict";
 
-/* SEREN - the screens in front of the race: switching between them, the
+/* REDLINE - the screens in front of the race: switching between them, the
    garage, the custom setup sheet, the car board and the select-screen art.
    Gameplay logic lives elsewhere. */
 
@@ -76,7 +76,7 @@ function show(id){
 }
 
 /* ---------------- best score ------------------------------------- */
-let best = parseInt(store.get("seren.best") || "0", 10) || 0;
+let best = parseInt(store.get("redline.best") || "0", 10) || 0;
 function paintBest(){ $("#homeBest").textContent = best; $("#hudBest").textContent = best; }
 
 /* Backing out of the difficulty sheet goes back to whichever sheet sent you

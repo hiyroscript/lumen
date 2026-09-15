@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* SEREN - a dependency-free check over the things that break silently.
+/* REDLINE - a dependency-free check over the things that break silently.
  *
  *   node tools/check.mjs
  *

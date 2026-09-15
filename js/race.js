@@ -1,6 +1,6 @@
 "use strict";
 
-/* SEREN - the race itself: the world it runs through, the grid it starts
+/* REDLINE - the race itself: the world it runs through, the grid it starts
    with, the lifecycle around it, the finish, and the per-frame update that
    drives all of it. */
 
@@ -262,7 +262,7 @@ function leave(){
   const bd = $("#ovBoard"); if(bd) bd.classList.remove("on");
   if(!G.local && (G.state === "running" || G.state === "paused") && Math.floor(G.meters) > best){
     best = Math.floor(G.meters);
-    store.set("seren.best", best);
+    store.set("redline.best", best);
     paintBest();
   }
   G.state = "idle";
@@ -287,7 +287,7 @@ function crash(){
   flash(.85, 260);
   const m = Math.floor(G.meters);
   const isBest = m > best;
-  if(isBest){ best = m; store.set("seren.best", best); }
+  if(isBest){ best = m; store.set("redline.best", best); }
   paintBest();
   later(function(){
     $("#ovDist").textContent = m;
@@ -394,7 +394,7 @@ function finishRace(){
      covered this distance may not even have been player one's to drive. Local
      play reads the record and never writes it. */
   const isBest = !G.local && m > best;
-  if(isBest){ best = m; store.set("seren.best", best); paintBest(); }
+  if(isBest){ best = m; store.set("redline.best", best); paintBest(); }
   tone(660, .18, "square", .12);
   later(function(){ tone(880, .18, "square", .12); }, 150);
   later(function(){ tone(1180, .3, "square", .12); }, 300);

@@ -1,6 +1,6 @@
 "use strict";
 
-/* SEREN - what a person asks a car to do: keyboard, pointer and controller,
+/* REDLINE - what a person asks a car to do: keyboard, pointer and controller,
    translated into the same mechanics calls whoever is driving. The mappings
    are the mappings; nothing here decides what a car may do about them. */
 

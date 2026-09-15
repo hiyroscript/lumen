@@ -1,6 +1,6 @@
 "use strict";
 
-/* SEREN - localisation. Every string the page shows, the current language,
+/* REDLINE - localisation. Every string the page shows, the current language,
    and the sweep that writes them into the document.
 
    applyLang() reaches forward into ui.js; that is safe because nothing calls
@@ -239,7 +239,7 @@ const STR = {
                  fr:"La manette du joueur {n} s\u2019est d\u00e9connect\u00e9e. Reconnectez-la pour continuer."},
   botShort:     {en:"Bot",                         fr:"Bot"},
 };
-let lang = store.get("seren.lang") || null;
+let lang = store.get("redline.lang") || null;
 let curTrackKey = "trackCity";
 function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
 /* A missing string used to throw, which took down whatever screen asked for

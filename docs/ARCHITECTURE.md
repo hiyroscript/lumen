@@ -1,6 +1,6 @@
 # Architecture
 
-How SEREN is put together, and where to change what.
+How REDLINE is put together, and where to change what.
 
 The whole game is fourteen classic `<script defer>` files, one stylesheet and one
 HTML shell. There is no build step, no bundler, no package manager and no

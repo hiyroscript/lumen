@@ -1,6 +1,6 @@
 "use strict";
 
-/* SEREN - the bot mind: sense, weigh, act.
+/* REDLINE - the bot mind: sense, weigh, act.
    A difficulty changes how well a driver thinks, never what its car is
    allowed to do - every decision below hands off to the same mechanics the
    player's own inputs call. */
