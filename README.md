@@ -518,15 +518,7 @@ way: copy `index.html`, `css/` and `js/` and you are done.
   the state. The only persisted value, the personal best, was always one
   `localStorage.setItem` away regardless.
 
-## Credit and licence
+## Credit
 
-A game by **hiyroscript**.
-
-**All rights reserved.** See [LICENSE](LICENSE). No licence is granted to use,
-copy, modify, redistribute or build on any part of this repository — code,
-artwork, audio, text or documentation — and that applies to individual fragments
-as much as to the whole. The one exception is that the public build may be
-played, as published. Anything else needs written permission from the author.
-
-The repository is public so the game can be hosted and read, not so it can be
-reused.
+A game by **hiyroscript**. No license file is present, so default copyright
+applies until the author adds one.
