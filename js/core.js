@@ -24,9 +24,28 @@ const TRAFFIC_ENABLED = false;
 /* ---------------- storage (falls back to memory if blocked) ------ */
 const mem = {};
 const store = {
-  get(k){ try{ const v = localStorage.getItem(k); return v === null ? (k in mem ? mem[k] : null) : v; }catch(e){ return k in mem ? mem[k] : null; } },
+  get(k){
+    try{
+      const v = localStorage.getItem(k);
+      if(v === null) return k in mem ? mem[k] : null;
+      if(k === "seren.lang" && v !== "en" && v !== "fr") return null;
+      return v;
+    }catch(e){
+      const v = k in mem ? mem[k] : null;
+      if(k === "seren.lang" && v !== null && v !== "en" && v !== "fr") return null;
+      return v;
+    }
+  },
   set(k,v){ mem[k] = String(v); try{ localStorage.setItem(k, String(v)); }catch(e){} }
 };
+
+/* Carry existing players' preferences and records across the rename. */
+["lang", "sound", "best"].forEach(function(k){
+  const next = "seren." + k;
+  if(store.get(next) !== null) return;
+  const prior = store.get("redline." + k);
+  if(prior !== null) store.set(next, prior);
+});
 
 /* ---------------- tiny helpers ----------------------------------- */
 const $ = function(s){ return document.querySelector(s); };
