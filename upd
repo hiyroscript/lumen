@@ -776,3 +776,5 @@ When done, provide a concise summary of:
 * how the shared ultimate now works
 * manual/regression checks performed
 * any dead-code cleanup intentionally left in place and why
+
+IMPORTANT:you have to also raise the ultimate durations to 15 seconds
