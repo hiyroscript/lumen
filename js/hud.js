@@ -1,6 +1,6 @@
 "use strict";
 
-/* REDLINE - the instruments. The DOM HUD painted over the canvas, the effect
+/* SEREN - the instruments. The DOM HUD painted over the canvas, the effect
    labels beside it, and the canvas HUD each local-play column gets - all
    reading the same numbers so a column and a phone show the same race. */
 
