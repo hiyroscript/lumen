@@ -389,28 +389,87 @@ screen. The first visit asks.
 created lazily on your first interaction, so browsers never refuse it for starting
 outside a user gesture. The speaker icon toggles it.
 
+## The interface
+
+One system, from the splash to the finish line, built on four things:
+
+- **Black, white, grey, red.** The ground is near-black, the type is white
+  through a tight neutral ramp, and red is the only accent — the primary action,
+  the selected step, the charge in the ultimate square, the tick beside your own
+  row in the standings. Colours that mean something in the game — the four seat
+  colours, gold/silver/bronze in the running order, the rarity of a pickup, the
+  green of an armed launch, the gold of immunity — stay, because they are the
+  game speaking and not the interface decorating.
+- **Glass for anything elevated.** Sheets, dialogs, panels, the countdown plate
+  and every instrument over the road use one recipe: a dark tonal fill, a blurred
+  backdrop, a hairline edge and a highlight along the top. Where a browser cannot
+  blur, the same surfaces go opaque instead of translucent, so readability never
+  depends on the effect. Nothing else is glass — the hierarchy from ground to
+  surface to control to overlay is what the treatment is for.
+- **Five type roles and no more.** Archivo for display and actions, IBM Plex Sans
+  for copy, IBM Plex Mono for metadata and every readout. Numbers are tabular
+  everywhere they can change.
+- **One geometry.** A single radius scale, a single spacing scale, and one focus
+  ring — a white outline over a dark halo, so it is visible on glass, on red and
+  on the moving road alike.
+
+The race HUD is the same system rather than a second one. The corners hold what
+you consult: the pause button and the track and clock top left, distance and the
+running order top right. The bottom holds what you spend: the launch and boost
+meters in one tray, your states as pills on the left, the ultimate and item
+squares on the right. On a wide window that bottom band closes in on the road
+instead of stretching to the far corners, so it stays in peripheral vision. The
+ultimate square fills from the foot as it charges, so the reading is a shape
+before it is a number.
+
+Local play draws the same instruments on the canvas, once per column, from the
+same constants — see
+[the HUD section of ARCHITECTURE.md](docs/ARCHITECTURE.md#hudjs--1088-lines).
+
 ## Accessibility
 
 - **Reduced motion.** `prefers-reduced-motion: reduce` flattens the page's
   animations. Things drawn frame-by-frame on the canvas sit outside CSS, so they
   ask for the preference themselves — the item-box swap flash, for instance,
-  becomes a brightness pulse with the box held still.
+  becomes a brightness pulse with the box held still. Every state that is
+  normally carried by movement also has a still form: a charged ultimate stays
+  red, your row in the standings stays ticked, a wound-up launch stays lit.
+- **Never colour alone.** Every status effect is named as well as swatched, your
+  own row in the running order carries a red tick as well as full brightness, a
+  car already chosen by another player is struck through as well as dimmed, and
+  the difficulty levels are four bars filled to the level rather than four shades.
+- **Keyboard.** Everything is a real `<button>`, the focus ring is visible on
+  every surface, and a screen that is not showing is hidden outright rather than
+  faded — so nothing invisible sits in the tab order. A sheet makes the home
+  screen behind it `inert`, and a pause or a result makes the instruments
+  `inert`, so tabbing cannot walk out of the thing in front of you.
 - **Language.** Every string in the interface is translated, including the
-  reference pages.
-- **Desktop scaling.** On a large screen the whole shell is scaled up to fill the
-  window rather than sitting small in the middle, and the canvas backing store is
-  resized to match, so it stays crisp.
+  reference pages and the `aria-label` on every icon-only control — pause, back,
+  close, sound, language, and the two squares you spend.
+- **Touch.** Every target is at least 40px on its short side, the two HUD squares
+  are 56px, and the layout pads itself out of the safe-area insets on all four
+  sides.
+- **Contrast.** `prefers-contrast: more` firms up the hairlines, the secondary
+  ink and the glass. `forced-colors: active` falls back to system colours with
+  real borders.
+- **Desktop scaling.** In a portrait window the whole shell is scaled up to fill
+  it rather than sitting small in the middle, and the canvas backing store is
+  resized to match, so it stays crisp. In a landscape one the race takes the full
+  width while the menus keep their column.
 - **Orientation and resize.** The world scales off the viewport *height* against a
   portrait phone as the reference, which is what keeps both orientations the same
   game: a short landscape viewport draws a smaller road and smaller cars, so the
   stretch of road in front of you, measured in car lengths, comes out identical.
+  Below 480 points of height the standings panel tightens and the bottom row
+  pulls in, on the page and in a split-screen column alike.
 
 ## Browser support
 
 Any current desktop or mobile browser. The game uses Canvas 2D, Pointer Events,
 Web Audio, the Gamepad API, `matchMedia` and `localStorage`, and degrades
-gracefully where newer canvas features are missing — `roundRect`, `ellipse`,
-`Path2D` and canvas `letterSpacing` all have hand-written fallbacks.
+gracefully where newer features are missing — `roundRect`, `ellipse`, `Path2D`
+and canvas `letterSpacing` all have hand-written fallbacks, `backdrop-filter` has
+an opaque one, and a browser without `inert` simply keeps the older tab order.
 
 Local play needs a device that reports `(hover: hover) and (pointer: fine)` — a
 computer — plus a controller per player.
@@ -483,13 +542,13 @@ may rely on the ones above it and nothing starts before every declaration exists
 | `data.js` | cars, difficulties, temperaments, effects, items, tracks and every tuning constant |
 | `audio.js` | the lazily-created Web Audio context, tones, noise, engine |
 | `runtime.js` | canvas and context, road and split-view geometry, the game state object, layout/resize |
-| `ui.js` | screen switching, garage, custom setup, the car board, select-screen art |
+| `ui.js` | screen switching and focus gating, garage, custom setup, the car board, select-screen art |
 | `local.js` | seats, player colours, pad discovery, the menu pad loops |
 | `ai.js` | the bot mind: sense, weigh, act |
 | `mechanics.js` | contact, lanes, boost, the launch, wrecks, effects, ultimates, items, hazards, particles |
 | `race.js` | world seeding, the grid, the lifecycle, the finish, the per-frame update and frame loop |
 | `render.js` | all Canvas 2D drawing |
-| `hud.js` | the DOM HUD, the effect labels, the per-seat canvas HUD |
+| `hud.js` | the DOM HUD, the effect pills, the per-seat canvas HUD and the constants the two share |
 | `input.js` | keyboard, pointer and controller, translated into mechanics calls |
 | `main.js` | boot: initial paints, event wiring, splash, settle |
 

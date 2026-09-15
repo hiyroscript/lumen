@@ -238,6 +238,17 @@ const STR = {
   padGone:      {en:"Player {n}\u2019s controller dropped out. Reconnect it to carry on.",
                  fr:"La manette du joueur {n} s\u2019est d\u00e9connect\u00e9e. Reconnectez-la pour continuer."},
   botShort:     {en:"Bot",                         fr:"Bot"},
+
+  /* ---- interface furniture ----
+     Icon-only controls carry their name in aria-label rather than on screen,
+     so the label has to be translated like any other string. */
+  navBack:      {en:"Back",                        fr:"Retour"},
+  navClose:     {en:"Close",                       fr:"Fermer"},
+  navLang:      {en:"Language",                    fr:"Langue"},
+  navSound:     {en:"Sound",                       fr:"Son"},
+  navPause:     {en:"Pause",                       fr:"Pause"},
+  hudItem:      {en:"Item",                        fr:"Objet"},
+  controlsHead: {en:"Controls",                    fr:"Commandes"},
 };
 /* Saved preferences may come from older versions or be invalid. Keep null for
    the language picker, while rendering English until a supported choice exists. */
@@ -260,6 +271,11 @@ function applyLang(){
   document.documentElement.lang = L;
   document.querySelectorAll("[data-i18n]").forEach(function(el){
     el.textContent = t(el.getAttribute("data-i18n"));
+  });
+  /* Icon-only buttons say what they are in aria-label and nowhere else, so
+     that label is translated on the same sweep as the visible copy. */
+  document.querySelectorAll("[data-i18n-aria]").forEach(function(el){
+    el.setAttribute("aria-label", t(el.getAttribute("data-i18n-aria")));
   });
   const tn = $("#trackName"); if(tn) tn.textContent = t(curTrackKey);
   paintLocalGate();

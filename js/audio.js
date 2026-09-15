@@ -56,7 +56,9 @@ function engineStop(){ if(engineNode){ try{ engineNode.o.stop(); }catch(e){} eng
 function setSound(on){
   soundOn = on; store.set("seren.sound", on ? "1" : "0");
   if(master) master.gain.value = on ? 0.9 : 0;
-  $("#icSoundOn").style.display  = on ? "" : "none";
-  $("#icSoundOff").style.display = on ? "none" : "";
+  /* The two glyphs swap by class rather than inline style, so the stylesheet
+     stays the one place that decides how a hidden icon is hidden. */
+  $("#icSoundOn").classList.toggle("off", !on);
+  $("#icSoundOff").classList.toggle("off", on);
   if(!on) engineStop();
 }

@@ -166,9 +166,11 @@ function startRace(){
   clearTimers();
   if(!G.rules) G.rules = defaultRules();   /* the standard game, unless one was set */
   $("#pausePanel").classList.remove("on");
+  $("#pausePanel").classList.remove("alert");
   $("#overPanel").classList.remove("on");
   $("#newBest").classList.remove("on");
   const bd = $("#ovBoard"); if(bd) bd.classList.remove("on");
+  gateFocus();
   /* How many columns the canvas is cut into has to be settled before anything
      is measured, because a column is what W means from here on. */
   VIEWS = G.local ? clamp(G.players, 2, LOCAL_MAX) : 1;
@@ -250,9 +252,11 @@ function pause(on){
   G.state = on ? "paused" : (G.wasCounting ? "countdown" : "running");
   if(!on) G.wasCounting = false;                 /* or every later resume rewinds */
   $("#pausePanel").classList.toggle("on", on);
+  gateFocus();
   if(!on){
     const lead = $("#pauseLead");
     if(lead) lead.textContent = t("pausedLead");
+    $("#pausePanel").classList.remove("alert");
   }
   if(on){ engineStop(); } else { engineStart(); }
 }
@@ -271,8 +275,10 @@ function leave(){
   engineStop();
   loopStop();
   $("#pausePanel").classList.remove("on");
+  $("#pausePanel").classList.remove("alert");
   $("#overPanel").classList.remove("on");
   $("#count").classList.remove("on");
+  gateFocus();
   show("home");
 }
 
@@ -294,6 +300,7 @@ function crash(){
     $("#ovBest").textContent = best;
     $("#newBest").classList.toggle("on", isBest);
     $("#overPanel").classList.add("on");
+    gateFocus();
   }, 620);
 }
 
@@ -413,6 +420,7 @@ function finishRace(){
     $("#ovBest").textContent = best;
     $("#newBest").classList.toggle("on", isBest);
     $("#overPanel").classList.add("on");
+    gateFocus();
   }, 700);
 }
 function placeWord(n){ return t("place" + clamp(n, 1, 6)); }
@@ -449,7 +457,7 @@ function localBoard(){
       const r = rows[i], seated = r.seat >= 0;
       html += '<div class="r' + (seated ? " seat" : "") + '">' +
               '<span class="pl">' + placeWord(r.place) + '</span>' +
-              '<span class="chip"' + (seated ? ' style="background:' + PCOLS[r.seat] + '"' : '') + '></span>' +
+              '<span class="chip-seat"' + (seated ? ' style="background:' + PCOLS[r.seat] + '"' : '') + '></span>' +
               '<span class="nm">' + t(CARS[r.car].key) + '</span>' +
               '<span class="by">' + (seated ? t("playerN") + " " + (r.seat + 1) : t("botShort")) + '</span>' +
               '</div>';
