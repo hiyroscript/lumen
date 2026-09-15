@@ -265,6 +265,57 @@ else {
   if (orphans.length) warn(`${orphans.length} strings are never referenced literally (most are built at runtime)`);
 }
 
+head("Translation rendering with saved preferences");
+for (const scenario of [
+  { name: "first visit", seed: {}, language: null },
+  { name: "saved English", seed: { "seren.lang": "en" }, language: "en" },
+  { name: "saved French", seed: { "seren.lang": "fr" }, language: "fr" },
+  { name: "migrated French", seed: { "redline.lang": "fr" }, language: "fr" },
+  { name: "invalid migrated language", seed: { "redline.lang": "undefined" }, language: null },
+  ...["undefined", "null", "en-US", "", "de"].map(value => ({
+    name: `invalid saved language ${JSON.stringify(value)}`,
+    seed: { "seren.lang": value }, language: null
+  }))
+]) {
+  try {
+    const saved = new Map(Object.entries(scenario.seed));
+    const labels = [...html.matchAll(/\bdata-i18n="([^"]+)"/g)].map(([, key]) => ({
+      key, textContent: "static fallback", getAttribute() { return key; }
+    }));
+    const track = { textContent: "static track" };
+    const document = {
+      documentElement: {},
+      querySelectorAll: () => labels,
+      querySelector: selector => selector === "#trackName" ? track
+        : selector === "#cars" ? { classList: { contains: () => false } } : null
+    };
+    const context = vm.createContext({ document, window: {}, localStorage: {
+      getItem: key => saved.get(key) ?? null,
+      setItem: (key, value) => saved.set(key, value)
+    } });
+    vm.runInContext(sources.core + "\n" + sources.i18n, context);
+    assert.equal(vm.runInContext("lang", context), scenario.language);
+    vm.runInContext("applyLang()", context);
+    const language = scenario.language || "en";
+    assert.equal(document.documentElement.lang, language);
+    for (const label of labels) {
+      assert.equal(label.textContent, STR[label.key][language], label.key);
+      assert.ok(label.textContent.trim(), `${label.key} must not be blank`);
+    }
+    assert.equal(track.textContent, STR.trackCity[language]);
+    // Exercise the actual renderer's fallback for incomplete and unknown keys,
+    // including a bad language introduced after startup.
+    vm.runInContext('lang = "fr"; delete STR.start.fr; applyLang()', context);
+    assert.equal(labels.find(label => label.key === "start").textContent, STR.start.en);
+    labels.push({ key: "unknownLabel", getAttribute: () => "unknownLabel" });
+    vm.runInContext('lang = "unsupported"; curTrackKey = "unknownTrack"; applyLang()', context);
+    assert.equal(document.documentElement.lang, "en");
+    assert.equal(labels.at(-1).textContent, "unknownLabel");
+    assert.equal(track.textContent, "unknownTrack");
+    pass(scenario.name);
+  } catch (e) { fail(`${scenario.name}: ${e.message}`); }
+}
+
 head("Data tables");
 const CARS = objectLiteral(sources.data || "", "CARS");
 if (!CARS) warn("could not read CARS out of js/data.js");

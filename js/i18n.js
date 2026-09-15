@@ -239,7 +239,10 @@ const STR = {
                  fr:"La manette du joueur {n} s\u2019est d\u00e9connect\u00e9e. Reconnectez-la pour continuer."},
   botShort:     {en:"Bot",                         fr:"Bot"},
 };
-let lang = store.get("seren.lang") || null;
+/* Saved preferences may come from older versions or be invalid. Keep null for
+   the language picker, while rendering English until a supported choice exists. */
+function supportedLang(value){ return value === "en" || value === "fr" ? value : null; }
+let lang = supportedLang(store.get("seren.lang"));
 let curTrackKey = "trackCity";
 function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
 /* A missing string used to throw, which took down whatever screen asked for
@@ -252,13 +255,13 @@ function t(k){
 }
 
 function applyLang(){
+  lang = supportedLang(lang);
   const L = lang || "en";
   document.documentElement.lang = L;
   document.querySelectorAll("[data-i18n]").forEach(function(el){
-    const s = STR[el.getAttribute("data-i18n")];
-    if(s) el.textContent = s[L];
+    el.textContent = t(el.getAttribute("data-i18n"));
   });
-  const tn = $("#trackName"); if(tn) tn.textContent = STR[curTrackKey][L];
+  const tn = $("#trackName"); if(tn) tn.textContent = t(curTrackKey);
   paintLocalGate();
   if($("#cars").classList.contains("on")) paintPicks();
 }
